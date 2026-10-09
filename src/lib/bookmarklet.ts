@@ -306,7 +306,7 @@ function corujaScript(ORIGIN: string) {
     try {
       if (!id) {
         const u = (await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`, 2)).data.user;
-        id = String(u?.id || "");
+        id = u?.id ? String(u.id) : "";
         if (!id) throw new Error("ID do perfil não encontrado");
       }
       const st = () => root.querySelector("#st") as HTMLElement;
