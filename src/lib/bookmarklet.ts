@@ -235,7 +235,7 @@ function corujaScript(ORIGIN: string, theme: string) {
   };
   (window as any).__corujaProg = prog;
   const $ = (s: string) => root.querySelector(s) as HTMLElement;
-  $("#x").onclick = () => { host.remove(); W.__coruja = null; };
+  $("#x").onclick = () => { host.remove(); W.__coruja = null; (W.__corujaBlobs || []).forEach((b: string) => URL.revokeObjectURL(b)); W.__corujaBlobs = []; };
   const body = $("#b");
 
   (async () => {
@@ -366,7 +366,25 @@ function corujaScript(ORIGIN: string, theme: string) {
 
   async function nonFollowers(id: string, totals?: { followers?: number; following?: number }) {
     const box = $("#nfl");
-    box.innerHTML = `<div class="l" id="st">Lendo quem você segue…</div><div class="bar"><i id="nb" style="width:3%"></i></div>`;
+    box.innerHTML = `<div class="l" id="st">Lendo quem você segue…</div><div class="bar"><i id="nb" style="width:3%"></i></div><div class="l" id="eta">Calculando tempo…</div>`;
+    // Time-remaining estimate based on the real speed measured so far (smoothed).
+    const fmt = (s: number) => { s = Math.max(0, Math.round(s)); const m = Math.floor(s / 60); return m ? `${m} min ${String(s % 60).padStart(2, "0")} s` : `${s} s`; };
+    const t0 = Date.now();
+    let curP = 3, lastP = 3, lastT = t0, rate = 0, shownEta = 0;
+    const etaEl = () => root.querySelector("#eta") as HTMLElement | null;
+    const tick = setInterval(() => {
+      const el = etaEl(); if (!el) { clearInterval(tick); return; }
+      const now = Date.now(), el_s = (now - t0) / 1000;
+      const stTxt = (root.querySelector("#st") as HTMLElement | null)?.textContent || "";
+      if (curP > lastP) { const r = (curP - lastP) / ((now - lastT) / 1000); rate = rate ? rate * 0.8 + r * 0.2 : r; lastP = curP; lastT = now; }
+      const avg = (curP - 3) / Math.max(1, el_s);
+      const sp = rate && avg ? (rate + avg) / 2 : avg;
+      if (el_s < 4 || sp <= 0) { el.textContent = `Calculando tempo… · Decorrido: ${fmt(el_s)}`; return; }
+      let eta = (100 - curP) / sp;
+      const pm = stTxt.match(/em (\d+) s/); if (/pausa/i.test(stTxt) && pm) eta += Number(pm[1]);
+      shownEta = shownEta ? Math.max(0, Math.min(eta, shownEta * 0.7 + eta * 0.3)) : eta;
+      el.textContent = /pausa/i.test(stTxt) ? `Pausa do Instagram · Tempo restante: ~${fmt(shownEta)} · Decorrido: ${fmt(el_s)}` : `Tempo restante: ~${fmt(shownEta)} · Decorrido: ${fmt(el_s)}`;
+    }, 1000);
     try {
       // On your own profile, the login cookie holds the exact account ID.
       if (viewerId) id = viewerId;
@@ -376,7 +394,7 @@ function corujaScript(ORIGIN: string, theme: string) {
         if (!id) throw new Error("ID do perfil não encontrado");
       }
       const st = () => root.querySelector("#st") as HTMLElement;
-      const nb = (p: number) => { const b = root.querySelector("#nb") as HTMLElement | null; if (b) b.style.width = p + "%"; };
+      const nb = (p: number) => { curP = Math.max(curP, p); const b = root.querySelector("#nb") as HTMLElement | null; if (b) b.style.width = p + "%"; };
       const totFollowing = Number(totals?.following) || 0;
       const totFollowers = Number(totals?.followers) || 0;
       const of = (n: number, t: number) => `${n}${t ? " de " + t : ""}`;
@@ -497,10 +515,45 @@ function corujaScript(ORIGIN: string, theme: string) {
         if (following.length > 20 && list.length > following.length * 0.9) { W.__corujaNF = null; throw new Error("a comparação falhou"); }
       }
       nb(100);
+      clearInterval(tick);
+      const total = fmt((Date.now() - t0) / 1000);
       const pic = (u: any) => u.profile_pic_url || u.hd_profile_pic_url_info?.url || "";
-      box.innerHTML = `<h4>${list.length} não te seguem de volta</h4><div class="l">Conferi ${NF.read || 0} perfis que você segue (modo ${NF.method || "?"}).</div>` + list.map((u) =>
-        `<div class="row"><span class="av">${esc(String(u.username || "?").charAt(0).toUpperCase())}<img src="${esc(pic(u))}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="this.remove()"></span><a target="_blank" href="/${esc(u.username)}/">@${esc(u.username)}${u.full_name ? `<small> ${esc(u.full_name)}</small>` : ""}</a><button class="u" data-id="${esc(uid(u))}">Deixar de seguir</button></div>`).join("") +
+      const byId: Record<string, any> = {}; for (const u of list) byId[uid(u)] = u;
+      box.innerHTML = `<h4>${list.length} não te seguem de volta</h4><div class="l">Concluído em ${total} · Conferi ${NF.read || 0} perfis que você segue (modo ${NF.method || "?"}).</div>` + list.map((u) =>
+        `<div class="row"><span class="av">${esc(String(u.username || "?").charAt(0).toUpperCase())}<img data-pk="${esc(uid(u))}" data-src="${esc(pic(u))}" alt="" style="opacity:0"></span><a target="_blank" href="/${esc(u.username)}/">@${esc(u.username)}${u.full_name ? `<small> ${esc(u.full_name)}</small>` : ""}</a><button class="u" data-id="${esc(uid(u))}">Deixar de seguir</button></div>`).join("") +
         `<div class="w">Vá com calma: deixar de seguir muitas contas rápido pode fazer o Instagram limitar sua conta temporariamente.</div>`;
+      // Photos: loaded from the tool's own code (Instagram blocks inline handlers), with two fallbacks.
+      const blobs: string[] = (W.__corujaBlobs ||= []);
+      let infoQ = Promise.resolve();
+      const viaInfo = (pk: string) => (infoQ = infoQ.then(async () => {
+        try {
+          const r = await fetch(`/api/v1/users/${pk}/info/`, { headers: H, credentials: "include" });
+          if (!r.ok) return;
+          const u = (await r.json())?.user; await sleep(300);
+          (byId[pk] ||= {}).__info = u?.hd_profile_pic_url_info?.url || u?.profile_pic_url || "";
+        } catch { /* ignore */ }
+      })).then(() => byId[pk]?.__info || "");
+      const viaBlob = async (url: string) => {
+        try { const r = await fetch(url, { credentials: "omit", mode: "cors" }); if (!r.ok) return ""; const b = URL.createObjectURL(await r.blob()); blobs.push(b); return b; } catch { return ""; }
+      };
+      const loadImg = (img: HTMLImageElement) => {
+        const pk = img.dataset["pk"] || "", src = img.dataset["src"] || "";
+        let stage = 0;
+        img.addEventListener("load", () => { img.style.opacity = "1"; });
+        img.addEventListener("error", async () => {
+          stage++;
+          let next = "";
+          if (stage === 1 && src) next = await viaBlob(src);
+          if (!next && stage <= 2 && pk) { stage = 2; const u = await viaInfo(pk); if (u) next = (await viaBlob(u)) || u; }
+          if (next && stage <= 2) img.src = next; else img.remove();
+        });
+        if (src) img.src = src; else img.dispatchEvent(new Event("error"));
+      };
+      const imgs = Array.from(box.querySelectorAll<HTMLImageElement>("img[data-pk]"));
+      if ("IntersectionObserver" in window) {
+        const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { io.unobserve(e.target); loadImg(e.target as HTMLImageElement); } }), { rootMargin: "200px" });
+        imgs.forEach((i) => io.observe(i));
+      } else imgs.forEach(loadImg);
       box.querySelectorAll<HTMLButtonElement>(".u").forEach((b) => (b.onclick = async () => {
         b.disabled = true; b.textContent = "…";
         const uid = b.dataset["id"] || "";
