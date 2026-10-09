@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Serialize the global CSS root tokens into the bookmarklet's Shadow DOM so the installed tool and website share one palette without external stylesheet requests.
