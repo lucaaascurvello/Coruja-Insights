@@ -262,10 +262,11 @@ function corujaScript(ORIGIN: string) {
     body.innerHTML = `
     <div class="g">
       <div class="c"><small>Seguidores</small><strong>${fmt(d.followers)}</strong></div>
-      <div class="c"><small>Engajamento</small><strong>${d.engagementRate}%</strong></div>
+      <div class="c"><small>Engajamento</small><strong>${d.engagementRate == null ? "—" : d.engagementRate + "%"}</strong></div>
       <div class="c"><small>Seguindo</small><strong>${fmt(d.following)}</strong></div>
       <div class="c"><small>Publicações</small><strong>${fmt(d.postsCount)}</strong></div>
     </div>
+    ${d.likesHidden ? `<div class="w" style="background:rgba(95,224,239,.08);border-color:rgba(95,224,239,.25);color:#bdf3f9">O Instagram ocultou as curtidas nesta leitura, então engajamento e publicação em destaque ficam indisponíveis. O relatório com IA ainda funciona.</div>` : ""}
     ${d.isBusiness ? "" : `<div class="w">💡 Esta conta não é Profissional/Business. A análise usa só dados públicos. Recomendamos mudar para conta Profissional para ter métricas mais completas.</div>`}
     ${d.topPost ? `<h4>Publicação que mais engajou</h4><div class="c" style="font-size:13px">❤ ${fmt(d.topPost.likes)} · 💬 ${fmt(d.topPost.comments)}<br><a style="color:#5fe0ef" target="_blank" href="/p/${d.topPost.code}/">Ver publicação →</a></div>` : ""}
     ${d.engagedUsers.length ? `<h4>Mais engajados</h4>${d.engagedUsers.map((x: any) => `<div class="row"><a target="_blank" href="/${esc(x.user)}/">@${esc(x.user)}</a><span>${x.count} coment.</span></div>`).join("")}` : `<div class="l">Lendo comentários…</div>`}
@@ -300,6 +301,11 @@ function corujaScript(ORIGIN: string) {
     const box = $("#nfl");
     box.innerHTML = `<div class="l" id="st">Lendo quem você segue…</div><div class="bar"><i id="nb" style="width:3%"></i></div>`;
     try {
+      if (!id) {
+        const u = (await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`, 2)).data.user;
+        id = String(u?.id || "");
+        if (!id) throw new Error("ID do perfil não encontrado");
+      }
       const st = () => root.querySelector("#st") as HTMLElement;
       const nb = (p: number) => { const b = root.querySelector("#nb") as HTMLElement | null; if (b) b.style.width = p + "%"; };
       const following = await listAll(id, "following", (n) => { st().textContent = `Lendo quem você segue… ${n}`; nb(Math.min(48, 3 + n / 20)); });
