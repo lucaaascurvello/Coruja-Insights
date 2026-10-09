@@ -338,9 +338,9 @@ function corujaScript(ORIGIN: string, theme: string) {
   async function listRest(id: string, kind: string, cb: (n: number) => void) {
     const out: any[] = []; let max = "";
     for (let i = 0; i < 100; i++) {
-      const r = await get(`/api/v1/friendships/${id}/${kind}/?count=50${max ? "&max_id=" + max : ""}`, 3);
+      const r = await get(`/api/v1/friendships/${id}/${kind}/?count=200${max ? "&max_id=" + max : ""}`, 3);
       out.push(...(r.users || [])); cb(out.length);
-      if (!r.next_max_id) break; max = r.next_max_id; await sleep(1200);
+      if (!r.next_max_id) break; max = r.next_max_id; await sleep(500);
     }
     return out;
   }
@@ -377,7 +377,7 @@ function corujaScript(ORIGIN: string, theme: string) {
       }
       const st = () => root.querySelector("#st") as HTMLElement;
       const nb = (p: number) => { const b = root.querySelector("#nb") as HTMLElement | null; if (b) b.style.width = p + "%"; };
-      const total = Number(window.__corujaFollowing || 0) || 0;
+      const total = 0;
       const following = await listAll(id, "following", (n) => { st().textContent = `Lendo quem você segue… ${n}${total ? " de " + total : ""}`; nb(Math.min(60, 3 + (total ? (n / total) * 57 : n / 20))); });
       const uid = (u: any) => String(u.pk ?? u.pk_id ?? u.id ?? "");
       // Check only the people you follow: does each one follow you back?
@@ -412,7 +412,7 @@ function corujaScript(ORIGIN: string, theme: string) {
       const list = following.filter((u) => back.get(uid(u)) === false);
       const pic = (u: any) => u.profile_pic_url || u.hd_profile_pic_url_info?.url || "";
       box.innerHTML = `<h4>${list.length} não te seguem de volta</h4>` + list.map((u) =>
-        `<div class="row"><span class="av">${esc(String(u.username || "?")[0].toUpperCase())}<img src="${esc(pic(u))}" referrerpolicy="no-referrer" crossorigin="anonymous" loading="lazy" alt="" onerror="this.remove()"></span><a target="_blank" href="/${esc(u.username)}/">@${esc(u.username)}${u.full_name ? `<small> ${esc(u.full_name)}</small>` : ""}</a><button class="u" data-id="${esc(uid(u))}">Deixar de seguir</button></div>`).join("") +
+        `<div class="row"><span class="av">${esc(String(u.username || "?")[0].toUpperCase())}<img src="${esc(pic(u))}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="this.remove()"></span><a target="_blank" href="/${esc(u.username)}/">@${esc(u.username)}${u.full_name ? `<small> ${esc(u.full_name)}</small>` : ""}</a><button class="u" data-id="${esc(uid(u))}">Deixar de seguir</button></div>`).join("") +
         `<div class="w">Vá com calma: deixar de seguir muitas contas rápido pode fazer o Instagram limitar sua conta temporariamente.</div>`;
       box.querySelectorAll<HTMLButtonElement>(".u").forEach((b) => (b.onclick = async () => {
         b.disabled = true; b.textContent = "…";
