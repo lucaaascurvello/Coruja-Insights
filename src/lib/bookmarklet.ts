@@ -214,7 +214,9 @@ function corujaScript(ORIGIN: string, theme: string) {
   .bar{height:6px;border-radius:99px;background:var(--muted);overflow:hidden;margin:4px 0 8px}
   .bar i{display:block;height:100%;border-radius:99px;background:var(--gradient-brand);transition:width .45s ease}
   .row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
-  .row img{width:30px;height:30px;border-radius:50%}
+  .row .av{position:relative;flex:none;width:36px;height:36px;border-radius:50%;background:var(--gradient-brand);display:grid;place-items:center;font-weight:700;color:var(--primary-foreground);overflow:hidden}
+  .row .av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .row small{color:var(--muted-foreground);margin-left:4px}
   .row a{color:var(--foreground);text-decoration:none;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
   .u{background:color-mix(in oklab,var(--primary) 15%,transparent);color:var(--foreground);border:1px solid color-mix(in oklab,var(--primary) 35%,transparent);border-radius:8px;padding:5px 9px;font-size:11px;cursor:pointer}
   .u[disabled]{opacity:.5}
@@ -375,13 +377,42 @@ function corujaScript(ORIGIN: string, theme: string) {
       }
       const st = () => root.querySelector("#st") as HTMLElement;
       const nb = (p: number) => { const b = root.querySelector("#nb") as HTMLElement | null; if (b) b.style.width = p + "%"; };
-      const following = await listAll(id, "following", (n) => { st().textContent = `Lendo quem você segue… ${n}`; nb(Math.min(48, 3 + n / 20)); });
-      const followers = await listAll(id, "followers", (n) => { st().textContent = `Lendo seus seguidores… ${n}`; nb(Math.min(97, 50 + n / 20)); });
+      const total = Number(window.__corujaFollowing || 0) || 0;
+      const following = await listAll(id, "following", (n) => { st().textContent = `Lendo quem você segue… ${n}${total ? " de " + total : ""}`; nb(Math.min(60, 3 + (total ? (n / total) * 57 : n / 20))); });
+      const uid = (u: any) => String(u.pk ?? u.pk_id ?? u.id ?? "");
+      // Check only the people you follow: does each one follow you back?
+      const back = new Map<string, boolean>();
+      const ids = following.map(uid).filter(Boolean);
+      const tok = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || csrf;
+      let bulkOk = true;
+      for (let i = 0; i < ids.length && bulkOk; i += 100) {
+        const chunk = ids.slice(i, i + 100);
+        st().textContent = `Conferindo quem te segue de volta… ${Math.min(i + 100, ids.length)} de ${ids.length}`;
+        nb(60 + Math.round((i / Math.max(1, ids.length)) * 38));
+        try {
+          const r = await fetch("/api/v1/friendships/show_many/", {
+            method: "POST", credentials: "include",
+            headers: { ...H, "x-csrftoken": tok, "content-type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({ user_ids: chunk.join(",") }).toString(),
+          });
+          if (!r.ok) throw new Error();
+          const j = await r.json();
+          const fs = j.friendship_statuses || {};
+          for (const k of chunk) if (fs[k]) back.set(k, fs[k].followed_by === true);
+          if (i + 100 < ids.length) await sleep(400);
+        } catch { bulkOk = false; }
+      }
+      if (!bulkOk || back.size < ids.length * 0.9) {
+        // Fallback: compare against the full followers list
+        const followers = await listAll(id, "followers", (n) => { st().textContent = `Lendo seus seguidores… ${n}`; nb(Math.min(97, 60 + n / 30)); });
+        const fset = new Set(followers.map(uid));
+        for (const k of ids) if (!back.has(k)) back.set(k, fset.has(k));
+      }
       nb(100);
-      const set = new Set(followers.map((u) => u.pk || u.id));
-      const list = following.filter((u) => !set.has(u.pk || u.id));
+      const list = following.filter((u) => back.get(uid(u)) === false);
+      const pic = (u: any) => u.profile_pic_url || u.hd_profile_pic_url_info?.url || "";
       box.innerHTML = `<h4>${list.length} não te seguem de volta</h4>` + list.map((u) =>
-        `<div class="row"><img src="${esc(u.profile_pic_url)}" referrerpolicy="no-referrer"><a target="_blank" href="/${esc(u.username)}/">@${esc(u.username)}</a><button class="u" data-id="${esc(u.pk || u.id)}">Deixar de seguir</button></div>`).join("") +
+        `<div class="row"><span class="av">${esc(String(u.username || "?")[0].toUpperCase())}<img src="${esc(pic(u))}" referrerpolicy="no-referrer" crossorigin="anonymous" loading="lazy" alt="" onerror="this.remove()"></span><a target="_blank" href="/${esc(u.username)}/">@${esc(u.username)}${u.full_name ? `<small> ${esc(u.full_name)}</small>` : ""}</a><button class="u" data-id="${esc(uid(u))}">Deixar de seguir</button></div>`).join("") +
         `<div class="w">Vá com calma: deixar de seguir muitas contas rápido pode fazer o Instagram limitar sua conta temporariamente.</div>`;
       box.querySelectorAll<HTMLButtonElement>(".u").forEach((b) => (b.onclick = async () => {
         b.disabled = true; b.textContent = "…";
