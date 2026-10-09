@@ -322,7 +322,7 @@ function corujaScript(ORIGIN: string, theme: string) {
     ${d.isOwn ? `<button class="btn sc" id="nf">👀 Quem não me segue de volta</button><div id="nfl"></div>` : `<div class="w info">Para ver quem não te segue de volta, abra o <b>seu próprio</b> perfil.</div>`}`;
     $("#ai").onclick = () => openReport(d);
     const nf = root.querySelector("#nf") as HTMLElement | null;
-    if (nf) nf.onclick = () => nonFollowers(d.userId);
+    if (nf) nf.onclick = () => nonFollowers(d.userId, { followers: d.followers, following: d.following });
   }
 
   function openReport(d: any) {
@@ -364,7 +364,7 @@ function corujaScript(ORIGIN: string, theme: string) {
     catch { return await listGql(id, kind, cb); }
   }
 
-  async function nonFollowers(id: string) {
+  async function nonFollowers(id: string, totals?: { followers?: number; following?: number }) {
     const box = $("#nfl");
     box.innerHTML = `<div class="l" id="st">Lendo quem você segue…</div><div class="bar"><i id="nb" style="width:3%"></i></div>`;
     try {
@@ -377,39 +377,39 @@ function corujaScript(ORIGIN: string, theme: string) {
       }
       const st = () => root.querySelector("#st") as HTMLElement;
       const nb = (p: number) => { const b = root.querySelector("#nb") as HTMLElement | null; if (b) b.style.width = p + "%"; };
-      const total = 0;
-      const following = await listAll(id, "following", (n) => { st().textContent = `Lendo quem você segue… ${n}${total ? " de " + total : ""}`; nb(Math.min(60, 3 + (total ? (n / total) * 57 : n / 20))); });
+      const totFollowing = Number(totals?.following) || 0;
+      const totFollowers = Number(totals?.followers) || 0;
+      const of = (n: number, t: number) => `${n}${t ? " de " + t : ""}`;
+      const following = await listAll(id, "following", (n) => { st().textContent = `Lendo quem você segue… ${of(n, totFollowing)}`; nb(Math.min(40, 3 + (totFollowing ? (n / totFollowing) * 37 : n / 20))); });
       const uid = (u: any) => String(u.pk ?? u.pk_id ?? u.id ?? "");
-      // Check only the people you follow: does each one follow you back?
-      const back = new Map<string, boolean>();
-      const ids = following.map(uid).filter(Boolean);
+      const uname = (u: any) => String(u.username || "").toLowerCase();
+      const followers = await listAll(id, "followers", (n) => { st().textContent = `Lendo seus seguidores… ${of(n, totFollowers)}`; nb(Math.min(80, 40 + (totFollowers ? (n / totFollowers) * 40 : n / 30))); });
+      // A list we can't trust is worse than no list
+      if (totFollowers > 0 && followers.length < totFollowers * 0.95) throw new Error(`incompleto: li ${followers.length} de ${totFollowers} seguidores`);
+      const fIds = new Set(followers.map(uid).filter(Boolean));
+      const fNames = new Set(followers.map(uname).filter(Boolean));
+      const followsBack = (u: any) => fIds.has(uid(u)) || fNames.has(uname(u));
+      let list = following.filter((u) => !followsBack(u));
+      if (following.length > 20 && list.length > following.length * 0.9) throw new Error("a comparação falhou");
+      // Double-check each candidate individually
       const tok = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || csrf;
-      let bulkOk = true;
-      for (let i = 0; i < ids.length && bulkOk; i += 100) {
-        const chunk = ids.slice(i, i + 100);
-        st().textContent = `Conferindo quem te segue de volta… ${Math.min(i + 100, ids.length)} de ${ids.length}`;
-        nb(60 + Math.round((i / Math.max(1, ids.length)) * 38));
-        try {
-          const r = await fetch("/api/v1/friendships/show_many/", {
-            method: "POST", credentials: "include",
-            headers: { ...H, "x-csrftoken": tok, "content-type": "application/x-www-form-urlencoded" },
-            body: new URLSearchParams({ user_ids: chunk.join(",") }).toString(),
-          });
-          if (!r.ok) throw new Error();
-          const j = await r.json();
-          const fs = j.friendship_statuses || {};
-          for (const k of chunk) if (fs[k]) back.set(k, fs[k].followed_by === true);
-          if (i + 100 < ids.length) await sleep(400);
-        } catch { bulkOk = false; }
+      const cap = Math.min(list.length, 150);
+      const confirmed: any[] = [];
+      for (let i = 0; i < list.length; i++) {
+        const u = list[i];
+        if (i < cap) {
+          st().textContent = `Confirmando ${i + 1} de ${cap} perfis…`;
+          nb(80 + Math.round(((i + 1) / Math.max(1, cap)) * 19));
+          try {
+            const r = await fetch(`/api/v1/friendships/show/${uid(u)}/`, { headers: { ...H, "x-csrftoken": tok }, credentials: "include" });
+            if (r.ok) { const j = await r.json(); if (j && j.followed_by === true) continue; }
+          } catch { /* keep candidate */ }
+          await sleep(250);
+        }
+        confirmed.push(u);
       }
-      if (!bulkOk || back.size < ids.length * 0.9) {
-        // Fallback: compare against the full followers list
-        const followers = await listAll(id, "followers", (n) => { st().textContent = `Lendo seus seguidores… ${n}`; nb(Math.min(97, 60 + n / 30)); });
-        const fset = new Set(followers.map(uid));
-        for (const k of ids) if (!back.has(k)) back.set(k, fset.has(k));
-      }
+      list = confirmed;
       nb(100);
-      const list = following.filter((u) => back.get(uid(u)) === false);
       const pic = (u: any) => u.profile_pic_url || u.hd_profile_pic_url_info?.url || "";
       box.innerHTML = `<h4>${list.length} não te seguem de volta</h4>` + list.map((u) =>
         `<div class="row"><span class="av">${esc(String(u.username || "?").charAt(0).toUpperCase())}<img src="${esc(pic(u))}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="this.remove()"></span><a target="_blank" href="/${esc(u.username)}/">@${esc(u.username)}${u.full_name ? `<small> ${esc(u.full_name)}</small>` : ""}</a><button class="u" data-id="${esc(uid(u))}">Deixar de seguir</button></div>`).join("") +
