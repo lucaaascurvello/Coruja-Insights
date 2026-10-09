@@ -224,6 +224,7 @@ function corujaScript(ORIGIN: string) {
     const l = root.querySelector("#pl");
     if (l && t) l.textContent = t;
   };
+  (window as any).__corujaProg = prog;
   const $ = (s: string) => root.querySelector(s) as HTMLElement;
   $("#x").onclick = () => { host.remove(); W.__coruja = null; };
   const body = $("#b");
