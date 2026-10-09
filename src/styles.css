@@ -100,3 +100,18 @@
 
 @keyframes float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-14px) } }
 @keyframes rise { from { opacity: 0; transform: translateY(18px) } to { opacity: 1; transform: none } }
+
+.installation-drag-path {
+  position: absolute;
+  right: 18px;
+  top: 12px;
+  height: 52px;
+  width: 22px;
+  border-right: 1px dashed var(--primary);
+  border-bottom: 1px dashed var(--primary);
+  border-bottom-right-radius: 12px;
+}
+.installation-drag-path svg { position: absolute; top: -6px; right: -8px; }
+@media (prefers-reduced-motion: reduce) {
+  .animate-float, .animate-rise { animation: none; }
+}

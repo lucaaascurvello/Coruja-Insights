@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Serialize the global CSS root tokens into the bookmarklet's Shadow DOM so the installed tool and website share one palette without external stylesheet requests.
+- Keep the illustrated installation guide in a dedicated component with a real bookmarklet link so the instructions and installation action remain together.

@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import mascote from "@/assets/mascote.png";
 import { buildBookmarklet } from "@/lib/bookmarklet";
+import { InstallationGuide } from "@/components/installation-guide";
+import { Button } from "@/components/ui/button";
 
 const PIX_KEY = "seu-pix@email.com";
 
@@ -56,13 +58,14 @@ function Index() {
             <a
               ref={ref}
               href="#"
-              onClick={(e) => { e.preventDefault(); alert("Arraste este botão para a sua barra de favoritos 😉"); }}
+              onClick={(e) => { e.preventDefault(); document.getElementById("instalar")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); }}
               className="bg-brand shadow-glow rounded-2xl px-6 py-4 font-display font-bold text-primary-foreground transition hover:-translate-y-0.5"
             >
               🦉 Coruja Insights
             </a>
             <span className="text-sm text-muted-foreground">← arraste para a barra de favoritos</span>
           </div>
+          <Button asChild variant="link" className="mt-3 h-auto p-0 text-muted-foreground"><a href="#instalar">Ver como instalar, passo a passo →</a></Button>
         </div>
         <img src={mascote} alt="Mascote coruja analista" width={1024} height={1024} className="animate-float mx-auto w-80 drop-shadow-2xl md:w-[26rem]" />
       </section>
@@ -80,25 +83,7 @@ function Index() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-6 py-16">
-        <h2 className="text-3xl font-bold">Como usar</h2>
-        <ol className="mt-8 grid gap-4 md:grid-cols-3">
-          {[
-            ["Instale", "Mostre a barra de favoritos (Ctrl/Cmd + Shift + B) e arraste o botão 🦉 para ela. Funciona no Chrome, Edge, Firefox, Brave, Opera e Safari."],
-            ["Abra um perfil", "Entre no instagram.com já logado e abra o perfil que quer analisar — o seu ou qualquer outro público."],
-            ["Clique no favorito", "O menu da coruja aparece por cima da página. Gere o relatório com IA e baixe. Para ver quem não te segue, abra o seu próprio perfil."],
-          ].map(([t, d], k) => (
-            <li key={t} className="glass rounded-3xl p-6">
-              <span className="font-mono text-sm text-primary">0{k + 1}</span>
-              <h3 className="mt-2 text-xl font-semibold">{t}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{d}</p>
-            </li>
-          ))}
-        </ol>
-        <p className="mt-6 text-sm text-muted-foreground">
-          Por que favorito e não extensão? Instalar extensão com um clique só é possível pelas lojas oficiais. O favorito funciona em qualquer navegador de computador, sem permissões extras.
-        </p>
-      </section>
+      <InstallationGuide />
 
       <section className="mx-auto max-w-3xl px-6 py-16 text-center">
         <h2 className="text-3xl font-bold">Um projeto caseiro 🏡</h2>
