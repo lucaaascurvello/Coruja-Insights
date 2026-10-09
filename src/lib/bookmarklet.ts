@@ -168,6 +168,8 @@ function corujaScript(ORIGIN: string) {
   .pr{background:linear-gradient(120deg,#5fe0ef,#ff7a59);color:#141a26}
   .sc{background:rgba(255,255,255,.07);color:#eef4f8;border:1px solid rgba(255,255,255,.1)}
   .l{font-size:12px;color:#8fa3b5;animation:pulse 1.4s infinite;padding:8px 0}
+  .bar{height:6px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin:4px 0 8px}
+  .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(120deg,#5fe0ef,#ff7a59);transition:width .45s ease}
   .row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px}
   .row img{width:30px;height:30px;border-radius:50%}
   .row a{color:#eef4f8;text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis}
@@ -176,7 +178,13 @@ function corujaScript(ORIGIN: string) {
   h4{margin:16px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#5fe0ef}
   </style>
   <div class="p"><div class="h"><div class="dot"></div><div><b>Coruja Insights</b><br><span>@${esc(username)}</span></div><button class="x" id="x">×</button></div>
-  <div class="b" id="b"><div class="l">Coletando dados públicos do perfil…</div></div></div>`;
+  <div class="b" id="b"><div class="l" id="pl">Coletando dados públicos do perfil…</div><div class="bar"><i id="pb" style="width:6%"></i></div></div></div>`;
+  const prog = (p: number, t?: string) => {
+    const b = root.querySelector("#pb") as HTMLElement | null;
+    if (b) b.style.width = p + "%";
+    const l = root.querySelector("#pl");
+    if (l && t) l.textContent = t;
+  };
   const $ = (s: string) => root.querySelector(s) as HTMLElement;
   $("#x").onclick = () => { host.remove(); W.__coruja = null; };
   const body = $("#b");
@@ -184,7 +192,9 @@ function corujaScript(ORIGIN: string) {
   (async () => {
     let data: any;
     try {
+      prog(15, "Lendo dados do perfil…");
       const u = await getProfile();
+      prog(40, "Calculando métricas…");
       const posts = (u.edge_owner_to_timeline_media?.edges || []).map((e: any) => ({
         id: e.node.id,
         code: e.node.shortcode,
@@ -203,7 +213,10 @@ function corujaScript(ORIGIN: string) {
         username, fullName: u.full_name, bio: u.biography, category: u.category_name,
         followers, following: u.edge_follow?.count || 0, postsCount: u.edge_owner_to_timeline_media?.count || 0,
         isBusiness: !!(u.is_business_account || u.is_professional_account), isPrivate: !!u.is_private,
-        isOwn: viewerId && viewerId === u.id, userId: u.id,
+        isOwn: (viewerId && String(viewerId) === String(u.id))
+          || !!document.querySelector('a[href*="/accounts/edit"]')
+          || Array.from(document.querySelectorAll("header a, header button, header span")).some((el) => /editar perfil|edit profile/i.test((el as HTMLElement).textContent || "")),
+        userId: u.id,
         engagementRate: +er.toFixed(2), avgInteractions: Math.round(avg), posts, topPost: top || null,
         engagedUsers: [], topComment: null, followerNames: [],
       };
@@ -211,7 +224,10 @@ function corujaScript(ORIGIN: string) {
       // comments of top posts
       const users: Record<string, number> = {};
       let best: any = null;
-      for (const p of [...posts].sort((a: any, b: any) => b.comments - a.comments).slice(0, 5)) {
+      const topCommented = [...posts].sort((a: any, b: any) => b.comments - a.comments).slice(0, 5);
+      let ci = 0;
+      for (const p of topCommented) {
+        prog(45 + Math.round((ci++ / Math.max(1, topCommented.length)) * 35), `Lendo comentários… (${ci}/${topCommented.length})`);
         try {
           const c = await get(`/api/v1/media/${p.id}/comments/?can_support_threading=true&permalink_enabled=false`);
           for (const cm of c.comments || []) {
@@ -223,10 +239,13 @@ function corujaScript(ORIGIN: string) {
       }
       data.engagedUsers = Object.entries(users).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([user, count]) => ({ user, count }));
       data.topComment = best;
+      prog(85, "Lendo amostra de seguidores…");
       try {
         const f = await get(`/api/v1/friendships/${u.id}/followers/?count=100&search_surface=follow_list_page`);
         data.followerNames = (f.users || []).map((x: any) => x.full_name || x.username).slice(0, 100);
       } catch {}
+      prog(100, "Análise pronta! ✨");
+      await sleep(500);
       render(data);
     } catch (e: any) {
       body.innerHTML = `<div class="w">${String(e.message).includes("429") ? "O Instagram limitou temporariamente as consultas da sua conta (erro 429). Isso acontece após muitos acessos seguidos: aguarde de 10 a 30 minutos e recarregue a página antes de tentar de novo." : "Não consegui ler os dados desta página. Role a página do perfil até aparecerem as publicações, recarregue (F5) e clique no favorito de novo."}</div>`;
@@ -273,11 +292,13 @@ function corujaScript(ORIGIN: string) {
 
   async function nonFollowers(id: string) {
     const box = $("#nfl");
-    box.innerHTML = `<div class="l" id="st">Lendo quem você segue…</div>`;
+    box.innerHTML = `<div class="l" id="st">Lendo quem você segue…</div><div class="bar"><i id="nb" style="width:3%"></i></div>`;
     try {
       const st = () => root.querySelector("#st") as HTMLElement;
-      const following = await listAll(id, "following", (n) => (st().textContent = `Lendo quem você segue… ${n}`));
-      const followers = await listAll(id, "followers", (n) => (st().textContent = `Lendo seus seguidores… ${n}`));
+      const nb = (p: number) => { const b = root.querySelector("#nb") as HTMLElement | null; if (b) b.style.width = p + "%"; };
+      const following = await listAll(id, "following", (n) => { st().textContent = `Lendo quem você segue… ${n}`; nb(Math.min(48, 3 + n / 20)); });
+      const followers = await listAll(id, "followers", (n) => { st().textContent = `Lendo seus seguidores… ${n}`; nb(Math.min(97, 50 + n / 20)); });
+      nb(100);
       const set = new Set(followers.map((u) => u.pk || u.id));
       const list = following.filter((u) => !set.has(u.pk || u.id));
       box.innerHTML = `<h4>${list.length} não te seguem de volta</h4>` + list.map((u) =>

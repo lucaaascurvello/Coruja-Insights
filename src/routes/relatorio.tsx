@@ -26,6 +26,7 @@ function Relatorio() {
   const [ai, setAi] = useState<AiReport | null>(null);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
+  const [aiProg, setAiProg] = useState(0);
 
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
@@ -40,11 +41,17 @@ function Relatorio() {
   useEffect(() => {
     if (!d) return;
     setLoading(true);
+    setAiProg(8);
+    const tick = setInterval(() => setAiProg((p) => (p < 90 ? p + Math.max(1, (90 - p) / 6) : p)), 700);
     const slim = { ...d, posts: d.posts?.slice(0, 12) };
     analyzeProfile({ data: slim })
       .then((r) => (r.report ? setAi(r.report) : setErr(r.error || "Erro")))
       .catch(() => setErr("Não foi possível gerar a análise agora."))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        clearInterval(tick);
+        setAiProg(100);
+        setTimeout(() => setLoading(false), 400);
+      });
   }, [d]);
 
   const download = () => {
@@ -98,7 +105,14 @@ function Relatorio() {
         {d.engagedUsers?.length > 0 && (<><h2 className="mt-8 text-xl font-bold">Usuários mais engajados</h2>
           <ul className="mt-2 flex flex-wrap gap-2">{d.engagedUsers.map((u: any) => <li key={u.user} className="glass rounded-full px-3 py-1 text-sm">@{u.user} · {u.count}</li>)}</ul></>)}
 
-        {loading && <p className="mt-10 animate-pulse text-primary">A coruja está analisando com IA…</p>}
+        {loading && (
+          <div className="mt-10">
+            <p className="animate-pulse text-primary">A coruja está analisando com IA…</p>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+              <div className="bg-brand h-2 rounded-full transition-all duration-700" style={{ width: `${aiProg}%` }} />
+            </div>
+          </div>
+        )}
         {err && <p className="mt-10 text-destructive">{err}</p>}
 
         {ai && (<div className="animate-rise">
