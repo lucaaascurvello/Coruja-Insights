@@ -230,12 +230,13 @@ function corujaScript(ORIGIN: string) {
       // comments of top posts
       const users: Record<string, number> = {};
       let best: any = null;
-      const topCommented = [...posts].sort((a: any, b: any) => b.comments - a.comments).slice(0, 5);
-      let ci = 0;
+      const topCommented = [...posts].filter((p: any) => p.id).sort((a: any, b: any) => b.comments - a.comments).slice(0, 5);
+      let ci = 0, commentsOk = false;
       for (const p of topCommented) {
         prog(45 + Math.round((ci++ / Math.max(1, topCommented.length)) * 35), `Lendo comentários… (${ci}/${topCommented.length})`);
         try {
           const c = await get(`/api/v1/media/${p.id}/comments/?can_support_threading=true&permalink_enabled=false`);
+          commentsOk = true;
           for (const cm of c.comments || []) {
             const n = cm.user?.username; if (n && n !== username) users[n] = (users[n] || 0) + 1;
             if (!best || (cm.comment_like_count || 0) > best.likes) best = { user: n, text: (cm.text || "").slice(0, 300), likes: cm.comment_like_count || 0, post: p.code };
@@ -245,6 +246,8 @@ function corujaScript(ORIGIN: string) {
       }
       data.engagedUsers = Object.entries(users).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([user, count]) => ({ user, count }));
       data.topComment = best;
+      data.commentsDone = true;
+      data.commentsFailed = !commentsOk;
       prog(85, "Lendo amostra de seguidores…");
       try {
         const f = await get(`/api/v1/friendships/${u.id}/followers/?count=100&search_surface=follow_list_page`);
