@@ -16,10 +16,33 @@ function corujaScript(ORIGIN: string) {
   const csrf = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || "";
   const viewerId = (document.cookie.match(/ds_user_id=([^;]+)/) || [])[1] || "";
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-  const get = async (u: string) => {
-    const r = await fetch(u, { headers: H, credentials: "include" });
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    return r.json();
+  H["x-csrftoken"] = csrf;
+  H["x-asbd-id"] = "129477";
+  try { H["x-ig-www-claim"] = sessionStorage.getItem("www-claim-v2") || "0"; } catch { H["x-ig-www-claim"] = "0"; }
+  const get = async (u: string, tries = 4): Promise<any> => {
+    let last = 0;
+    for (let i = 0; i < tries; i++) {
+      const r = await fetch(u, { headers: H, credentials: "include" });
+      if (r.ok) return r.json();
+      last = r.status;
+      if (r.status !== 429 && r.status < 500) break;
+      const st = root.querySelector(".l");
+      if (st) st.textContent = `Instagram pediu uma pausa… tentando de novo (${i + 1}/${tries})`;
+      await sleep(2500 * Math.pow(2, i));
+    }
+    throw new Error("HTTP " + last);
+  };
+  const getProfile = async (): Promise<any> => {
+    try {
+      return (await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`, 3)).data.user;
+    } catch (e) {
+      try {
+        const r = await get(`/${encodeURIComponent(username)}/?__a=1&__d=dis`, 2);
+        const u = r.graphql?.user || r.data?.user;
+        if (u) return u;
+      } catch {}
+      throw e;
+    }
   };
   const fmt = (n: number) => (n || 0).toLocaleString("pt-BR");
   const esc = (s: any) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" } as any)[c]);
