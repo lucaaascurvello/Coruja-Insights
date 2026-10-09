@@ -16,10 +16,33 @@ function corujaScript(ORIGIN: string) {
   const csrf = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || "";
   const viewerId = (document.cookie.match(/ds_user_id=([^;]+)/) || [])[1] || "";
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-  const get = async (u: string) => {
-    const r = await fetch(u, { headers: H, credentials: "include" });
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    return r.json();
+  H["x-csrftoken"] = csrf;
+  H["x-asbd-id"] = "129477";
+  try { H["x-ig-www-claim"] = sessionStorage.getItem("www-claim-v2") || "0"; } catch { H["x-ig-www-claim"] = "0"; }
+  const get = async (u: string, tries = 4): Promise<any> => {
+    let last = 0;
+    for (let i = 0; i < tries; i++) {
+      const r = await fetch(u, { headers: H, credentials: "include" });
+      if (r.ok) return r.json();
+      last = r.status;
+      if (r.status !== 429 && r.status < 500) break;
+      const st = root.querySelector(".l");
+      if (st) st.textContent = `Instagram pediu uma pausa… tentando de novo (${i + 1}/${tries})`;
+      await sleep(2500 * Math.pow(2, i));
+    }
+    throw new Error("HTTP " + last);
+  };
+  const getProfile = async (): Promise<any> => {
+    try {
+      return (await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`, 3)).data.user;
+    } catch (e) {
+      try {
+        const r = await get(`/${encodeURIComponent(username)}/?__a=1&__d=dis`, 2);
+        const u = r.graphql?.user || r.data?.user;
+        if (u) return u;
+      } catch {}
+      throw e;
+    }
   };
   const fmt = (n: number) => (n || 0).toLocaleString("pt-BR");
   const esc = (s: any) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" } as any)[c]);
@@ -66,8 +89,7 @@ function corujaScript(ORIGIN: string) {
   (async () => {
     let data: any;
     try {
-      const info = await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`);
-      const u = info.data.user;
+      const u = await getProfile();
       const posts = (u.edge_owner_to_timeline_media?.edges || []).map((e: any) => ({
         id: e.node.id,
         code: e.node.shortcode,
@@ -112,7 +134,7 @@ function corujaScript(ORIGIN: string) {
       } catch {}
       render(data);
     } catch (e: any) {
-      body.innerHTML = `<div class="w">Não foi possível ler este perfil (${esc(e.message)}). Verifique se está logado e se o perfil é público.</div>`;
+      body.innerHTML = `<div class="w">${String(e.message).includes("429") ? "O Instagram limitou temporariamente as consultas da sua conta (erro 429). Isso acontece após muitos acessos seguidos: aguarde de 10 a 30 minutos e recarregue a página antes de tentar de novo." : "Não foi possível ler este perfil (" + esc(e.message) + "). Verifique se está logado no instagram.com."}</div>`;
     }
   })();
 
