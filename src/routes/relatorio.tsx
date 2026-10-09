@@ -29,11 +29,11 @@ function Relatorio() {
 
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
-      if (e.data?.type !== "coruja:data") return;
+      if (e.data?.type !== "boo:data") return;
       setD(e.data.payload);
     };
     window.addEventListener("message", onMsg);
-    window.opener?.postMessage("coruja:ready", "https://www.instagram.com");
+    window.opener?.postMessage("boo:ready", "https://www.instagram.com");
     return () => window.removeEventListener("message", onMsg);
   }, []);
 

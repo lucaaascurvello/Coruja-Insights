@@ -1,12 +1,12 @@
 /* Self-contained script injected on instagram.com via bookmark.
    Must not reference anything outside its own body (it's serialized with toString). */
-function corujaScript(ORIGIN: string) {
+function booScript(ORIGIN: string) {
   const W = window as any;
   if (!/instagram\.com$/.test(location.hostname)) {
     alert("Abra um perfil no instagram.com e clique no favorito novamente.");
     return;
   }
-  if (W.__coruja) { W.__coruja.remove(); W.__coruja = null; }
+  if (W.__boo) { W.__boo.remove(); W.__boo = null; }
   const username = location.pathname.split("/").filter(Boolean)[0];
   if (!username || ["explore", "reels", "direct", "p", "stories", "accounts"].includes(username)) {
     alert("Abra a página de um perfil (ex: instagram.com/seuusuario).");
@@ -51,39 +51,39 @@ function corujaScript(ORIGIN: string) {
   host.style.cssText = "position:fixed;top:20px;right:20px;z-index:2147483647;";
   const root = host.attachShadow({ mode: "open" });
   document.body.appendChild(host);
-  W.__coruja = host;
+  W.__boo = host;
 
   root.innerHTML = `<style>
   *{box-sizing:border-box;font-family:Manrope,system-ui,sans-serif}
-  .p{width:380px;max-height:86vh;overflow:auto;background:rgba(22,28,40,.94);backdrop-filter:blur(16px);color:#eef4f8;border:1px solid rgba(255,255,255,.1);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 50px -10px rgba(80,220,240,.4);animation:in .5s cubic-bezier(.2,.7,.2,1)}
+  .p{width:380px;max-height:86vh;overflow:auto;background:rgba(22,28,40,.94);backdrop-filter:blur(16px);color:#eef4f8;border:1px solid rgba(255,255,255,.1);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 50px -10px rgba(165,145,255,.4);animation:in .5s cubic-bezier(.2,.7,.2,1)}
   @keyframes in{from{opacity:0;transform:translateY(-12px) scale(.97)}to{opacity:1;transform:none}}
   @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
   .h{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
   .h b{font-size:15px}.h span{font-size:11px;color:#8fa3b5}
-  .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(120deg,#5fe0ef,#ff7a59);box-shadow:0 0 12px #5fe0ef}
+  .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(120deg,#b9a8ff,#8ff0d5);box-shadow:0 0 12px #b9a8ff}
   .x{margin-left:auto;background:none;border:0;color:#8fa3b5;font-size:20px;cursor:pointer}
   .b{padding:16px 18px}
   .g{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .c{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:12px}
   .c small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#8fa3b5}
   .c strong{font-size:18px}
-  .w{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(255,122,89,.12);border:1px solid rgba(255,122,89,.3);font-size:12px;color:#ffc2b0}
+  .w{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(143,240,213,.12);border:1px solid rgba(143,240,213,.3);font-size:12px;color:#c9f7e9}
   .btn{width:100%;margin-top:10px;padding:12px;border:0;border-radius:12px;font-weight:700;cursor:pointer;font-size:13px;transition:transform .2s}
   .btn:hover{transform:translateY(-1px)}
-  .pr{background:linear-gradient(120deg,#5fe0ef,#ff7a59);color:#141a26}
+  .pr{background:linear-gradient(120deg,#b9a8ff,#8ff0d5);color:#141a26}
   .sc{background:rgba(255,255,255,.07);color:#eef4f8;border:1px solid rgba(255,255,255,.1)}
   .l{font-size:12px;color:#8fa3b5;animation:pulse 1.4s infinite;padding:8px 0}
   .row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px}
   .row img{width:30px;height:30px;border-radius:50%}
   .row a{color:#eef4f8;text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis}
-  .u{background:rgba(255,122,89,.15);color:#ff9d82;border:1px solid rgba(255,122,89,.35);border-radius:8px;padding:5px 9px;font-size:11px;cursor:pointer}
+  .u{background:rgba(143,240,213,.15);color:#8ff0d5;border:1px solid rgba(143,240,213,.35);border-radius:8px;padding:5px 9px;font-size:11px;cursor:pointer}
   .u[disabled]{opacity:.5}
-  h4{margin:16px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#5fe0ef}
+  h4{margin:16px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#8ff0d5}
   </style>
-  <div class="p"><div class="h"><div class="dot"></div><div><b>Coruja Insights</b><br><span>@${esc(username)}</span></div><button class="x" id="x">×</button></div>
+  <div class="p"><div class="h"><div class="dot"></div><div><b>Boo Insights</b><br><span>@${esc(username)}</span></div><button class="x" id="x">×</button></div>
   <div class="b" id="b"><div class="l">Coletando dados públicos do perfil…</div></div></div>`;
   const $ = (s: string) => root.querySelector(s) as HTMLElement;
-  $("#x").onclick = () => { host.remove(); W.__coruja = null; };
+  $("#x").onclick = () => { host.remove(); W.__boo = null; };
   const body = $("#b");
 
   (async () => {
@@ -147,20 +147,20 @@ function corujaScript(ORIGIN: string) {
       <div class="c"><small>Publicações</small><strong>${fmt(d.postsCount)}</strong></div>
     </div>
     ${d.isBusiness ? "" : `<div class="w">💡 Esta conta não é Profissional/Business. A análise usa só dados públicos. Recomendamos mudar para conta Profissional para ter métricas mais completas.</div>`}
-    ${d.topPost ? `<h4>Publicação que mais engajou</h4><div class="c" style="font-size:13px">❤ ${fmt(d.topPost.likes)} · 💬 ${fmt(d.topPost.comments)}<br><a style="color:#5fe0ef" target="_blank" href="/p/${d.topPost.code}/">Ver publicação →</a></div>` : ""}
+    ${d.topPost ? `<h4>Publicação que mais engajou</h4><div class="c" style="font-size:13px">❤ ${fmt(d.topPost.likes)} · 💬 ${fmt(d.topPost.comments)}<br><a style="color:#b9a8ff" target="_blank" href="/p/${d.topPost.code}/">Ver publicação →</a></div>` : ""}
     ${d.engagedUsers.length ? `<h4>Mais engajados</h4>${d.engagedUsers.map((x: any) => `<div class="row"><a target="_blank" href="/${esc(x.user)}/">@${esc(x.user)}</a><span>${x.count} coment.</span></div>`).join("")}` : `<div class="l">Lendo comentários…</div>`}
     <button class="btn pr" id="ai">✨ Gerar relatório completo com IA</button>
-    ${d.isOwn ? `<button class="btn sc" id="nf">👀 Quem não me segue de volta</button><div id="nfl"></div>` : `<div class="w" style="background:rgba(95,224,239,.08);border-color:rgba(95,224,239,.25);color:#bdf3f9">Para ver quem não te segue de volta, abra o <b>seu próprio</b> perfil.</div>`}`;
+    ${d.isOwn ? `<button class="btn sc" id="nf">👀 Quem não me segue de volta</button><div id="nfl"></div>` : `<div class="w" style="background:rgba(185,168,255,.08);border-color:rgba(185,168,255,.25);color:#ddd3ff">Para ver quem não te segue de volta, abra o <b>seu próprio</b> perfil.</div>`}`;
     $("#ai").onclick = () => openReport(d);
     const nf = root.querySelector("#nf") as HTMLElement | null;
     if (nf) nf.onclick = () => nonFollowers(d.userId);
   }
 
   function openReport(d: any) {
-    const win = window.open(ORIGIN + "/relatorio", "coruja_relatorio");
+    const win = window.open(ORIGIN + "/relatorio", "boo_relatorio");
     const onMsg = (ev: MessageEvent) => {
-      if (ev.origin !== ORIGIN || ev.data !== "coruja:ready") return;
-      win?.postMessage({ type: "coruja:data", payload: d }, ORIGIN);
+      if (ev.origin !== ORIGIN || ev.data !== "boo:ready") return;
+      win?.postMessage({ type: "boo:data", payload: d }, ORIGIN);
       window.removeEventListener("message", onMsg);
     };
     window.addEventListener("message", onMsg);
@@ -205,5 +205,5 @@ function corujaScript(ORIGIN: string) {
 }
 
 export function buildBookmarklet(origin: string) {
-  return "javascript:" + encodeURIComponent(`(${corujaScript.toString()})(${JSON.stringify(origin)});void 0;`);
+  return "javascript:" + encodeURIComponent(`(${booScript.toString()})(${JSON.stringify(origin)});void 0;`);
 }
