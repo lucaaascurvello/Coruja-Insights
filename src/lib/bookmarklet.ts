@@ -421,13 +421,17 @@ function corujaScript(ORIGIN: string, theme: string) {
         }
         if (S.done) {
           const known = S.out.filter((u: any) => typeof u.fv === "boolean").length;
-          if (known >= S.out.length * 0.95) { list = S.out.filter((u: any) => u.fv === false); break; }
+          // Only trust it if the whole list came back (an empty or short answer means Instagram cut it off)
+          const complete = S.out.length > 0 && (!totFollowing || S.out.length >= totFollowing * 0.9);
+          if (complete && known >= S.out.length * 0.95) { list = S.out.filter((u: any) => u.fv === false); NF.method = "A"; NF.read = S.out.length; break; }
           S.bad = true;
         }
       }
 
       if (!list) {
         const following: any[] = NF.following || (NF.following = await listAll(id, "following", onFollowing));
+        if (!following.length || (totFollowing && following.length < totFollowing * 0.9)) { NF.following = null; throw new Error(`li só ${following.length} de ${totFollowing} perfis que você segue`); }
+        NF.method = "B"; NF.read = following.length;
         const ids = following.map(uid).filter(Boolean);
         const back: Record<string, boolean> = NF.back;
         // Strategy B: ask about 100 people at a time — only trusted when Instagram sends the "follows you" field.
