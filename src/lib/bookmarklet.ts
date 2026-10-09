@@ -239,10 +239,13 @@ function corujaScript(ORIGIN: string) {
       }
       data.engagedUsers = Object.entries(users).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([user, count]) => ({ user, count }));
       data.topComment = best;
+      prog(85, "Lendo amostra de seguidores…");
       try {
         const f = await get(`/api/v1/friendships/${u.id}/followers/?count=100&search_surface=follow_list_page`);
         data.followerNames = (f.users || []).map((x: any) => x.full_name || x.username).slice(0, 100);
       } catch {}
+      prog(100, "Análise pronta! ✨");
+      await sleep(500);
       render(data);
     } catch (e: any) {
       body.innerHTML = `<div class="w">${String(e.message).includes("429") ? "O Instagram limitou temporariamente as consultas da sua conta (erro 429). Isso acontece após muitos acessos seguidos: aguarde de 10 a 30 minutos e recarregue a página antes de tentar de novo." : "Não consegui ler os dados desta página. Role a página do perfil até aparecerem as publicações, recarregue (F5) e clique no favorito de novo."}</div>`;
