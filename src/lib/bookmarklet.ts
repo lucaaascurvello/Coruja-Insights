@@ -168,6 +168,8 @@ function corujaScript(ORIGIN: string) {
   .pr{background:linear-gradient(120deg,#5fe0ef,#ff7a59);color:#141a26}
   .sc{background:rgba(255,255,255,.07);color:#eef4f8;border:1px solid rgba(255,255,255,.1)}
   .l{font-size:12px;color:#8fa3b5;animation:pulse 1.4s infinite;padding:8px 0}
+  .bar{height:6px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin:4px 0 8px}
+  .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(120deg,#5fe0ef,#ff7a59);transition:width .45s ease}
   .row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px}
   .row img{width:30px;height:30px;border-radius:50%}
   .row a{color:#eef4f8;text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis}
@@ -176,7 +178,13 @@ function corujaScript(ORIGIN: string) {
   h4{margin:16px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#5fe0ef}
   </style>
   <div class="p"><div class="h"><div class="dot"></div><div><b>Coruja Insights</b><br><span>@${esc(username)}</span></div><button class="x" id="x">×</button></div>
-  <div class="b" id="b"><div class="l">Coletando dados públicos do perfil…</div></div></div>`;
+  <div class="b" id="b"><div class="l" id="pl">Coletando dados públicos do perfil…</div><div class="bar"><i id="pb" style="width:6%"></i></div></div></div>`;
+  const prog = (p: number, t?: string) => {
+    const b = root.querySelector("#pb") as HTMLElement | null;
+    if (b) b.style.width = p + "%";
+    const l = root.querySelector("#pl");
+    if (l && t) l.textContent = t;
+  };
   const $ = (s: string) => root.querySelector(s) as HTMLElement;
   $("#x").onclick = () => { host.remove(); W.__coruja = null; };
   const body = $("#b");
