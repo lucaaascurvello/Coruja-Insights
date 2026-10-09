@@ -66,7 +66,8 @@ function corujaScript(ORIGIN: string) {
   .g{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .c{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:12px}
   .c small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#8fa3b5}
-      const u = await getProfile();
+  .c strong{font-size:18px}
+  .w{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(255,122,89,.12);border:1px solid rgba(255,122,89,.3);font-size:12px;color:#ffc2b0}
   .btn{width:100%;margin-top:10px;padding:12px;border:0;border-radius:12px;font-weight:700;cursor:pointer;font-size:13px;transition:transform .2s}
   .btn:hover{transform:translateY(-1px)}
   .pr{background:linear-gradient(120deg,#5fe0ef,#ff7a59);color:#141a26}
