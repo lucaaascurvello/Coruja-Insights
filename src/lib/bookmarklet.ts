@@ -450,7 +450,9 @@ function corujaScript(ORIGIN: string, theme: string) {
         }
       }));
     } catch (e: any) {
-      box.innerHTML = `<div class="w">Não deu para carregar a lista (${esc(e.message)}). Tente novamente em alguns minutos.</div>`;
+      box.innerHTML = `<div class="w">Não mostrei a lista para não te passar dados errados (${esc(e.message)}). Espere alguns minutos e tente de novo.</div><button class="btn" id="nfr" style="margin-top:8px">Tentar de novo</button>`;
+      const rb = root.querySelector("#nfr") as HTMLButtonElement | null;
+      if (rb) rb.onclick = () => nonFollowers(id, totals);
     }
   }
 }
