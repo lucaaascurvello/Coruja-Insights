@@ -515,10 +515,45 @@ function corujaScript(ORIGIN: string, theme: string) {
         if (following.length > 20 && list.length > following.length * 0.9) { W.__corujaNF = null; throw new Error("a comparação falhou"); }
       }
       nb(100);
+      clearInterval(tick);
+      const total = fmt((Date.now() - t0) / 1000);
       const pic = (u: any) => u.profile_pic_url || u.hd_profile_pic_url_info?.url || "";
-      box.innerHTML = `<h4>${list.length} não te seguem de volta</h4><div class="l">Conferi ${NF.read || 0} perfis que você segue (modo ${NF.method || "?"}).</div>` + list.map((u) =>
-        `<div class="row"><span class="av">${esc(String(u.username || "?").charAt(0).toUpperCase())}<img src="${esc(pic(u))}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="this.remove()"></span><a target="_blank" href="/${esc(u.username)}/">@${esc(u.username)}${u.full_name ? `<small> ${esc(u.full_name)}</small>` : ""}</a><button class="u" data-id="${esc(uid(u))}">Deixar de seguir</button></div>`).join("") +
+      const byId: Record<string, any> = {}; for (const u of list) byId[uid(u)] = u;
+      box.innerHTML = `<h4>${list.length} não te seguem de volta</h4><div class="l">Concluído em ${total} · Conferi ${NF.read || 0} perfis que você segue (modo ${NF.method || "?"}).</div>` + list.map((u) =>
+        `<div class="row"><span class="av">${esc(String(u.username || "?").charAt(0).toUpperCase())}<img data-pk="${esc(uid(u))}" data-src="${esc(pic(u))}" alt="" style="opacity:0"></span><a target="_blank" href="/${esc(u.username)}/">@${esc(u.username)}${u.full_name ? `<small> ${esc(u.full_name)}</small>` : ""}</a><button class="u" data-id="${esc(uid(u))}">Deixar de seguir</button></div>`).join("") +
         `<div class="w">Vá com calma: deixar de seguir muitas contas rápido pode fazer o Instagram limitar sua conta temporariamente.</div>`;
+      // Photos: loaded from the tool's own code (Instagram blocks inline handlers), with two fallbacks.
+      const blobs: string[] = (W.__corujaBlobs ||= []);
+      let infoQ = Promise.resolve();
+      const viaInfo = (pk: string) => (infoQ = infoQ.then(async () => {
+        try {
+          const r = await fetch(`/api/v1/users/${pk}/info/`, { headers: H, credentials: "include" });
+          if (!r.ok) return;
+          const u = (await r.json())?.user; await sleep(300);
+          (byId[pk] ||= {}).__info = u?.hd_profile_pic_url_info?.url || u?.profile_pic_url || "";
+        } catch { /* ignore */ }
+      })).then(() => byId[pk]?.__info || "");
+      const viaBlob = async (url: string) => {
+        try { const r = await fetch(url, { credentials: "omit", mode: "cors" }); if (!r.ok) return ""; const b = URL.createObjectURL(await r.blob()); blobs.push(b); return b; } catch { return ""; }
+      };
+      const loadImg = (img: HTMLImageElement) => {
+        const pk = img.dataset["pk"] || "", src = img.dataset["src"] || "";
+        let stage = 0;
+        img.addEventListener("load", () => { img.style.opacity = "1"; });
+        img.addEventListener("error", async () => {
+          stage++;
+          let next = "";
+          if (stage === 1 && src) next = await viaBlob(src);
+          if (!next && stage <= 2 && pk) { stage = 2; const u = await viaInfo(pk); if (u) next = (await viaBlob(u)) || u; }
+          if (next && stage <= 2) img.src = next; else img.remove();
+        });
+        if (src) img.src = src; else img.dispatchEvent(new Event("error"));
+      };
+      const imgs = Array.from(box.querySelectorAll<HTMLImageElement>("img[data-pk]"));
+      if ("IntersectionObserver" in window) {
+        const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { io.unobserve(e.target); loadImg(e.target as HTMLImageElement); } }), { rootMargin: "200px" });
+        imgs.forEach((i) => io.observe(i));
+      } else imgs.forEach(loadImg);
       box.querySelectorAll<HTMLButtonElement>(".u").forEach((b) => (b.onclick = async () => {
         b.disabled = true; b.textContent = "…";
         const uid = b.dataset["id"] || "";
