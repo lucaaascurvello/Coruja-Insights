@@ -169,7 +169,7 @@ function corujaScript(ORIGIN: string) {
       box.querySelectorAll<HTMLButtonElement>(".u").forEach((b) => (b.onclick = async () => {
         b.disabled = true; b.textContent = "…";
         try {
-          const r = await fetch(`/api/v1/friendships/destroy/${b.dataset.id}/`, {
+          const r = await fetch(`/api/v1/friendships/destroy/${b.dataset["id"]}/`, {
             method: "POST", credentials: "include",
             headers: { ...H, "x-csrftoken": csrf, "content-type": "application/x-www-form-urlencoded" },
           });

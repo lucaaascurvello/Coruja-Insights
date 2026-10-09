@@ -38,7 +38,7 @@ export const analyzeProfile = createServerFn({ method: "POST" })
     return d as Record<string, unknown>;
   })
   .handler(async ({ data }): Promise<{ report?: AiReport; error?: string }> => {
-    const key = process.env.LOVABLE_API_KEY;
+    const key = process.env["LOVABLE_API_KEY"];
     if (!key) return { error: "IA não configurada." };
     const prompt = `Você é um analista sênior de marketing de Instagram. Analise os dados públicos abaixo e responda em português do Brasil, de forma profissional e objetiva.
 - "genero": estime % homens/mulheres/indefinido a partir dos nomes em followerNames (amostra). Some 100.
