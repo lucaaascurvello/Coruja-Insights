@@ -229,7 +229,7 @@ function corujaScript(ORIGIN: string) {
       } catch {}
       render(data);
     } catch (e: any) {
-      body.innerHTML = `<div class="w">${String(e.message).includes("429") ? "O Instagram limitou temporariamente as consultas da sua conta (erro 429). Isso acontece após muitos acessos seguidos: aguarde de 10 a 30 minutos e recarregue a página antes de tentar de novo." : "Não foi possível ler este perfil (" + esc(e.message) + "). Verifique se está logado no instagram.com."}</div>`;
+      body.innerHTML = `<div class="w">${String(e.message).includes("429") ? "O Instagram limitou temporariamente as consultas da sua conta (erro 429). Isso acontece após muitos acessos seguidos: aguarde de 10 a 30 minutos e recarregue a página antes de tentar de novo." : "Não consegui ler os dados desta página. Role a página do perfil até aparecerem as publicações, recarregue (F5) e clique no favorito de novo."}</div>`;
     }
   })();
 
