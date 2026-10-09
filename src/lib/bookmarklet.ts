@@ -305,7 +305,7 @@ function corujaScript(ORIGIN: string) {
     box.innerHTML = `<div class="l" id="st">Lendo quem você segue…</div><div class="bar"><i id="nb" style="width:3%"></i></div>`;
     try {
       if (!id) {
-        const u = (await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`, 2)).data.user;
+        const u = (await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(String(username))}`, 2)).data.user;
         id = u?.id ? String(u.id) : "";
         if (!id) throw new Error("ID do perfil não encontrado");
       }
