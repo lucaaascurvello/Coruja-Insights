@@ -366,7 +366,25 @@ function corujaScript(ORIGIN: string, theme: string) {
 
   async function nonFollowers(id: string, totals?: { followers?: number; following?: number }) {
     const box = $("#nfl");
-    box.innerHTML = `<div class="l" id="st">Lendo quem você segue…</div><div class="bar"><i id="nb" style="width:3%"></i></div>`;
+    box.innerHTML = `<div class="l" id="st">Lendo quem você segue…</div><div class="bar"><i id="nb" style="width:3%"></i></div><div class="l" id="eta">Calculando tempo…</div>`;
+    // Time-remaining estimate based on the real speed measured so far (smoothed).
+    const fmt = (s: number) => { s = Math.max(0, Math.round(s)); const m = Math.floor(s / 60); return m ? `${m} min ${String(s % 60).padStart(2, "0")} s` : `${s} s`; };
+    const t0 = Date.now();
+    let curP = 3, lastP = 3, lastT = t0, rate = 0, shownEta = 0;
+    const etaEl = () => root.querySelector("#eta") as HTMLElement | null;
+    const tick = setInterval(() => {
+      const el = etaEl(); if (!el) { clearInterval(tick); return; }
+      const now = Date.now(), el_s = (now - t0) / 1000;
+      const stTxt = (root.querySelector("#st") as HTMLElement | null)?.textContent || "";
+      if (curP > lastP) { const r = (curP - lastP) / ((now - lastT) / 1000); rate = rate ? rate * 0.8 + r * 0.2 : r; lastP = curP; lastT = now; }
+      const avg = (curP - 3) / Math.max(1, el_s);
+      const sp = rate && avg ? (rate + avg) / 2 : avg;
+      if (el_s < 4 || sp <= 0) { el.textContent = `Calculando tempo… · Decorrido: ${fmt(el_s)}`; return; }
+      let eta = (100 - curP) / sp;
+      const pm = stTxt.match(/em (\d+) s/); if (/pausa/i.test(stTxt) && pm) eta += Number(pm[1]);
+      shownEta = shownEta ? Math.max(0, Math.min(eta, shownEta * 0.7 + eta * 0.3)) : eta;
+      el.textContent = /pausa/i.test(stTxt) ? `Pausa do Instagram · Tempo restante: ~${fmt(shownEta)} · Decorrido: ${fmt(el_s)}` : `Tempo restante: ~${fmt(shownEta)} · Decorrido: ${fmt(el_s)}`;
+    }, 1000);
     try {
       // On your own profile, the login cookie holds the exact account ID.
       if (viewerId) id = viewerId;
@@ -376,7 +394,7 @@ function corujaScript(ORIGIN: string, theme: string) {
         if (!id) throw new Error("ID do perfil não encontrado");
       }
       const st = () => root.querySelector("#st") as HTMLElement;
-      const nb = (p: number) => { const b = root.querySelector("#nb") as HTMLElement | null; if (b) b.style.width = p + "%"; };
+      const nb = (p: number) => { curP = Math.max(curP, p); const b = root.querySelector("#nb") as HTMLElement | null; if (b) b.style.width = p + "%"; };
       const totFollowing = Number(totals?.following) || 0;
       const totFollowers = Number(totals?.followers) || 0;
       const of = (n: number, t: number) => `${n}${t ? " de " + t : ""}`;
