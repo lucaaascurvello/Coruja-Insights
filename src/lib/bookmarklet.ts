@@ -104,15 +104,26 @@ function corujaScript(ORIGIN: string) {
       ?? (pick(/([\d.,]+\s*(?:k|m|mil|mi)?)\s*(?:following|seguindo)/i) || hdr(/seguindo|following/i));
     const postsCount = user?.media_count ?? user?.edge_owner_to_timeline_media?.count
       ?? (pick(/([\d.,]+\s*(?:k|m|mil|mi)?)\s*(?:posts|publicaç)/i) || hdr(/publicaç|posts/i));
-    if (!media.length) {
-      document.querySelectorAll('main a[href*="/p/"], main a[href*="/reel/"]').forEach((a) => {
-        const code = (a.getAttribute("href") || "").split("/").filter(Boolean)[1];
-        if (code && !seen.has(code)) {
-          seen.add(code);
-          media.push({ node: { id: "", shortcode: code, edge_liked_by: { count: 0 }, edge_media_to_comment: { count: 0 }, edge_media_to_caption: { edges: [{ node: { text: a.querySelector("img")?.getAttribute("alt") || "" } }] } } });
-        }
-      });
-    }
+    // Grid scan: always merge counts found in alt / aria-label / visible text
+    const cnt = (tx: string, re: RegExp) => { const m = tx.match(re); return m ? num(m[1]) : 0; };
+    const byCode: Record<string, any> = {};
+    media.forEach((m) => (byCode[m.node.shortcode] = m));
+    document.querySelectorAll('main a[href*="/p/"], main a[href*="/reel/"]').forEach((a) => {
+      const code = (a.getAttribute("href") || "").split("/").filter(Boolean).find((_, i, arr) => arr[i - 1] === "p" || arr[i - 1] === "reel");
+      if (!code) return;
+      const alt = a.querySelector("img")?.getAttribute("alt") || "";
+      const tx = [alt, a.getAttribute("aria-label") || "", (a as HTMLElement).innerText || "", a.querySelector("[aria-label]")?.getAttribute("aria-label") || ""].join(" ");
+      const likes = cnt(tx, /([\d.,]+\s*(?:mil|mi|k|m)?)\s*(?:curtidas?|likes?)/i);
+      const comments = cnt(tx, /([\d.,]+\s*(?:mil|mi|k|m)?)\s*(?:coment[aá]rios?|comments?)/i);
+      const isVideo = (a.getAttribute("href") || "").includes("/reel/");
+      let m = byCode[code];
+      if (!m) {
+        m = { node: { id: "", shortcode: code, is_video: isVideo, edge_liked_by: { count: 0 }, edge_media_to_comment: { count: 0 }, edge_media_to_caption: { edges: [{ node: { text: alt } }] } } };
+        byCode[code] = m; seen.add(code); media.push(m);
+      }
+      if (!m.node.edge_liked_by.count && likes) m.node.edge_liked_by.count = likes;
+      if (!m.node.edge_media_to_comment.count && comments) m.node.edge_media_to_comment.count = comments;
+    });
     const html = document.documentElement.innerHTML;
     const un = username.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const idMatch = html.match(/"profile_id":"(\d+)"|profilePage_(\d+)/)
