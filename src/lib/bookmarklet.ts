@@ -32,17 +32,112 @@ function corujaScript(ORIGIN: string) {
     }
     throw new Error("HTTP " + last);
   };
+  // Parse "1,2 mil", "12.5K", "3M", "1.234" etc.
+  const num = (s: string): number => {
+    if (!s) return 0;
+    const t = s.toLowerCase().replace(/\s/g, "");
+    const m = t.match(/([\d.,]+)(k|m|mi|mil|b)?/);
+    if (!m) return 0;
+    let v = m[1] || "";
+    const suf = m[2] || "";
+    if (suf) v = v.replace(",", ".");
+    else v = v.replace(/[.,](?=\d{3}(\D|$))/g, "").replace(",", ".");
+    const n = parseFloat(v) || 0;
+    const mult = suf === "k" || suf === "mil" ? 1e3 : suf === "m" || suf === "mi" ? 1e6 : suf === "b" ? 1e9 : 1;
+    return Math.round(n * mult);
+  };
+  // Read data already embedded on the page (no network = no 429)
+  const fromPage = (): any => {
+    let user: any = null;
+    const media: any[] = [];
+    const seen = new Set<string>();
+    const walk = (o: any, depth: number) => {
+      if (!o || typeof o !== "object" || depth > 40) return;
+      if (Array.isArray(o)) { for (const x of o) walk(x, depth + 1); return; }
+      if (o.username === username && (o.follower_count != null || o.edge_followed_by)) {
+        user = { ...(user || {}), ...o };
+      }
+      const code = o.code || o.shortcode;
+      if (code && (o.like_count != null || o.comment_count != null || o.edge_liked_by) && !seen.has(code)) {
+        const owner = o.user?.username || o.owner?.username;
+        if (!owner || owner === username) {
+          seen.add(code);
+          media.push({
+            node: {
+              id: String(o.pk || o.id || "").split("_")[0], shortcode: code,
+              edge_liked_by: { count: o.like_count ?? o.edge_liked_by?.count ?? 0 },
+              edge_media_to_comment: { count: o.comment_count ?? o.edge_media_to_comment?.count ?? 0 },
+              video_view_count: o.play_count || o.view_count || o.video_view_count || 0,
+              is_video: o.media_type === 2 || !!o.is_video,
+              taken_at_timestamp: o.taken_at || o.taken_at_timestamp,
+              edge_media_to_caption: { edges: [{ node: { text: o.caption?.text || "" } }] },
+            },
+          });
+        }
+      }
+      for (const k in o) walk(o[k], depth + 1);
+    };
+    document.querySelectorAll('script[type="application/json"]').forEach((s) => {
+      const t = s.textContent || "";
+      if (!t.includes(username)) return;
+      try { walk(JSON.parse(t), 0); } catch {}
+    });
+    // DOM / meta fallback
+    const meta = (document.querySelector('meta[property="og:description"]') as HTMLMetaElement)?.content
+      || (document.querySelector('meta[name="description"]') as HTMLMetaElement)?.content || "";
+    const pick = (re: RegExp) => { const m = meta.match(re); return m ? num(m[1] || "") : 0; };
+    const header = document.querySelector("header");
+    const hdr = (re: RegExp) => {
+      const links = header ? Array.from(header.querySelectorAll("a, li, span")) : [];
+      for (const el of links) {
+        const tx = (el as HTMLElement).innerText || "";
+        if (re.test(tx)) {
+          const titled = el.querySelector("[title]")?.getAttribute("title");
+          return num(titled || tx);
+        }
+      }
+      return 0;
+    };
+    const followers = user?.follower_count ?? user?.edge_followed_by?.count
+      ?? (pick(/([\d.,]+\s*(?:k|m|mil|mi)?)\s*(?:followers|seguidores)/i) || hdr(/seguidores|followers/i));
+    const following = user?.following_count ?? user?.edge_follow?.count
+      ?? (pick(/([\d.,]+\s*(?:k|m|mil|mi)?)\s*(?:following|seguindo)/i) || hdr(/seguindo|following/i));
+    const postsCount = user?.media_count ?? user?.edge_owner_to_timeline_media?.count
+      ?? (pick(/([\d.,]+\s*(?:k|m|mil|mi)?)\s*(?:posts|publicaç)/i) || hdr(/publicaç|posts/i));
+    if (!media.length) {
+      document.querySelectorAll('main a[href*="/p/"], main a[href*="/reel/"]').forEach((a) => {
+        const code = (a.getAttribute("href") || "").split("/").filter(Boolean)[1];
+        if (code && !seen.has(code)) {
+          seen.add(code);
+          media.push({ node: { id: "", shortcode: code, edge_liked_by: { count: 0 }, edge_media_to_comment: { count: 0 }, edge_media_to_caption: { edges: [{ node: { text: a.querySelector("img")?.getAttribute("alt") || "" } }] } } });
+        }
+      });
+    }
+    const idMatch = document.documentElement.innerHTML.match(/"profile_id":"(\d+)"|profilePage_(\d+)/);
+    const id = user?.pk || user?.id || (idMatch && (idMatch[1] || idMatch[2])) || "";
+    if (!followers && !user) return null;
+    return {
+      id: String(id), full_name: user?.full_name || (document.title.split("(")[0] || "").trim(), biography: user?.biography || "",
+      category_name: user?.category_name || user?.category || "",
+      is_business_account: user?.is_business_account || user?.is_business, is_professional_account: user?.is_professional_account,
+      is_private: user?.is_private,
+      edge_followed_by: { count: followers }, edge_follow: { count: following },
+      edge_owner_to_timeline_media: { count: postsCount, edges: media.slice(0, 24) },
+    };
+  };
   const getProfile = async (): Promise<any> => {
+    const p = fromPage();
+    if (p && p.edge_owner_to_timeline_media.edges.some((e: any) => e.node.edge_liked_by.count > 0)) return p;
+    // Try one light network call to enrich likes; fall back to page data on failure
     try {
-      return (await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`, 3)).data.user;
+      const u = (await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`, 1)).data.user;
+      if (u) return u;
     } catch (e) {
-      try {
-        const r = await get(`/${encodeURIComponent(username)}/?__a=1&__d=dis`, 2);
-        const u = r.graphql?.user || r.data?.user;
-        if (u) return u;
-      } catch {}
+      if (p) return p;
       throw e;
     }
+    if (p) return p;
+    throw new Error("sem dados");
   };
   const fmt = (n: number) => (n || 0).toLocaleString("pt-BR");
   const esc = (s: any) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" } as any)[c]);
@@ -134,7 +229,7 @@ function corujaScript(ORIGIN: string) {
       } catch {}
       render(data);
     } catch (e: any) {
-      body.innerHTML = `<div class="w">${String(e.message).includes("429") ? "O Instagram limitou temporariamente as consultas da sua conta (erro 429). Isso acontece após muitos acessos seguidos: aguarde de 10 a 30 minutos e recarregue a página antes de tentar de novo." : "Não foi possível ler este perfil (" + esc(e.message) + "). Verifique se está logado no instagram.com."}</div>`;
+      body.innerHTML = `<div class="w">${String(e.message).includes("429") ? "O Instagram limitou temporariamente as consultas da sua conta (erro 429). Isso acontece após muitos acessos seguidos: aguarde de 10 a 30 minutos e recarregue a página antes de tentar de novo." : "Não consegui ler os dados desta página. Role a página do perfil até aparecerem as publicações, recarregue (F5) e clique no favorito de novo."}</div>`;
     }
   })();
 
