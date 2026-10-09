@@ -357,13 +357,38 @@ function corujaScript(ORIGIN: string) {
         `<div class="w">Vá com calma: deixar de seguir muitas contas rápido pode fazer o Instagram limitar sua conta temporariamente.</div>`;
       box.querySelectorAll<HTMLButtonElement>(".u").forEach((b) => (b.onclick = async () => {
         b.disabled = true; b.textContent = "…";
-        try {
-          const r = await fetch(`/api/v1/friendships/destroy/${b.dataset["id"]}/`, {
-            method: "POST", credentials: "include",
-            headers: { ...H, "x-csrftoken": csrf, "content-type": "application/x-www-form-urlencoded" },
-          });
-          b.textContent = r.ok ? "Feito ✓" : "Erro";
-        } catch { b.textContent = "Erro"; b.disabled = false; }
+        const uid = b.dataset["id"] || "";
+        const tok = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || csrf;
+        const hdr = { ...H, "x-csrftoken": tok, "content-type": "application/x-www-form-urlencoded" };
+        const body = new URLSearchParams({ user_id: uid, container_module: "profile", nav_chain: "" }).toString();
+        // Confirm with Instagram whether we still follow this person
+        const stillFollowing = async (): Promise<boolean | null> => {
+          try {
+            const s = await fetch(`/api/v1/friendships/show/${uid}/`, { headers: H, credentials: "include" });
+            if (!s.ok) return null;
+            const j = await s.json();
+            return typeof j.following === "boolean" ? j.following : null;
+          } catch { return null; }
+        };
+        const tryPost = async (url: string) => {
+          try {
+            const r = await fetch(url, { method: "POST", credentials: "include", headers: hdr, body });
+            const j = await r.json().catch(() => null);
+            return r.ok && j && j.status === "ok" && j.friendship_status?.following !== true;
+          } catch { return false; }
+        };
+        let ok = await tryPost(`/api/v1/friendships/destroy/${uid}/`);
+        if (!ok) ok = await tryPost(`/api/v1/web/friendships/${uid}/unfollow/`);
+        await sleep(800);
+        const still = await stillFollowing();
+        if (still === false || (ok && still === null)) {
+          b.textContent = "Feito ✓";
+          b.closest(".row")?.setAttribute("style", "opacity:.45");
+        } else {
+          b.disabled = false;
+          b.textContent = "Tentar de novo";
+          b.title = "O Instagram não confirmou. Espere alguns minutos ou deixe de seguir pelo perfil.";
+        }
       }));
     } catch (e: any) {
       box.innerHTML = `<div class="w">Não deu para carregar a lista (${esc(e.message)}). Tente novamente em alguns minutos.</div>`;
