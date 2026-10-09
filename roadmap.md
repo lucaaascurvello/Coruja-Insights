@@ -1,2 +1,2 @@
-- [ ] Recolor the existing owl with the Instagram palette.
-- [ ] Add an illustrated, usable installation tutorial and verify it in the browser.
+- [x] Recolor the existing owl with the Instagram palette.
+- [x] Add an illustrated, usable installation tutorial and verify it in the browser.
