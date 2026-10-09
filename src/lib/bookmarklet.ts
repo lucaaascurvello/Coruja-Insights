@@ -140,19 +140,43 @@ function corujaScript(ORIGIN: string) {
       edge_owner_to_timeline_media: { count: postsCount, edges: media.slice(0, 24) },
     };
   };
+  const hasLikes = (p: any) => p?.edge_owner_to_timeline_media.edges.some((e: any) => e.node.edge_liked_by.count > 0);
+  // Read each post's public page meta ("123 likes, 4 comments") — same as opening the post normally
+  const enrichFromPosts = async (p: any) => {
+    const edges = p.edge_owner_to_timeline_media.edges.slice(0, 12);
+    for (let i = 0; i < edges.length; i++) {
+      const n = edges[i].node;
+      try {
+        (window as any).__corujaProg?.(15 + Math.round((i / edges.length) * 22), `Lendo curtidas das publicações… (${i + 1}/${edges.length})`);
+        const r = await fetch(`/p/${n.shortcode}/`, { credentials: "include" });
+        if (r.ok) {
+          const h = await r.text();
+          const m = h.match(/<meta[^>]+(?:property="og:description"|name="description")[^>]+content="([^"]+)"/i);
+          const d = (m?.[1] || "").replace(/&#064;|&#x40;/g, "@");
+          const l = d.match(/([\d.,]+\s*(?:mil|mi|k|m)?)\s*(?:curtidas?|likes?)/i);
+          const c = d.match(/([\d.,]+\s*(?:mil|mi|k|m)?)\s*(?:coment[aá]rios?|comments?)/i);
+          if (l) n.edge_liked_by.count = num(l[1]);
+          if (c) n.edge_media_to_comment.count = num(c[1]);
+          if (!n.id) { const id = h.match(/"media_id":"(\d+)"|instagram:\/\/media\?id=(\d+)/); if (id) n.id = id[1] || id[2]; }
+        }
+      } catch {}
+      await sleep(350);
+    }
+  };
   const getProfile = async (): Promise<any> => {
     const p = fromPage();
-    if (p && p.id && p.edge_owner_to_timeline_media.edges.some((e: any) => e.node.edge_liked_by.count > 0)) return p;
-    // Try one light network call to enrich likes and get the numeric id; fall back to page data on failure
+    if (p && p.id && hasLikes(p)) return p;
     try {
-      const u = (await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`, 2)).data.user;
-      if (u) return u;
+      const u = (await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`, 1)).data.user;
+      if (u && (hasLikes(u) || !p)) return u;
+      if (u && p && !p.id) p.id = u.id;
     } catch (e) {
-      if (p) { p.likesHidden = true; return p; }
-      throw e;
+      if (!p) throw e;
     }
-    if (p) { p.likesHidden = true; return p; }
-    throw new Error("sem dados");
+    if (!p) throw new Error("sem dados");
+    if (!hasLikes(p)) await enrichFromPosts(p);
+    if (!hasLikes(p)) p.likesHidden = true;
+    return p;
   };
   const fmt = (n: number) => (n || 0).toLocaleString("pt-BR");
   const esc = (s: any) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" } as any)[c]);
