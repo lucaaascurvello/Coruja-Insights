@@ -98,7 +98,14 @@ function Relatorio() {
         {d.engagedUsers?.length > 0 && (<><h2 className="mt-8 text-xl font-bold">Usuários mais engajados</h2>
           <ul className="mt-2 flex flex-wrap gap-2">{d.engagedUsers.map((u: any) => <li key={u.user} className="glass rounded-full px-3 py-1 text-sm">@{u.user} · {u.count}</li>)}</ul></>)}
 
-        {loading && <p className="mt-10 animate-pulse text-primary">A coruja está analisando com IA…</p>}
+        {loading && (
+          <div className="mt-10">
+            <p className="animate-pulse text-primary">A coruja está analisando com IA…</p>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+              <div className="bg-brand h-2 rounded-full transition-all duration-700" style={{ width: `${aiProg}%` }} />
+            </div>
+          </div>
+        )}
         {err && <p className="mt-10 text-destructive">{err}</p>}
 
         {ai && (<div className="animate-rise">

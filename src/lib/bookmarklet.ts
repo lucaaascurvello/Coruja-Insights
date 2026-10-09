@@ -292,11 +292,13 @@ function corujaScript(ORIGIN: string) {
 
   async function nonFollowers(id: string) {
     const box = $("#nfl");
-    box.innerHTML = `<div class="l" id="st">Lendo quem você segue…</div>`;
+    box.innerHTML = `<div class="l" id="st">Lendo quem você segue…</div><div class="bar"><i id="nb" style="width:3%"></i></div>`;
     try {
       const st = () => root.querySelector("#st") as HTMLElement;
-      const following = await listAll(id, "following", (n) => (st().textContent = `Lendo quem você segue… ${n}`));
-      const followers = await listAll(id, "followers", (n) => (st().textContent = `Lendo seus seguidores… ${n}`));
+      const nb = (p: number) => { const b = root.querySelector("#nb") as HTMLElement | null; if (b) b.style.width = p + "%"; };
+      const following = await listAll(id, "following", (n) => { st().textContent = `Lendo quem você segue… ${n}`; nb(Math.min(48, 3 + n / 20)); });
+      const followers = await listAll(id, "followers", (n) => { st().textContent = `Lendo seus seguidores… ${n}`; nb(Math.min(97, 50 + n / 20)); });
+      nb(100);
       const set = new Set(followers.map((u) => u.pk || u.id));
       const list = following.filter((u) => !set.has(u.pk || u.id));
       box.innerHTML = `<h4>${list.length} não te seguem de volta</h4>` + list.map((u) =>
