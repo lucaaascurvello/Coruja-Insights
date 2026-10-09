@@ -213,7 +213,10 @@ function corujaScript(ORIGIN: string) {
         username, fullName: u.full_name, bio: u.biography, category: u.category_name,
         followers, following: u.edge_follow?.count || 0, postsCount: u.edge_owner_to_timeline_media?.count || 0,
         isBusiness: !!(u.is_business_account || u.is_professional_account), isPrivate: !!u.is_private,
-        isOwn: viewerId && viewerId === u.id, userId: u.id,
+        isOwn: (viewerId && String(viewerId) === String(u.id))
+          || !!document.querySelector('a[href*="/accounts/edit"]')
+          || Array.from(document.querySelectorAll("header a, header button, header span")).some((el) => /editar perfil|edit profile/i.test((el as HTMLElement).textContent || "")),
+        userId: u.id,
         engagementRate: +er.toFixed(2), avgInteractions: Math.round(avg), posts, topPost: top || null,
         engagedUsers: [], topComment: null, followerNames: [],
       };
@@ -221,7 +224,10 @@ function corujaScript(ORIGIN: string) {
       // comments of top posts
       const users: Record<string, number> = {};
       let best: any = null;
-      for (const p of [...posts].sort((a: any, b: any) => b.comments - a.comments).slice(0, 5)) {
+      const topCommented = [...posts].sort((a: any, b: any) => b.comments - a.comments).slice(0, 5);
+      let ci = 0;
+      for (const p of topCommented) {
+        prog(45 + Math.round((ci++ / Math.max(1, topCommented.length)) * 35), `Lendo comentários… (${ci}/${topCommented.length})`);
         try {
           const c = await get(`/api/v1/media/${p.id}/comments/?can_support_threading=true&permalink_enabled=false`);
           for (const cm of c.comments || []) {
