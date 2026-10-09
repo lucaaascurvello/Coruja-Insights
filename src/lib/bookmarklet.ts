@@ -105,7 +105,7 @@ function corujaScript(ORIGIN: string) {
     const postsCount = user?.media_count ?? user?.edge_owner_to_timeline_media?.count
       ?? (pick(/([\d.,]+\s*(?:k|m|mil|mi)?)\s*(?:posts|publicaç)/i) || hdr(/publicaç|posts/i));
     // Grid scan: always merge counts found in alt / aria-label / visible text
-    const cnt = (tx: string, re: RegExp) => { const m = tx.match(re); return m ? num(m[1]) : 0; };
+    const cnt = (tx: string, re: RegExp) => { const m = tx.match(re); return m ? num(m[1] || "") : 0; };
     const byCode: Record<string, any> = {};
     media.forEach((m) => (byCode[m.node.shortcode] = m));
     document.querySelectorAll('main a[href*="/p/"], main a[href*="/reel/"]').forEach((a) => {
@@ -155,8 +155,8 @@ function corujaScript(ORIGIN: string) {
           const d = (m?.[1] || "").replace(/&#064;|&#x40;/g, "@");
           const l = d.match(/([\d.,]+\s*(?:mil|mi|k|m)?)\s*(?:curtidas?|likes?)/i);
           const c = d.match(/([\d.,]+\s*(?:mil|mi|k|m)?)\s*(?:coment[aá]rios?|comments?)/i);
-          if (l) n.edge_liked_by.count = num(l[1]);
-          if (c) n.edge_media_to_comment.count = num(c[1]);
+          if (l) n.edge_liked_by.count = num(l[1] || "");
+          if (c) n.edge_media_to_comment.count = num(c[1] || "");
           if (!n.id) { const id = h.match(/"media_id":"(\d+)"|instagram:\/\/media\?id=(\d+)/); if (id) n.id = id[1] || id[2]; }
         }
       } catch {}
