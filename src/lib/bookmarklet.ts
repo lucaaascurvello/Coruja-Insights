@@ -113,7 +113,11 @@ function corujaScript(ORIGIN: string) {
         }
       });
     }
-    const idMatch = document.documentElement.innerHTML.match(/"profile_id":"(\d+)"|profilePage_(\d+)/);
+    const html = document.documentElement.innerHTML;
+    const un = username.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const idMatch = html.match(/"profile_id":"(\d+)"|profilePage_(\d+)/)
+      || html.match(new RegExp(`"username":"${un}"[^}]{0,400}?"id":"?(\\d+)`))
+      || html.match(new RegExp(`"id":"?(\\d+)"?,"username":"${un}"`));
     const id = user?.pk || user?.id || (idMatch && (idMatch[1] || idMatch[2])) || "";
     if (!followers && !user) return null;
     return {
@@ -127,16 +131,16 @@ function corujaScript(ORIGIN: string) {
   };
   const getProfile = async (): Promise<any> => {
     const p = fromPage();
-    if (p && p.edge_owner_to_timeline_media.edges.some((e: any) => e.node.edge_liked_by.count > 0)) return p;
-    // Try one light network call to enrich likes; fall back to page data on failure
+    if (p && p.id && p.edge_owner_to_timeline_media.edges.some((e: any) => e.node.edge_liked_by.count > 0)) return p;
+    // Try one light network call to enrich likes and get the numeric id; fall back to page data on failure
     try {
-      const u = (await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`, 1)).data.user;
+      const u = (await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`, 2)).data.user;
       if (u) return u;
     } catch (e) {
-      if (p) return p;
+      if (p) { p.likesHidden = true; return p; }
       throw e;
     }
-    if (p) return p;
+    if (p) { p.likesHidden = true; return p; }
     throw new Error("sem dados");
   };
   const fmt = (n: number) => (n || 0).toLocaleString("pt-BR");
@@ -206,6 +210,7 @@ function corujaScript(ORIGIN: string) {
         caption: (e.node.edge_media_to_caption?.edges?.[0]?.node?.text || "").slice(0, 200),
       }));
       const followers = u.edge_followed_by?.count || 0;
+      const likesHidden = !!u.likesHidden || (posts.length > 0 && posts.every((p: any) => p.likes + p.comments === 0));
       const avg = posts.length ? posts.reduce((a: number, p: any) => a + p.likes + p.comments, 0) / posts.length : 0;
       const er = followers ? (avg / followers) * 100 : 0;
       const top = [...posts].sort((a: any, b: any) => b.likes + b.comments - (a.likes + a.comments))[0];
@@ -217,19 +222,21 @@ function corujaScript(ORIGIN: string) {
           || !!document.querySelector('a[href*="/accounts/edit"]')
           || Array.from(document.querySelectorAll("header a, header button, header span")).some((el) => /editar perfil|edit profile/i.test((el as HTMLElement).textContent || "")),
         userId: u.id,
-        engagementRate: +er.toFixed(2), avgInteractions: Math.round(avg), posts, topPost: top || null,
+        likesHidden,
+        engagementRate: likesHidden ? null : +er.toFixed(2), avgInteractions: likesHidden ? null : Math.round(avg), posts, topPost: likesHidden ? null : top || null,
         engagedUsers: [], topComment: null, followerNames: [],
       };
       render(data);
       // comments of top posts
       const users: Record<string, number> = {};
       let best: any = null;
-      const topCommented = [...posts].sort((a: any, b: any) => b.comments - a.comments).slice(0, 5);
-      let ci = 0;
+      const topCommented = [...posts].filter((p: any) => p.id).sort((a: any, b: any) => b.comments - a.comments).slice(0, 5);
+      let ci = 0, commentsOk = false;
       for (const p of topCommented) {
         prog(45 + Math.round((ci++ / Math.max(1, topCommented.length)) * 35), `Lendo comentários… (${ci}/${topCommented.length})`);
         try {
           const c = await get(`/api/v1/media/${p.id}/comments/?can_support_threading=true&permalink_enabled=false`);
+          commentsOk = true;
           for (const cm of c.comments || []) {
             const n = cm.user?.username; if (n && n !== username) users[n] = (users[n] || 0) + 1;
             if (!best || (cm.comment_like_count || 0) > best.likes) best = { user: n, text: (cm.text || "").slice(0, 300), likes: cm.comment_like_count || 0, post: p.code };
@@ -239,6 +246,8 @@ function corujaScript(ORIGIN: string) {
       }
       data.engagedUsers = Object.entries(users).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([user, count]) => ({ user, count }));
       data.topComment = best;
+      data.commentsDone = true;
+      data.commentsFailed = !commentsOk;
       prog(85, "Lendo amostra de seguidores…");
       try {
         const f = await get(`/api/v1/friendships/${u.id}/followers/?count=100&search_surface=follow_list_page`);
@@ -256,13 +265,14 @@ function corujaScript(ORIGIN: string) {
     body.innerHTML = `
     <div class="g">
       <div class="c"><small>Seguidores</small><strong>${fmt(d.followers)}</strong></div>
-      <div class="c"><small>Engajamento</small><strong>${d.engagementRate}%</strong></div>
+      <div class="c"><small>Engajamento</small><strong>${d.engagementRate == null ? "—" : d.engagementRate + "%"}</strong></div>
       <div class="c"><small>Seguindo</small><strong>${fmt(d.following)}</strong></div>
       <div class="c"><small>Publicações</small><strong>${fmt(d.postsCount)}</strong></div>
     </div>
+    ${d.likesHidden ? `<div class="w" style="background:rgba(95,224,239,.08);border-color:rgba(95,224,239,.25);color:#bdf3f9">O Instagram ocultou as curtidas nesta leitura, então engajamento e publicação em destaque ficam indisponíveis. O relatório com IA ainda funciona.</div>` : ""}
     ${d.isBusiness ? "" : `<div class="w">💡 Esta conta não é Profissional/Business. A análise usa só dados públicos. Recomendamos mudar para conta Profissional para ter métricas mais completas.</div>`}
     ${d.topPost ? `<h4>Publicação que mais engajou</h4><div class="c" style="font-size:13px">❤ ${fmt(d.topPost.likes)} · 💬 ${fmt(d.topPost.comments)}<br><a style="color:#5fe0ef" target="_blank" href="/p/${d.topPost.code}/">Ver publicação →</a></div>` : ""}
-    ${d.engagedUsers.length ? `<h4>Mais engajados</h4>${d.engagedUsers.map((x: any) => `<div class="row"><a target="_blank" href="/${esc(x.user)}/">@${esc(x.user)}</a><span>${x.count} coment.</span></div>`).join("")}` : `<div class="l">Lendo comentários…</div>`}
+    ${d.engagedUsers.length ? `<h4>Mais engajados</h4>${d.engagedUsers.map((x: any) => `<div class="row"><a target="_blank" href="/${esc(x.user)}/">@${esc(x.user)}</a><span>${x.count} coment.</span></div>`).join("")}` : d.commentsDone ? (d.commentsFailed ? `<div class="l" style="animation:none">Comentários indisponíveis nesta leitura (o Instagram limitou o acesso).</div>` : "") : `<div class="l">Lendo comentários…</div>`}
     <button class="btn pr" id="ai">✨ Gerar relatório completo com IA</button>
     ${d.isOwn ? `<button class="btn sc" id="nf">👀 Quem não me segue de volta</button><div id="nfl"></div>` : `<div class="w" style="background:rgba(95,224,239,.08);border-color:rgba(95,224,239,.25);color:#bdf3f9">Para ver quem não te segue de volta, abra o <b>seu próprio</b> perfil.</div>`}`;
     $("#ai").onclick = () => openReport(d);
@@ -294,6 +304,11 @@ function corujaScript(ORIGIN: string) {
     const box = $("#nfl");
     box.innerHTML = `<div class="l" id="st">Lendo quem você segue…</div><div class="bar"><i id="nb" style="width:3%"></i></div>`;
     try {
+      if (!id) {
+        const u = (await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(String(username))}`, 2)).data.user;
+        id = u?.id ? String(u.id) : "";
+        if (!id) throw new Error("ID do perfil não encontrado");
+      }
       const st = () => root.querySelector("#st") as HTMLElement;
       const nb = (p: number) => { const b = root.querySelector("#nb") as HTMLElement | null; if (b) b.style.width = p + "%"; };
       const following = await listAll(id, "following", (n) => { st().textContent = `Lendo quem você segue… ${n}`; nb(Math.min(48, 3 + n / 20)); });
