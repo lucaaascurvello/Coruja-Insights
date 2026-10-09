@@ -38,7 +38,7 @@ function corujaScript(ORIGIN: string) {
     const t = s.toLowerCase().replace(/\s/g, "");
     const m = t.match(/([\d.,]+)(k|m|mi|mil|b)?/);
     if (!m) return 0;
-    let v = m[1];
+    let v = m[1] || "";
     const suf = m[2] || "";
     if (suf) v = v.replace(",", ".");
     else v = v.replace(/[.,](?=\d{3}(\D|$))/g, "").replace(",", ".");
@@ -85,7 +85,7 @@ function corujaScript(ORIGIN: string) {
     // DOM / meta fallback
     const meta = (document.querySelector('meta[property="og:description"]') as HTMLMetaElement)?.content
       || (document.querySelector('meta[name="description"]') as HTMLMetaElement)?.content || "";
-    const pick = (re: RegExp) => { const m = meta.match(re); return m ? num(m[1]) : 0; };
+    const pick = (re: RegExp) => { const m = meta.match(re); return m ? num(m[1] || "") : 0; };
     const header = document.querySelector("header");
     const hdr = (re: RegExp) => {
       const links = header ? Array.from(header.querySelectorAll("a, li, span")) : [];
@@ -117,7 +117,7 @@ function corujaScript(ORIGIN: string) {
     const id = user?.pk || user?.id || (idMatch && (idMatch[1] || idMatch[2])) || "";
     if (!followers && !user) return null;
     return {
-      id: String(id), full_name: user?.full_name || document.title.split("(")[0].trim(), biography: user?.biography || "",
+      id: String(id), full_name: user?.full_name || (document.title.split("(")[0] || "").trim(), biography: user?.biography || "",
       category_name: user?.category_name || user?.category || "",
       is_business_account: user?.is_business_account || user?.is_business, is_professional_account: user?.is_professional_account,
       is_private: user?.is_private,
