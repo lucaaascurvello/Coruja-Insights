@@ -89,8 +89,7 @@ function corujaScript(ORIGIN: string) {
   (async () => {
     let data: any;
     try {
-      const info = await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`);
-      const u = info.data.user;
+      const u = await getProfile();
       const posts = (u.edge_owner_to_timeline_media?.edges || []).map((e: any) => ({
         id: e.node.id,
         code: e.node.shortcode,
