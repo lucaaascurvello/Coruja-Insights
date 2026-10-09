@@ -522,7 +522,7 @@ function corujaScript(ORIGIN: string, theme: string) {
         }
       }));
     } catch (e: any) {
-      box.innerHTML = `<div class="w">Não mostrei a lista para não te passar dados errados (${esc(e.message)}). Espere alguns minutos e tente de novo.</div><button class="btn" id="nfr" style="margin-top:8px">Tentar de novo</button>`;
+      box.innerHTML = `<div class="w">Não mostrei a lista para não te passar dados errados (${esc(e.message)}). Espere alguns minutos e clique em “Continuar” — a coruja segue de onde parou (feche a aba para apagar tudo).</div><button class="btn" id="nfr" style="margin-top:8px">Continuar</button>`;
       const rb = root.querySelector("#nfr") as HTMLButtonElement | null;
       if (rb) rb.onclick = () => nonFollowers(id, totals);
     }
