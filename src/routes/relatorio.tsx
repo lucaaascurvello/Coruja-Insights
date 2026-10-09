@@ -6,9 +6,9 @@ import { analyzeProfile, type AiReport } from "@/lib/analyze.functions";
 export const Route = createFileRoute("/relatorio")({
   head: () => ({
     meta: [
-      { title: "Relatório — Coruja Insights" },
+      { title: "Relatório — Boo Insights" },
       { name: "description", content: "Mini relatório do perfil do Instagram gerado na hora com IA. Nada é armazenado." },
-      { property: "og:title", content: "Relatório — Coruja Insights" },
+      { property: "og:title", content: "Relatório — Boo Insights" },
       { property: "og:description", content: "Mini relatório do perfil do Instagram gerado com IA." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -29,11 +29,11 @@ function Relatorio() {
 
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
-      if (e.data?.type !== "coruja:data") return;
+      if (e.data?.type !== "boo:data") return;
       setD(e.data.payload);
     };
     window.addEventListener("message", onMsg);
-    window.opener?.postMessage("coruja:ready", "https://www.instagram.com");
+    window.opener?.postMessage("boo:ready", "https://www.instagram.com");
     return () => window.removeEventListener("message", onMsg);
   }, []);
 
@@ -61,7 +61,7 @@ function Relatorio() {
       <main className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
         <img src={mascote} alt="Fantasminha" width={1024} height={1024} className="animate-float w-48" />
         <h1 className="mt-6 text-2xl font-bold">Esperando dados do Instagram…</h1>
-        <p className="mt-2 max-w-md text-muted-foreground">Esta página abre sozinha quando você clica em “Gerar relatório” no menu da coruja dentro do Instagram.</p>
+        <p className="mt-2 max-w-md text-muted-foreground">Esta página abre sozinha quando você clica em “Gerar relatório” no menu do fantasminha dentro do Instagram.</p>
         <Link to="/" className="mt-6 text-primary underline">Como instalar</Link>
       </main>
     );
@@ -70,7 +70,7 @@ function Relatorio() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
       <div className="flex items-center justify-between">
-        <span className="font-display font-bold">👻 Coruja Insights</span>
+        <span className="font-display font-bold">👻 Boo Insights</span>
         <button onClick={download} disabled={!ai} className="bg-brand rounded-xl px-4 py-2 text-sm font-bold text-primary-foreground disabled:opacity-40">Baixar relatório</button>
       </div>
 
@@ -98,7 +98,7 @@ function Relatorio() {
         {d.engagedUsers?.length > 0 && (<><h2 className="mt-8 text-xl font-bold">Usuários mais engajados</h2>
           <ul className="mt-2 flex flex-wrap gap-2">{d.engagedUsers.map((u: any) => <li key={u.user} className="glass rounded-full px-3 py-1 text-sm">@{u.user} · {u.count}</li>)}</ul></>)}
 
-        {loading && <p className="mt-10 animate-pulse text-primary">A coruja está analisando com IA…</p>}
+        {loading && <p className="mt-10 animate-pulse text-primary">O fantasminha está analisando com IA…</p>}
         {err && <p className="mt-10 text-destructive">{err}</p>}
 
         {ai && (<div className="animate-rise">

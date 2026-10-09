@@ -8,9 +8,9 @@ const PIX_KEY = "seu-pix@email.com";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Coruja Insights — Análise grátis do seu Instagram" },
+      { title: "Boo Insights — Análise grátis do seu Instagram" },
       { name: "description", content: "Ferramenta gratuita que analisa seu perfil do Instagram com IA e mostra quem não te segue de volta." },
-      { property: "og:title", content: "Coruja Insights — Análise grátis do seu Instagram" },
+      { property: "og:title", content: "Boo Insights — Análise grátis do seu Instagram" },
       { property: "og:description", content: "Engajamento, melhores posts, público e quem não te segue de volta. Grátis e sem salvar nada." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -37,7 +37,7 @@ function Index() {
     <main className="min-h-screen overflow-hidden">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-2 font-display font-bold">
-          <span className="h-3 w-3 rounded-full bg-brand shadow-glow" /> Coruja Insights
+          <span className="h-3 w-3 rounded-full bg-brand shadow-glow" /> Boo Insights
         </div>
         <a href="#cafe" className="text-sm text-muted-foreground transition hover:text-foreground">☕ Cafezinho</a>
       </header>
@@ -47,7 +47,7 @@ function Index() {
         <div className="animate-rise">
           <span className="glass inline-block rounded-full px-3 py-1 font-mono text-xs text-primary">100% gratuito · nada é salvo</span>
           <h1 className="mt-5 text-5xl font-bold leading-tight md:text-6xl">
-            Seu Instagram, <span className="text-gradient">analisado</span> por uma corujinha esperta.
+            Seu Instagram, <span className="text-gradient">analisado</span> por um fantasminha espertinho.
           </h1>
           <p className="mt-5 max-w-md text-lg text-muted-foreground">
             Abra qualquer perfil, clique no favorito e receba um mini relatório profissional na hora.
@@ -59,7 +59,7 @@ function Index() {
               onClick={(e) => { e.preventDefault(); alert("Arraste este botão para a sua barra de favoritos 😉"); }}
               className="bg-brand shadow-glow rounded-2xl px-6 py-4 font-display font-bold text-primary-foreground transition hover:-translate-y-0.5"
             >
-              👻 Coruja Insights
+              👻 Boo Insights
             </a>
             <span className="text-sm text-muted-foreground">← arraste para a barra de favoritos</span>
           </div>
@@ -86,7 +86,7 @@ function Index() {
           {[
             ["Instale", "Mostre a barra de favoritos (Ctrl/Cmd + Shift + B) e arraste o botão 👻 para ela. Funciona no Chrome, Edge, Firefox, Brave, Opera e Safari."],
             ["Abra um perfil", "Entre no instagram.com já logado e abra o perfil que quer analisar — o seu ou qualquer outro público."],
-            ["Clique no favorito", "O menu da coruja aparece por cima da página. Gere o relatório com IA e baixe. Para ver quem não te segue, abra o seu próprio perfil."],
+            ["Clique no favorito", "O menu do Boo aparece por cima da página. Gere o relatório com IA e baixe. Para ver quem não te segue, abra o seu próprio perfil."],
           ].map(([t, d], k) => (
             <li key={t} className="glass rounded-3xl p-6">
               <span className="font-mono text-sm text-primary">0{k + 1}</span>
@@ -103,8 +103,8 @@ function Index() {
       <section className="mx-auto max-w-3xl px-6 py-16 text-center">
         <h2 className="text-3xl font-bold">Um projeto caseiro 🏡</h2>
         <p className="mt-4 text-muted-foreground">
-          A Coruja Insights é um projeto feito em casa, para fins de estudo e para ajudar quem precisa dessas ferramentas de forma gratuita.
-          Ela lê apenas dados públicos que o próprio Instagram mostra a você. Nenhum dado é guardado: ao fechar, tudo some.
+          O Boo Insights é um projeto feito em casa, para fins de estudo e para ajudar quem precisa dessas ferramentas de forma gratuita.
+          Ele lê apenas dados públicos que o próprio Instagram mostra a você. Nenhum dado é guardado: ao fechar, tudo some — feito fantasma.
           Estimativas de público (gênero e regiões) são feitas por IA e servem só como referência. Não tem vínculo com o Instagram/Meta.
         </p>
       </section>
@@ -113,7 +113,7 @@ function Index() {
         <div className="glass shadow-glow rounded-3xl p-8 text-center">
           <div className="text-4xl">☕</div>
           <h2 className="mt-3 text-2xl font-bold">Pague um cafezinho</h2>
-          <p className="mt-2 text-sm text-muted-foreground">Gostou? Qualquer valor via Pix ajuda a manter a corujinha acordada.</p>
+          <p className="mt-2 text-sm text-muted-foreground">Gostou? Qualquer valor via Pix ajuda o fantasminha a continuar assombrando de graça.</p>
           <button
             onClick={() => { navigator.clipboard.writeText(PIX_KEY); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
             className="mt-6 w-full rounded-2xl border border-border bg-secondary px-4 py-4 font-mono text-sm transition hover:border-primary"
