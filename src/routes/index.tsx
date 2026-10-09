@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import mascote from "@/assets/mascote.png";
+import mascote from "@/assets/mascote-ghost.png";
 import { buildBookmarklet } from "@/lib/bookmarklet";
 
 const PIX_KEY = "seu-pix@email.com";
@@ -59,12 +59,12 @@ function Index() {
               onClick={(e) => { e.preventDefault(); alert("Arraste este botão para a sua barra de favoritos 😉"); }}
               className="bg-brand shadow-glow rounded-2xl px-6 py-4 font-display font-bold text-primary-foreground transition hover:-translate-y-0.5"
             >
-              🦉 Coruja Insights
+              👻 Coruja Insights
             </a>
             <span className="text-sm text-muted-foreground">← arraste para a barra de favoritos</span>
           </div>
         </div>
-        <img src={mascote} alt="Mascote coruja analista" width={1024} height={1024} className="animate-float mx-auto w-80 drop-shadow-2xl md:w-[26rem]" />
+        <img src={mascote} alt="Mascote fantasminha analista" width={1024} height={1024} className="animate-float mx-auto w-80 drop-shadow-2xl md:w-[26rem]" />
       </section>
 
       <section className="mx-auto max-w-6xl px-6 py-16">
@@ -84,7 +84,7 @@ function Index() {
         <h2 className="text-3xl font-bold">Como usar</h2>
         <ol className="mt-8 grid gap-4 md:grid-cols-3">
           {[
-            ["Instale", "Mostre a barra de favoritos (Ctrl/Cmd + Shift + B) e arraste o botão 🦉 para ela. Funciona no Chrome, Edge, Firefox, Brave, Opera e Safari."],
+            ["Instale", "Mostre a barra de favoritos (Ctrl/Cmd + Shift + B) e arraste o botão 👻 para ela. Funciona no Chrome, Edge, Firefox, Brave, Opera e Safari."],
             ["Abra um perfil", "Entre no instagram.com já logado e abra o perfil que quer analisar — o seu ou qualquer outro público."],
             ["Clique no favorito", "O menu da coruja aparece por cima da página. Gere o relatório com IA e baixe. Para ver quem não te segue, abra o seu próprio perfil."],
           ].map(([t, d], k) => (

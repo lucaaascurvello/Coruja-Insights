@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import mascote from "@/assets/mascote.png";
+import mascote from "@/assets/mascote-ghost.png";
 import { analyzeProfile, type AiReport } from "@/lib/analyze.functions";
 
 export const Route = createFileRoute("/relatorio")({
@@ -59,7 +59,7 @@ function Relatorio() {
   if (!d) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
-        <img src={mascote} alt="Coruja" width={1024} height={1024} className="animate-float w-48" />
+        <img src={mascote} alt="Fantasminha" width={1024} height={1024} className="animate-float w-48" />
         <h1 className="mt-6 text-2xl font-bold">Esperando dados do Instagram…</h1>
         <p className="mt-2 max-w-md text-muted-foreground">Esta página abre sozinha quando você clica em “Gerar relatório” no menu da coruja dentro do Instagram.</p>
         <Link to="/" className="mt-6 text-primary underline">Como instalar</Link>
@@ -70,7 +70,7 @@ function Relatorio() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
       <div className="flex items-center justify-between">
-        <span className="font-display font-bold">🦉 Coruja Insights</span>
+        <span className="font-display font-bold">👻 Coruja Insights</span>
         <button onClick={download} disabled={!ai} className="bg-brand rounded-xl px-4 py-2 text-sm font-bold text-primary-foreground disabled:opacity-40">Baixar relatório</button>
       </div>
 
