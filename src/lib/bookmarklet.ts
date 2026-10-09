@@ -340,7 +340,7 @@ function corujaScript(ORIGIN: string, theme: string) {
     for (let i = 0; i < 100; i++) {
       const r = await get(`/api/v1/friendships/${id}/${kind}/?count=200${max ? "&max_id=" + max : ""}`, 3);
       out.push(...(r.users || [])); cb(out.length);
-      if (!r.next_max_id) break; max = r.next_max_id; await sleep(500);
+      if (!r.next_max_id) break; max = r.next_max_id; await sleep(300);
     }
     return out;
   }
@@ -417,7 +417,7 @@ function corujaScript(ORIGIN: string, theme: string) {
           if (!S.out.length && page.length && !page.some((u: any) => typeof u.fv === "boolean")) { S.bad = true; break; }
           S.out.push(...page);
           onFollowing(S.out.length);
-          if (!e.page_info?.has_next_page) S.done = true; else { S.after = e.page_info.end_cursor; await sleep(700); }
+          if (!e.page_info?.has_next_page) S.done = true; else { S.after = e.page_info.end_cursor; await sleep(350); }
         }
         if (S.done) {
           const known = S.out.filter((u: any) => typeof u.fv === "boolean").length;
@@ -462,26 +462,37 @@ function corujaScript(ORIGIN: string, theme: string) {
             for (const u of following) { const k = uid(u); if (!(k in back)) back[k] = fIds.has(k) || fNames.has(uname(u)); }
           }
         }
-        // Strategy D: whatever is still unknown, ask one by one (resumable).
+        // Strategy D: whatever is still unknown, ask several at once (resumable).
+        // Parallel workers share one pause: if Instagram asks to slow down, all stop and fewer workers continue.
         const left = following.filter((u) => !(uid(u) in back));
-        let fails = 0;
-        for (let i = 0; i < left.length; i++) {
-          const u = left[i];
-          const done = ids.length - left.length + i + 1;
-          st().textContent = `Conferindo ${done} de ${ids.length} perfis que você segue…`;
-          nb(3 + Math.round((done / ids.length) * 96));
-          let ans: boolean | null = null;
-          for (let t = 0; t < 3 && ans === null; t++) {
-            try {
-              const r = await fetch(`/api/v1/friendships/show/${uid(u)}/`, { headers: { ...H, "x-csrftoken": tok }, credentials: "include" });
-              if (r.ok) { const j = await r.json(); if (typeof j?.followed_by === "boolean") ans = j.followed_by; }
-              else if (r.status === 429 || r.status === 401) { for (let s = 30; s > 0; s--) { st().textContent = `O Instagram pediu uma pausa — continuando em ${s} s… (${done} de ${ids.length})`; await sleep(1000); } }
-            } catch { /* retry */ }
+        const base = ids.length - left.length;
+        let fails = 0, next = 0, done = base, pauseUntil = 0, workers = 4, stop: Error | null = null;
+        const show = () => { st().textContent = `Conferindo ${done} de ${ids.length} perfis que você segue…`; nb(3 + Math.round((done / ids.length) * 96)); };
+        const waitPause = async () => {
+          while (Date.now() < pauseUntil) { st().textContent = `O Instagram pediu uma pausa — continuando em ${Math.ceil((pauseUntil - Date.now()) / 1000)} s… (${done} de ${ids.length})`; await sleep(1000); }
+        };
+        const worker = async (w: number) => {
+          while (!stop && next < left.length) {
+            if (w >= workers) { await sleep(500); continue; }
+            await waitPause();
+            const u = left[next++];
+            let ans: boolean | null = null;
+            for (let t = 0; t < 3 && ans === null && !stop; t++) {
+              try {
+                const r = await fetch(`/api/v1/friendships/show/${uid(u)}/`, { headers: { ...H, "x-csrftoken": tok }, credentials: "include" });
+                if (r.ok) { const j = await r.json(); if (typeof j?.followed_by === "boolean") ans = j.followed_by; }
+                else if (r.status === 429 || r.status === 401) { workers = Math.max(1, workers - 1); pauseUntil = Math.max(pauseUntil, Date.now() + 30000); await waitPause(); }
+              } catch { /* retry */ }
+            }
+            if (ans === null) { if (++fails > 5) stop = new Error(`o Instagram pausou a conferência em ${done} de ${ids.length} — o progresso foi guardado`); }
+            else { back[uid(u)] = ans; fails = 0; }
+            done++; show();
+            await sleep(120);
           }
-          if (ans === null) { if (++fails > 5) throw new Error(`o Instagram pausou a conferência em ${done} de ${ids.length} — o progresso foi guardado`); }
-          else { back[uid(u)] = ans; fails = 0; }
-          await sleep(250);
-        }
+        };
+        show();
+        await Promise.all([0, 1, 2, 3].map(worker));
+        if (stop) throw stop;
         list = following.filter((u) => back[uid(u)] === false);
         if (following.length > 20 && list.length > following.length * 0.9) { W.__corujaNF = null; throw new Error("a comparação falhou"); }
       }
