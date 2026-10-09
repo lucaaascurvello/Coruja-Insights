@@ -113,7 +113,11 @@ function corujaScript(ORIGIN: string) {
         }
       });
     }
-    const idMatch = document.documentElement.innerHTML.match(/"profile_id":"(\d+)"|profilePage_(\d+)/);
+    const html = document.documentElement.innerHTML;
+    const un = username.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const idMatch = html.match(/"profile_id":"(\d+)"|profilePage_(\d+)/)
+      || html.match(new RegExp(`"username":"${un}"[^}]{0,400}?"id":"?(\\d+)`))
+      || html.match(new RegExp(`"id":"?(\\d+)"?,"username":"${un}"`));
     const id = user?.pk || user?.id || (idMatch && (idMatch[1] || idMatch[2])) || "";
     if (!followers && !user) return null;
     return {
@@ -127,16 +131,16 @@ function corujaScript(ORIGIN: string) {
   };
   const getProfile = async (): Promise<any> => {
     const p = fromPage();
-    if (p && p.edge_owner_to_timeline_media.edges.some((e: any) => e.node.edge_liked_by.count > 0)) return p;
-    // Try one light network call to enrich likes; fall back to page data on failure
+    if (p && p.id && p.edge_owner_to_timeline_media.edges.some((e: any) => e.node.edge_liked_by.count > 0)) return p;
+    // Try one light network call to enrich likes and get the numeric id; fall back to page data on failure
     try {
-      const u = (await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`, 1)).data.user;
+      const u = (await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`, 2)).data.user;
       if (u) return u;
     } catch (e) {
-      if (p) return p;
+      if (p) { p.likesHidden = true; return p; }
       throw e;
     }
-    if (p) return p;
+    if (p) { p.likesHidden = true; return p; }
     throw new Error("sem dados");
   };
   const fmt = (n: number) => (n || 0).toLocaleString("pt-BR");
