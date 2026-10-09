@@ -39,28 +39,28 @@
 
 :root {
   --radius: 1rem;
-  --background: oklch(0.16 0.025 250);
+  --background: oklch(0.15 0.02 320);
   --foreground: oklch(0.96 0.01 220);
-  --card: oklch(0.2 0.03 250);
+  --card: oklch(0.2 0.03 320);
   --card-foreground: oklch(0.96 0.01 220);
-  --popover: oklch(0.2 0.03 250);
+  --popover: oklch(0.2 0.03 320);
   --popover-foreground: oklch(0.96 0.01 220);
-  --primary: oklch(0.82 0.13 200);
-  --primary-foreground: oklch(0.16 0.025 250);
-  --secondary: oklch(0.25 0.03 250);
+  --primary: oklch(0.63 0.23 0);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.25 0.03 320);
   --secondary-foreground: oklch(0.96 0.01 220);
-  --muted: oklch(0.24 0.03 250);
+  --muted: oklch(0.24 0.03 320);
   --muted-foreground: oklch(0.7 0.03 240);
-  --accent: oklch(0.7 0.17 35);
-  --accent-foreground: oklch(0.16 0.025 250);
-  --coral: oklch(0.7 0.17 35);
-  --glow: oklch(0.82 0.13 200);
+  --accent: oklch(0.8 0.15 70);
+  --accent-foreground: oklch(0.16 0.025 320);
+  --coral: oklch(0.8 0.15 70);
+  --glow: oklch(0.5 0.2 310);
   --destructive: oklch(0.65 0.22 25);
   --destructive-foreground: oklch(0.98 0 0);
   --border: oklch(1 0 0 / 9%);
   --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.82 0.13 200);
-  --gradient-brand: linear-gradient(120deg, var(--glow), var(--coral));
+  --ring: oklch(0.63 0.23 0);
+  --gradient-brand: linear-gradient(120deg, oklch(0.5 0.2 310), oklch(0.63 0.23 0) 45%, oklch(0.63 0.25 27) 70%, oklch(0.8 0.15 70));
   --shadow-glow: 0 0 60px -10px color-mix(in oklab, var(--glow) 45%, transparent);
 }
 

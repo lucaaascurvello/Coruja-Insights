@@ -104,15 +104,26 @@ function corujaScript(ORIGIN: string) {
       ?? (pick(/([\d.,]+\s*(?:k|m|mil|mi)?)\s*(?:following|seguindo)/i) || hdr(/seguindo|following/i));
     const postsCount = user?.media_count ?? user?.edge_owner_to_timeline_media?.count
       ?? (pick(/([\d.,]+\s*(?:k|m|mil|mi)?)\s*(?:posts|publicaç)/i) || hdr(/publicaç|posts/i));
-    if (!media.length) {
-      document.querySelectorAll('main a[href*="/p/"], main a[href*="/reel/"]').forEach((a) => {
-        const code = (a.getAttribute("href") || "").split("/").filter(Boolean)[1];
-        if (code && !seen.has(code)) {
-          seen.add(code);
-          media.push({ node: { id: "", shortcode: code, edge_liked_by: { count: 0 }, edge_media_to_comment: { count: 0 }, edge_media_to_caption: { edges: [{ node: { text: a.querySelector("img")?.getAttribute("alt") || "" } }] } } });
-        }
-      });
-    }
+    // Grid scan: always merge counts found in alt / aria-label / visible text
+    const cnt = (tx: string, re: RegExp) => { const m = tx.match(re); return m ? num(m[1] || "") : 0; };
+    const byCode: Record<string, any> = {};
+    media.forEach((m) => (byCode[m.node.shortcode] = m));
+    document.querySelectorAll('main a[href*="/p/"], main a[href*="/reel/"]').forEach((a) => {
+      const code = (a.getAttribute("href") || "").split("/").filter(Boolean).find((_, i, arr) => arr[i - 1] === "p" || arr[i - 1] === "reel");
+      if (!code) return;
+      const alt = a.querySelector("img")?.getAttribute("alt") || "";
+      const tx = [alt, a.getAttribute("aria-label") || "", (a as HTMLElement).innerText || "", a.querySelector("[aria-label]")?.getAttribute("aria-label") || ""].join(" ");
+      const likes = cnt(tx, /([\d.,]+\s*(?:mil|mi|k|m)?)\s*(?:curtidas?|likes?)/i);
+      const comments = cnt(tx, /([\d.,]+\s*(?:mil|mi|k|m)?)\s*(?:coment[aá]rios?|comments?)/i);
+      const isVideo = (a.getAttribute("href") || "").includes("/reel/");
+      let m = byCode[code];
+      if (!m) {
+        m = { node: { id: "", shortcode: code, is_video: isVideo, edge_liked_by: { count: 0 }, edge_media_to_comment: { count: 0 }, edge_media_to_caption: { edges: [{ node: { text: alt } }] } } };
+        byCode[code] = m; seen.add(code); media.push(m);
+      }
+      if (!m.node.edge_liked_by.count && likes) m.node.edge_liked_by.count = likes;
+      if (!m.node.edge_media_to_comment.count && comments) m.node.edge_media_to_comment.count = comments;
+    });
     const html = document.documentElement.innerHTML;
     const un = username.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const idMatch = html.match(/"profile_id":"(\d+)"|profilePage_(\d+)/)
@@ -129,19 +140,43 @@ function corujaScript(ORIGIN: string) {
       edge_owner_to_timeline_media: { count: postsCount, edges: media.slice(0, 24) },
     };
   };
+  const hasLikes = (p: any) => p?.edge_owner_to_timeline_media.edges.some((e: any) => e.node.edge_liked_by.count > 0);
+  // Read each post's public page meta ("123 likes, 4 comments") — same as opening the post normally
+  const enrichFromPosts = async (p: any) => {
+    const edges = p.edge_owner_to_timeline_media.edges.slice(0, 12);
+    for (let i = 0; i < edges.length; i++) {
+      const n = edges[i].node;
+      try {
+        (window as any).__corujaProg?.(15 + Math.round((i / edges.length) * 22), `Lendo curtidas das publicações… (${i + 1}/${edges.length})`);
+        const r = await fetch(`/p/${n.shortcode}/`, { credentials: "include" });
+        if (r.ok) {
+          const h = await r.text();
+          const m = h.match(/<meta[^>]+(?:property="og:description"|name="description")[^>]+content="([^"]+)"/i);
+          const d = (m?.[1] || "").replace(/&#064;|&#x40;/g, "@");
+          const l = d.match(/([\d.,]+\s*(?:mil|mi|k|m)?)\s*(?:curtidas?|likes?)/i);
+          const c = d.match(/([\d.,]+\s*(?:mil|mi|k|m)?)\s*(?:coment[aá]rios?|comments?)/i);
+          if (l) n.edge_liked_by.count = num(l[1] || "");
+          if (c) n.edge_media_to_comment.count = num(c[1] || "");
+          if (!n.id) { const id = h.match(/"media_id":"(\d+)"|instagram:\/\/media\?id=(\d+)/); if (id) n.id = id[1] || id[2]; }
+        }
+      } catch {}
+      await sleep(350);
+    }
+  };
   const getProfile = async (): Promise<any> => {
     const p = fromPage();
-    if (p && p.id && p.edge_owner_to_timeline_media.edges.some((e: any) => e.node.edge_liked_by.count > 0)) return p;
-    // Try one light network call to enrich likes and get the numeric id; fall back to page data on failure
+    if (p && p.id && hasLikes(p)) return p;
     try {
-      const u = (await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`, 2)).data.user;
-      if (u) return u;
+      const u = (await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`, 1)).data.user;
+      if (u && (hasLikes(u) || !p)) return u;
+      if (u && p && !p.id) p.id = u.id;
     } catch (e) {
-      if (p) { p.likesHidden = true; return p; }
-      throw e;
+      if (!p) throw e;
     }
-    if (p) { p.likesHidden = true; return p; }
-    throw new Error("sem dados");
+    if (!p) throw new Error("sem dados");
+    if (!hasLikes(p)) await enrichFromPosts(p);
+    if (!hasLikes(p)) p.likesHidden = true;
+    return p;
   };
   const fmt = (n: number) => (n || 0).toLocaleString("pt-BR");
   const esc = (s: any) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" } as any)[c]);
@@ -189,6 +224,7 @@ function corujaScript(ORIGIN: string) {
     const l = root.querySelector("#pl");
     if (l && t) l.textContent = t;
   };
+  (window as any).__corujaProg = prog;
   const $ = (s: string) => root.querySelector(s) as HTMLElement;
   $("#x").onclick = () => { host.remove(); W.__coruja = null; };
   const body = $("#b");
