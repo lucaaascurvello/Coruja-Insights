@@ -235,7 +235,7 @@ function corujaScript(ORIGIN: string, theme: string) {
   };
   (window as any).__corujaProg = prog;
   const $ = (s: string) => root.querySelector(s) as HTMLElement;
-  $("#x").onclick = () => { host.remove(); W.__coruja = null; };
+  $("#x").onclick = () => { host.remove(); W.__coruja = null; (W.__corujaBlobs || []).forEach((b: string) => URL.revokeObjectURL(b)); W.__corujaBlobs = []; };
   const body = $("#b");
 
   (async () => {
