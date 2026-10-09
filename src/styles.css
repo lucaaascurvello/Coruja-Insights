@@ -129,4 +129,6 @@
 .installation-drag-path svg { position: absolute; top: -6px; right: -8px; }
 @media (prefers-reduced-motion: reduce) {
   .animate-float, .animate-rise { animation: none; }
+  .marquee-track { animation: none; }
+  .marquee { overflow-x: auto; }
 }
