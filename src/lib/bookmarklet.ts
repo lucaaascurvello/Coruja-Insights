@@ -333,20 +333,41 @@ function corujaScript(ORIGIN: string, theme: string) {
     window.addEventListener("message", onMsg);
   }
 
-  async function listAll(id: string, kind: string, cb: (n: number) => void) {
+  async function listRest(id: string, kind: string, cb: (n: number) => void) {
     const out: any[] = []; let max = "";
-    for (let i = 0; i < 60; i++) {
-      const r = await get(`/api/v1/friendships/${id}/${kind}/?count=200${max ? "&max_id=" + max : ""}`);
+    for (let i = 0; i < 100; i++) {
+      const r = await get(`/api/v1/friendships/${id}/${kind}/?count=50${max ? "&max_id=" + max : ""}`, 3);
       out.push(...(r.users || [])); cb(out.length);
-      if (!r.next_max_id) break; max = r.next_max_id; await sleep(900);
+      if (!r.next_max_id) break; max = r.next_max_id; await sleep(1200);
     }
     return out;
+  }
+  async function listGql(id: string, kind: string, cb: (n: number) => void) {
+    const hash = kind === "followers" ? "c76146de99bb02f6415203be841dd25a" : "d04b0a864b4b54837c0d870b0e77e076";
+    const key = kind === "followers" ? "edge_followed_by" : "edge_follow";
+    const out: any[] = []; let after = "";
+    for (let i = 0; i < 100; i++) {
+      const vars = JSON.stringify({ id, include_reel: true, fetch_mutual: false, first: 50, ...(after ? { after } : {}) });
+      const r = await get(`/graphql/query/?query_hash=${hash}&variables=${encodeURIComponent(vars)}`, 3);
+      const e = r?.data?.user?.[key];
+      if (!e) throw new Error("HTTP 404");
+      out.push(...e.edges.map((x: any) => ({ pk: x.node.id, username: x.node.username, profile_pic_url: x.node.profile_pic_url })));
+      cb(out.length);
+      if (!e.page_info?.has_next_page) break; after = e.page_info.end_cursor; await sleep(1200);
+    }
+    return out;
+  }
+  async function listAll(id: string, kind: string, cb: (n: number) => void) {
+    try { return await listRest(id, kind, cb); }
+    catch { return await listGql(id, kind, cb); }
   }
 
   async function nonFollowers(id: string) {
     const box = $("#nfl");
     box.innerHTML = `<div class="l" id="st">Lendo quem você segue…</div><div class="bar"><i id="nb" style="width:3%"></i></div>`;
     try {
+      // On your own profile, the login cookie holds the exact account ID.
+      if (viewerId) id = viewerId;
       if (!id) {
         const u = (await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(String(username))}`, 2)).data.user;
         id = u?.id ? String(u.id) : "";
