@@ -26,6 +26,7 @@ function Relatorio() {
   const [ai, setAi] = useState<AiReport | null>(null);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
+  const [aiProg, setAiProg] = useState(0);
 
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
@@ -40,11 +41,17 @@ function Relatorio() {
   useEffect(() => {
     if (!d) return;
     setLoading(true);
+    setAiProg(8);
+    const tick = setInterval(() => setAiProg((p) => (p < 90 ? p + Math.max(1, (90 - p) / 6) : p)), 700);
     const slim = { ...d, posts: d.posts?.slice(0, 12) };
     analyzeProfile({ data: slim })
       .then((r) => (r.report ? setAi(r.report) : setErr(r.error || "Erro")))
       .catch(() => setErr("Não foi possível gerar a análise agora."))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        clearInterval(tick);
+        setAiProg(100);
+        setTimeout(() => setLoading(false), 400);
+      });
   }, [d]);
 
   const download = () => {
