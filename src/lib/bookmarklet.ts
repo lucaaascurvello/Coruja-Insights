@@ -421,13 +421,17 @@ function corujaScript(ORIGIN: string, theme: string) {
         }
         if (S.done) {
           const known = S.out.filter((u: any) => typeof u.fv === "boolean").length;
-          if (known >= S.out.length * 0.95) { list = S.out.filter((u: any) => u.fv === false); break; }
+          // Only trust it if the whole list came back (an empty or short answer means Instagram cut it off)
+          const complete = S.out.length > 0 && (!totFollowing || S.out.length >= totFollowing * 0.9);
+          if (complete && known >= S.out.length * 0.95) { list = S.out.filter((u: any) => u.fv === false); NF.method = "A"; NF.read = S.out.length; break; }
           S.bad = true;
         }
       }
 
       if (!list) {
         const following: any[] = NF.following || (NF.following = await listAll(id, "following", onFollowing));
+        if (!following.length || (totFollowing && following.length < totFollowing * 0.9)) { NF.following = null; throw new Error(`li só ${following.length} de ${totFollowing} perfis que você segue`); }
+        NF.method = "B"; NF.read = following.length;
         const ids = following.map(uid).filter(Boolean);
         const back: Record<string, boolean> = NF.back;
         // Strategy B: ask about 100 people at a time — only trusted when Instagram sends the "follows you" field.
@@ -483,7 +487,7 @@ function corujaScript(ORIGIN: string, theme: string) {
       }
       nb(100);
       const pic = (u: any) => u.profile_pic_url || u.hd_profile_pic_url_info?.url || "";
-      box.innerHTML = `<h4>${list.length} não te seguem de volta</h4>` + list.map((u) =>
+      box.innerHTML = `<h4>${list.length} não te seguem de volta</h4><div class="l">Conferi ${NF.read || 0} perfis que você segue (modo ${NF.method || "?"}).</div>` + list.map((u) =>
         `<div class="row"><span class="av">${esc(String(u.username || "?").charAt(0).toUpperCase())}<img src="${esc(pic(u))}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="this.remove()"></span><a target="_blank" href="/${esc(u.username)}/">@${esc(u.username)}${u.full_name ? `<small> ${esc(u.full_name)}</small>` : ""}</a><button class="u" data-id="${esc(uid(u))}">Deixar de seguir</button></div>`).join("") +
         `<div class="w">Vá com calma: deixar de seguir muitas contas rápido pode fazer o Instagram limitar sua conta temporariamente.</div>`;
       box.querySelectorAll<HTMLButtonElement>(".u").forEach((b) => (b.onclick = async () => {
