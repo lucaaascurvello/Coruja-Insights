@@ -412,7 +412,7 @@ function corujaScript(ORIGIN: string, theme: string) {
       const list = following.filter((u) => back.get(uid(u)) === false);
       const pic = (u: any) => u.profile_pic_url || u.hd_profile_pic_url_info?.url || "";
       box.innerHTML = `<h4>${list.length} não te seguem de volta</h4>` + list.map((u) =>
-        `<div class="row"><span class="av">${esc(String(u.username || "?")[0].toUpperCase())}<img src="${esc(pic(u))}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="this.remove()"></span><a target="_blank" href="/${esc(u.username)}/">@${esc(u.username)}${u.full_name ? `<small> ${esc(u.full_name)}</small>` : ""}</a><button class="u" data-id="${esc(uid(u))}">Deixar de seguir</button></div>`).join("") +
+        `<div class="row"><span class="av">${esc(String(u.username || "?").charAt(0).toUpperCase())}<img src="${esc(pic(u))}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="this.remove()"></span><a target="_blank" href="/${esc(u.username)}/">@${esc(u.username)}${u.full_name ? `<small> ${esc(u.full_name)}</small>` : ""}</a><button class="u" data-id="${esc(uid(u))}">Deixar de seguir</button></div>`).join("") +
         `<div class="w">Vá com calma: deixar de seguir muitas contas rápido pode fazer o Instagram limitar sua conta temporariamente.</div>`;
       box.querySelectorAll<HTMLButtonElement>(".u").forEach((b) => (b.onclick = async () => {
         b.disabled = true; b.textContent = "…";
