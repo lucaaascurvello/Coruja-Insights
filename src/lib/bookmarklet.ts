@@ -1,6 +1,8 @@
+import designStyles from "@/styles.css?raw";
+
 /* Self-contained script injected on instagram.com via bookmark.
    Must not reference anything outside its own body (it's serialized with toString). */
-function corujaScript(ORIGIN: string) {
+function corujaScript(ORIGIN: string, theme: string) {
   const W = window as any;
   if (!/instagram\.com$/.test(location.hostname)) {
     alert("Abra um perfil no instagram.com e clique no favorito novamente.");
@@ -188,33 +190,38 @@ function corujaScript(ORIGIN: string) {
   W.__coruja = host;
 
   root.innerHTML = `<style>
+  ${theme}
   *{box-sizing:border-box;font-family:Manrope,system-ui,sans-serif}
-  .p{width:380px;max-height:86vh;overflow:auto;background:rgba(22,28,40,.94);backdrop-filter:blur(16px);color:#eef4f8;border:1px solid rgba(255,255,255,.1);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 50px -10px rgba(80,220,240,.4);animation:in .5s cubic-bezier(.2,.7,.2,1)}
+  .p{width:380px;max-width:calc(100vw - 40px);max-height:86vh;overflow:auto;background:color-mix(in oklab,var(--background) 96%,transparent);backdrop-filter:blur(16px);color:var(--foreground);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow-glow);animation:in .5s cubic-bezier(.2,.7,.2,1)}
   @keyframes in{from{opacity:0;transform:translateY(-12px) scale(.97)}to{opacity:1;transform:none}}
   @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
-  .h{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
-  .h b{font-size:15px}.h span{font-size:11px;color:#8fa3b5}
-  .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(120deg,#5fe0ef,#ff7a59);box-shadow:0 0 12px #5fe0ef}
-  .x{margin-left:auto;background:none;border:0;color:#8fa3b5;font-size:20px;cursor:pointer}
+  .h{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--border)}
+  .h b{font-size:15px}.h span{font-size:11px;color:var(--muted-foreground)}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--gradient-brand);box-shadow:var(--shadow-glow)}
+  .x{margin-left:auto;background:none;border:0;color:var(--muted-foreground);font-size:20px;cursor:pointer}
   .b{padding:16px 18px}
   .g{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .c{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:12px}
-  .c small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#8fa3b5}
+  .c{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px}
+  .c small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:0;color:var(--muted-foreground)}
   .c strong{font-size:18px}
-  .w{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(255,122,89,.12);border:1px solid rgba(255,122,89,.3);font-size:12px;color:#ffc2b0}
+  .w{margin-top:10px;padding:10px 12px;border-radius:12px;background:color-mix(in oklab,var(--accent) 12%,transparent);border:1px solid color-mix(in oklab,var(--accent) 30%,transparent);font-size:12px;color:var(--accent)}
+  .info{background:color-mix(in oklab,var(--primary) 10%,transparent);border-color:color-mix(in oklab,var(--primary) 30%,transparent);color:var(--foreground)}
   .btn{width:100%;margin-top:10px;padding:12px;border:0;border-radius:12px;font-weight:700;cursor:pointer;font-size:13px;transition:transform .2s}
   .btn:hover{transform:translateY(-1px)}
-  .pr{background:linear-gradient(120deg,#5fe0ef,#ff7a59);color:#141a26}
-  .sc{background:rgba(255,255,255,.07);color:#eef4f8;border:1px solid rgba(255,255,255,.1)}
-  .l{font-size:12px;color:#8fa3b5;animation:pulse 1.4s infinite;padding:8px 0}
-  .bar{height:6px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin:4px 0 8px}
-  .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(120deg,#5fe0ef,#ff7a59);transition:width .45s ease}
-  .row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px}
+  .pr{background:var(--gradient-brand);color:var(--primary-foreground);text-shadow:var(--shadow-glow)}
+  .sc{background:var(--secondary);color:var(--secondary-foreground);border:1px solid var(--border)}
+  .l{font-size:12px;color:var(--muted-foreground);animation:pulse 1.4s infinite;padding:8px 0}
+  .bar{height:6px;border-radius:99px;background:var(--muted);overflow:hidden;margin:4px 0 8px}
+  .bar i{display:block;height:100%;border-radius:99px;background:var(--gradient-brand);transition:width .45s ease}
+  .row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
   .row img{width:30px;height:30px;border-radius:50%}
-  .row a{color:#eef4f8;text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis}
-  .u{background:rgba(255,122,89,.15);color:#ff9d82;border:1px solid rgba(255,122,89,.35);border-radius:8px;padding:5px 9px;font-size:11px;cursor:pointer}
+  .row a{color:var(--foreground);text-decoration:none;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .u{background:color-mix(in oklab,var(--primary) 15%,transparent);color:var(--foreground);border:1px solid color-mix(in oklab,var(--primary) 35%,transparent);border-radius:8px;padding:5px 9px;font-size:11px;cursor:pointer}
   .u[disabled]{opacity:.5}
-  h4{margin:16px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#5fe0ef}
+  h4{margin:16px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:0;color:var(--accent)}
+  .post-link{color:var(--accent)}
+  .btn:focus-visible,.u:focus-visible,.x:focus-visible{outline:2px solid var(--ring);outline-offset:3px}
+  @media(prefers-reduced-motion:reduce){.p,.l{animation:none}.btn,.bar i{transition:none}}
   </style>
   <div class="p"><div class="h"><div class="dot"></div><div><b>Coruja Insights</b><br><span>@${esc(username)}</span></div><button class="x" id="x">×</button></div>
   <div class="b" id="b"><div class="l" id="pl">Coletando dados públicos do perfil…</div><div class="bar"><i id="pb" style="width:6%"></i></div></div></div>`;
@@ -305,12 +312,12 @@ function corujaScript(ORIGIN: string) {
       <div class="c"><small>Seguindo</small><strong>${fmt(d.following)}</strong></div>
       <div class="c"><small>Publicações</small><strong>${fmt(d.postsCount)}</strong></div>
     </div>
-    ${d.likesHidden ? `<div class="w" style="background:rgba(95,224,239,.08);border-color:rgba(95,224,239,.25);color:#bdf3f9">O Instagram ocultou as curtidas nesta leitura, então engajamento e publicação em destaque ficam indisponíveis. O relatório com IA ainda funciona.</div>` : ""}
+    ${d.likesHidden ? `<div class="w info">O Instagram ocultou as curtidas nesta leitura, então engajamento e publicação em destaque ficam indisponíveis. O relatório com IA ainda funciona.</div>` : ""}
     ${d.isBusiness ? "" : `<div class="w">💡 Esta conta não é Profissional/Business. A análise usa só dados públicos. Recomendamos mudar para conta Profissional para ter métricas mais completas.</div>`}
-    ${d.topPost ? `<h4>Publicação que mais engajou</h4><div class="c" style="font-size:13px">❤ ${fmt(d.topPost.likes)} · 💬 ${fmt(d.topPost.comments)}<br><a style="color:#5fe0ef" target="_blank" href="/p/${d.topPost.code}/">Ver publicação →</a></div>` : ""}
+    ${d.topPost ? `<h4>Publicação que mais engajou</h4><div class="c" style="font-size:13px">❤ ${fmt(d.topPost.likes)} · 💬 ${fmt(d.topPost.comments)}<br><a class="post-link" target="_blank" href="/p/${d.topPost.code}/">Ver publicação →</a></div>` : ""}
     ${d.engagedUsers.length ? `<h4>Mais engajados</h4>${d.engagedUsers.map((x: any) => `<div class="row"><a target="_blank" href="/${esc(x.user)}/">@${esc(x.user)}</a><span>${x.count} coment.</span></div>`).join("")}` : d.commentsDone ? (d.commentsFailed ? `<div class="l" style="animation:none">Comentários indisponíveis nesta leitura (o Instagram limitou o acesso).</div>` : "") : `<div class="l">Lendo comentários…</div>`}
     <button class="btn pr" id="ai">✨ Gerar relatório completo com IA</button>
-    ${d.isOwn ? `<button class="btn sc" id="nf">👀 Quem não me segue de volta</button><div id="nfl"></div>` : `<div class="w" style="background:rgba(95,224,239,.08);border-color:rgba(95,224,239,.25);color:#bdf3f9">Para ver quem não te segue de volta, abra o <b>seu próprio</b> perfil.</div>`}`;
+    ${d.isOwn ? `<button class="btn sc" id="nf">👀 Quem não me segue de volta</button><div id="nfl"></div>` : `<div class="w info">Para ver quem não te segue de volta, abra o <b>seu próprio</b> perfil.</div>`}`;
     $("#ai").onclick = () => openReport(d);
     const nf = root.querySelector("#nf") as HTMLElement | null;
     if (nf) nf.onclick = () => nonFollowers(d.userId);
@@ -397,5 +404,7 @@ function corujaScript(ORIGIN: string) {
 }
 
 export function buildBookmarklet(origin: string) {
-  return "javascript:" + encodeURIComponent(`(${corujaScript.toString()})(${JSON.stringify(origin)});void 0;`);
+  const tokens = designStyles.match(/:root\s*\{([^}]+)\}/)?.[1] || "";
+  const theme = `:host{${tokens}}`;
+  return "javascript:" + encodeURIComponent(`(${corujaScript.toString()})(${JSON.stringify(origin)},${JSON.stringify(theme)});void 0;`);
 }
