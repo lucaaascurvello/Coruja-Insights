@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import mascote from "@/assets/mascote.png";
 import { buildBookmarklet } from "@/lib/bookmarklet";
 import { InstallationGuide } from "@/components/installation-guide";
+import { BrowserCarousel } from "@/components/browser-carousel";
 import { Button } from "@/components/ui/button";
 
 const PIX_KEY = "seu-pix@email.com";
@@ -69,6 +70,9 @@ function Index() {
         </div>
         <img src={mascote} alt="Mascote coruja analista" width={1024} height={1024} className="animate-float mx-auto w-80 drop-shadow-2xl md:w-[26rem]" />
       </section>
+
+      <BrowserCarousel />
+
 
       <section className="mx-auto max-w-6xl px-6 py-16">
         <h2 className="text-3xl font-bold">O que ela faz</h2>
