@@ -192,7 +192,9 @@ function corujaScript(ORIGIN: string) {
   (async () => {
     let data: any;
     try {
+      prog(15, "Lendo dados do perfil…");
       const u = await getProfile();
+      prog(40, "Calculando métricas…");
       const posts = (u.edge_owner_to_timeline_media?.edges || []).map((e: any) => ({
         id: e.node.id,
         code: e.node.shortcode,
