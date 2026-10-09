@@ -210,6 +210,7 @@ function corujaScript(ORIGIN: string) {
         caption: (e.node.edge_media_to_caption?.edges?.[0]?.node?.text || "").slice(0, 200),
       }));
       const followers = u.edge_followed_by?.count || 0;
+      const likesHidden = !!u.likesHidden || (posts.length > 0 && posts.every((p: any) => p.likes + p.comments === 0));
       const avg = posts.length ? posts.reduce((a: number, p: any) => a + p.likes + p.comments, 0) / posts.length : 0;
       const er = followers ? (avg / followers) * 100 : 0;
       const top = [...posts].sort((a: any, b: any) => b.likes + b.comments - (a.likes + a.comments))[0];
@@ -221,7 +222,8 @@ function corujaScript(ORIGIN: string) {
           || !!document.querySelector('a[href*="/accounts/edit"]')
           || Array.from(document.querySelectorAll("header a, header button, header span")).some((el) => /editar perfil|edit profile/i.test((el as HTMLElement).textContent || "")),
         userId: u.id,
-        engagementRate: +er.toFixed(2), avgInteractions: Math.round(avg), posts, topPost: top || null,
+        likesHidden,
+        engagementRate: likesHidden ? null : +er.toFixed(2), avgInteractions: likesHidden ? null : Math.round(avg), posts, topPost: likesHidden ? null : top || null,
         engagedUsers: [], topComment: null, followerNames: [],
       };
       render(data);
