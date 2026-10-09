@@ -380,35 +380,66 @@ function corujaScript(ORIGIN: string, theme: string) {
       const totFollowing = Number(totals?.following) || 0;
       const totFollowers = Number(totals?.followers) || 0;
       const of = (n: number, t: number) => `${n}${t ? " de " + t : ""}`;
-      const following = await listAll(id, "following", (n) => { st().textContent = `Lendo quem você segue… ${of(n, totFollowing)}`; nb(Math.min(40, 3 + (totFollowing ? (n / totFollowing) * 37 : n / 20))); });
       const uid = (u: any) => String(u.pk ?? u.pk_id ?? u.id ?? "");
       const uname = (u: any) => String(u.username || "").toLowerCase();
-      const followers = await listAll(id, "followers", (n) => { st().textContent = `Lendo seus seguidores… ${of(n, totFollowers)}`; nb(Math.min(80, 40 + (totFollowers ? (n / totFollowers) * 40 : n / 30))); });
-      // A list we can't trust is worse than no list
-      if (totFollowers > 0 && followers.length < totFollowers * 0.95) throw new Error(`incompleto: li ${followers.length} de ${totFollowers} seguidores`);
-      const fIds = new Set(followers.map(uid).filter(Boolean));
-      const fNames = new Set(followers.map(uname).filter(Boolean));
-      const followsBack = (u: any) => fIds.has(uid(u)) || fNames.has(uname(u));
-      let list = following.filter((u) => !followsBack(u));
-      if (following.length > 20 && list.length > following.length * 0.9) throw new Error("a comparação falhou");
-      // Double-check each candidate individually
       const tok = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || csrf;
-      const cap = Math.min(list.length, 150);
-      const confirmed: any[] = [];
-      for (let i = 0; i < list.length; i++) {
-        const u = list[i];
-        if (i < cap) {
-          st().textContent = `Confirmando ${i + 1} de ${cap} perfis…`;
-          nb(80 + Math.round(((i + 1) / Math.max(1, cap)) * 19));
-          try {
-            const r = await fetch(`/api/v1/friendships/show/${uid(u)}/`, { headers: { ...H, "x-csrftoken": tok }, credentials: "include" });
-            if (r.ok) { const j = await r.json(); if (j && j.followed_by === true) continue; }
-          } catch { /* keep candidate */ }
-          await sleep(250);
-        }
-        confirmed.push(u);
+      const onFollowing = (n: number) => { st().textContent = `Lendo quem você segue… ${of(n, totFollowing)}`; nb(Math.min(90, 3 + (totFollowing ? (n / totFollowing) * 87 : n / 20))); };
+      let list: any[] | null = null;
+
+      // Strategy A (fastest): the "following" list already says, for each person, whether they follow you.
+      // Only the accounts you follow are read, no matter how many followers you have.
+      for (const hash of ["3dec7e2c57367ef3da3d987d89f9dbc8", "d04b0a864b4b54837c0d870b0e77e076"]) {
+        try {
+          const out: any[] = []; let after = "";
+          for (let i = 0; i < 400; i++) {
+            const vars = JSON.stringify({ id, include_reel: true, fetch_mutual: false, first: 50, ...(after ? { after } : {}) });
+            const r = await get(`/graphql/query/?query_hash=${hash}&variables=${encodeURIComponent(vars)}`, 3);
+            const e = r?.data?.user?.edge_follow;
+            if (!e) throw new Error("sem dados");
+            out.push(...e.edges.map((x: any) => ({ pk: x.node.id, username: x.node.username, full_name: x.node.full_name, profile_pic_url: x.node.profile_pic_url, fv: x.node.follows_viewer })));
+            onFollowing(out.length);
+            if (!e.page_info?.has_next_page) break; after = e.page_info.end_cursor; await sleep(600);
+          }
+          const known = out.filter((u) => typeof u.fv === "boolean").length;
+          if (out.length && known >= out.length * 0.95 && (!totFollowing || out.length >= totFollowing * 0.9)) {
+            list = out.filter((u) => u.fv === false);
+            break;
+          }
+        } catch { /* try next way */ }
       }
-      list = confirmed;
+
+      if (!list) {
+        const following = await listAll(id, "following", onFollowing);
+        if (totFollowers && totFollowers <= 15000) {
+          // Strategy B: small accounts — compare with the followers list
+          const followers = await listAll(id, "followers", (n) => { st().textContent = `Lendo seus seguidores… ${of(n, totFollowers)}`; nb(Math.min(80, 40 + (n / totFollowers) * 40)); });
+          if (followers.length < totFollowers * 0.95) throw new Error(`incompleto: li ${followers.length} de ${totFollowers} seguidores`);
+          const fIds = new Set(followers.map(uid).filter(Boolean));
+          const fNames = new Set(followers.map(uname).filter(Boolean));
+          list = following.filter((u) => !fIds.has(uid(u)) && !fNames.has(uname(u)));
+        } else {
+          // Strategy C: big accounts — ask Instagram about each person you follow
+          list = [];
+          let fails = 0;
+          for (let i = 0; i < following.length; i++) {
+            const u = following[i];
+            st().textContent = `Conferindo ${i + 1} de ${following.length} perfis que você segue…`;
+            nb(3 + Math.round(((i + 1) / following.length) * 96));
+            let ans: boolean | null = null;
+            for (let t = 0; t < 3 && ans === null; t++) {
+              try {
+                const r = await fetch(`/api/v1/friendships/show/${uid(u)}/`, { headers: { ...H, "x-csrftoken": tok }, credentials: "include" });
+                if (r.ok) { const j = await r.json(); if (typeof j?.followed_by === "boolean") ans = j.followed_by; }
+                else if (r.status === 429) { st().textContent = "O Instagram pediu uma pausa, continuando em 30 s…"; await sleep(30000); }
+              } catch { /* retry */ }
+            }
+            if (ans === null) { if (++fails > 5) throw new Error(`o Instagram limitou a conferência em ${i + 1} de ${following.length}`); }
+            else if (ans === false) list.push(u);
+            await sleep(300);
+          }
+        }
+        if (following.length > 20 && list.length > following.length * 0.9) throw new Error("a comparação falhou");
+      }
       nb(100);
       const pic = (u: any) => u.profile_pic_url || u.hd_profile_pic_url_info?.url || "";
       box.innerHTML = `<h4>${list.length} não te seguem de volta</h4>` + list.map((u) =>
