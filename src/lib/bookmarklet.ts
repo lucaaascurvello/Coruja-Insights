@@ -385,60 +385,101 @@ function corujaScript(ORIGIN: string, theme: string) {
       const tok = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || csrf;
       const onFollowing = (n: number) => { st().textContent = `Lendo quem você segue… ${of(n, totFollowing)}`; nb(Math.min(90, 3 + (totFollowing ? (n / totFollowing) * 87 : n / 20))); };
       let list: any[] | null = null;
+      // Progress is kept while this Instagram tab stays open, so "Tentar de novo" resumes instead of restarting.
+      const W = window as any;
+      const NF = (W.__corujaNF = W.__corujaNF && W.__corujaNF.id === id ? W.__corujaNF : { id, a: {}, back: {} });
+      const fetchPage = async (url: string) => {
+        for (let t = 0; t < 4; t++) {
+          try { return await get(url, 2); }
+          catch (e: any) {
+            if (t === 3) throw e;
+            for (let s = 20; s > 0; s--) { st().textContent = `O Instagram pediu uma pausa — continuando em ${s} s…`; await sleep(1000); }
+          }
+        }
+      };
 
       // Strategy A (fastest): the "following" list already says, for each person, whether they follow you.
       // Only the accounts you follow are read, no matter how many followers you have.
       for (const hash of ["3dec7e2c57367ef3da3d987d89f9dbc8", "d04b0a864b4b54837c0d870b0e77e076"]) {
-        try {
-          const out: any[] = []; let after = "";
-          for (let i = 0; i < 400; i++) {
-            const vars = JSON.stringify({ id, include_reel: true, fetch_mutual: false, first: 50, ...(after ? { after } : {}) });
-            const r = await get(`/graphql/query/?query_hash=${hash}&variables=${encodeURIComponent(vars)}`, 3);
-            const e = r?.data?.user?.edge_follow;
-            if (!e) throw new Error("sem dados");
-            out.push(...e.edges.map((x: any) => ({ pk: x.node.id, username: x.node.username, full_name: x.node.full_name, profile_pic_url: x.node.profile_pic_url, fv: x.node.follows_viewer })));
-            onFollowing(out.length);
-            if (!e.page_info?.has_next_page) break; after = e.page_info.end_cursor; await sleep(600);
+        const S = (NF.a[hash] ||= { out: [], after: "", done: false, bad: false });
+        if (S.bad) continue;
+        while (!S.done) {
+          const vars = JSON.stringify({ id, include_reel: true, fetch_mutual: false, first: 50, ...(S.after ? { after: S.after } : {}) });
+          let e: any;
+          try {
+            const r = S.out.length ? await fetchPage(`/graphql/query/?query_hash=${hash}&variables=${encodeURIComponent(vars)}`) : await get(`/graphql/query/?query_hash=${hash}&variables=${encodeURIComponent(vars)}`, 2);
+            e = r?.data?.user?.edge_follow;
+          } catch (err) {
+            if (S.out.length) throw new Error(`o Instagram pausou a leitura em ${S.out.length} de ${totFollowing || "?"} — o progresso foi guardado`);
           }
-          const known = out.filter((u) => typeof u.fv === "boolean").length;
-          if (out.length && known >= out.length * 0.95 && (!totFollowing || out.length >= totFollowing * 0.9)) {
-            list = out.filter((u) => u.fv === false);
-            break;
-          }
-        } catch { /* try next way */ }
+          if (!e) { S.bad = true; break; }
+          const page = e.edges.map((x: any) => ({ pk: x.node.id, username: x.node.username, full_name: x.node.full_name, profile_pic_url: x.node.profile_pic_url, fv: x.node.follows_viewer }));
+          if (!S.out.length && page.length && !page.some((u: any) => typeof u.fv === "boolean")) { S.bad = true; break; }
+          S.out.push(...page);
+          onFollowing(S.out.length);
+          if (!e.page_info?.has_next_page) S.done = true; else { S.after = e.page_info.end_cursor; await sleep(700); }
+        }
+        if (S.done) {
+          const known = S.out.filter((u: any) => typeof u.fv === "boolean").length;
+          if (known >= S.out.length * 0.95) { list = S.out.filter((u: any) => u.fv === false); break; }
+          S.bad = true;
+        }
       }
 
       if (!list) {
-        const following = await listAll(id, "following", onFollowing);
-        if (totFollowers && totFollowers <= 15000) {
-          // Strategy B: small accounts — compare with the followers list
-          const followers = await listAll(id, "followers", (n) => { st().textContent = `Lendo seus seguidores… ${of(n, totFollowers)}`; nb(Math.min(80, 40 + (n / totFollowers) * 40)); });
-          if (followers.length < totFollowers * 0.95) throw new Error(`incompleto: li ${followers.length} de ${totFollowers} seguidores`);
-          const fIds = new Set(followers.map(uid).filter(Boolean));
-          const fNames = new Set(followers.map(uname).filter(Boolean));
-          list = following.filter((u) => !fIds.has(uid(u)) && !fNames.has(uname(u)));
-        } else {
-          // Strategy C: big accounts — ask Instagram about each person you follow
-          list = [];
-          let fails = 0;
-          for (let i = 0; i < following.length; i++) {
-            const u = following[i];
-            st().textContent = `Conferindo ${i + 1} de ${following.length} perfis que você segue…`;
-            nb(3 + Math.round(((i + 1) / following.length) * 96));
-            let ans: boolean | null = null;
-            for (let t = 0; t < 3 && ans === null; t++) {
-              try {
-                const r = await fetch(`/api/v1/friendships/show/${uid(u)}/`, { headers: { ...H, "x-csrftoken": tok }, credentials: "include" });
-                if (r.ok) { const j = await r.json(); if (typeof j?.followed_by === "boolean") ans = j.followed_by; }
-                else if (r.status === 429) { st().textContent = "O Instagram pediu uma pausa, continuando em 30 s…"; await sleep(30000); }
-              } catch { /* retry */ }
-            }
-            if (ans === null) { if (++fails > 5) throw new Error(`o Instagram limitou a conferência em ${i + 1} de ${following.length}`); }
-            else if (ans === false) list.push(u);
-            await sleep(300);
+        const following: any[] = NF.following || (NF.following = await listAll(id, "following", onFollowing));
+        const ids = following.map(uid).filter(Boolean);
+        const back: Record<string, boolean> = NF.back;
+        // Strategy B: ask about 100 people at a time — only trusted when Instagram sends the "follows you" field.
+        if (!NF.bulkTried) {
+          NF.bulkTried = true;
+          for (let i = 0; i < ids.length; i += 100) {
+            const chunk = ids.slice(i, i + 100).filter((k: string) => !(k in back));
+            if (!chunk.length) continue;
+            st().textContent = `Conferindo em grupo… ${Math.min(i + 100, ids.length)} de ${ids.length}`;
+            nb(40 + Math.round((i / ids.length) * 20));
+            try {
+              const r = await fetch("/api/v1/friendships/show_many/", { method: "POST", credentials: "include", headers: { ...H, "x-csrftoken": tok, "content-type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ user_ids: chunk.join(",") }).toString() });
+              if (!r.ok) break;
+              const fs = (await r.json())?.friendship_statuses || {};
+              let got = 0;
+              for (const k of chunk) if (fs[k] && typeof fs[k].followed_by === "boolean") { back[k] = fs[k].followed_by; got++; }
+              if (!got) break; // this endpoint doesn't tell us — stop using it
+              await sleep(400);
+            } catch { break; }
           }
         }
-        if (following.length > 20 && list.length > following.length * 0.9) throw new Error("a comparação falhou");
+        // Strategy C: small accounts can compare with the full followers list.
+        if (ids.some((k: string) => !(k in back)) && totFollowers && totFollowers <= 15000 && !NF.followersTried) {
+          NF.followersTried = true;
+          const followers = await listAll(id, "followers", (n) => { st().textContent = `Lendo seus seguidores… ${of(n, totFollowers)}`; nb(Math.min(80, 40 + (n / totFollowers) * 40)); });
+          if (followers.length >= totFollowers * 0.95) {
+            const fIds = new Set(followers.map(uid)); const fNames = new Set(followers.map(uname));
+            for (const u of following) { const k = uid(u); if (!(k in back)) back[k] = fIds.has(k) || fNames.has(uname(u)); }
+          }
+        }
+        // Strategy D: whatever is still unknown, ask one by one (resumable).
+        const left = following.filter((u) => !(uid(u) in back));
+        let fails = 0;
+        for (let i = 0; i < left.length; i++) {
+          const u = left[i];
+          const done = ids.length - left.length + i + 1;
+          st().textContent = `Conferindo ${done} de ${ids.length} perfis que você segue…`;
+          nb(3 + Math.round((done / ids.length) * 96));
+          let ans: boolean | null = null;
+          for (let t = 0; t < 3 && ans === null; t++) {
+            try {
+              const r = await fetch(`/api/v1/friendships/show/${uid(u)}/`, { headers: { ...H, "x-csrftoken": tok }, credentials: "include" });
+              if (r.ok) { const j = await r.json(); if (typeof j?.followed_by === "boolean") ans = j.followed_by; }
+              else if (r.status === 429 || r.status === 401) { for (let s = 30; s > 0; s--) { st().textContent = `O Instagram pediu uma pausa — continuando em ${s} s… (${done} de ${ids.length})`; await sleep(1000); } }
+            } catch { /* retry */ }
+          }
+          if (ans === null) { if (++fails > 5) throw new Error(`o Instagram pausou a conferência em ${done} de ${ids.length} — o progresso foi guardado`); }
+          else { back[uid(u)] = ans; fails = 0; }
+          await sleep(250);
+        }
+        list = following.filter((u) => back[uid(u)] === false);
+        if (following.length > 20 && list.length > following.length * 0.9) { W.__corujaNF = null; throw new Error("a comparação falhou"); }
       }
       nb(100);
       const pic = (u: any) => u.profile_pic_url || u.hd_profile_pic_url_info?.url || "";
