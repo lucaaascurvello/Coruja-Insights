@@ -24,21 +24,18 @@ export function SecuritySeal() {
             </defs>
 
             <circle cx="100" cy="100" r="95" fill="none" stroke="url(#seal-grad)" strokeWidth="1" opacity=".45" />
-            {Array.from({ length: 36 }).map((_, i) => {
-              const a = (i / 36) * Math.PI * 2;
-              return (
-                <line
-                  key={i}
-                  x1={100 + Math.cos(a) * 88}
-                  y1={100 + Math.sin(a) * 88}
-                  x2={100 + Math.cos(a) * 94}
-                  y2={100 + Math.sin(a) * 94}
-                  stroke="url(#seal-grad)"
-                  strokeWidth="1.2"
-                  opacity=".5"
-                />
-              );
-            })}
+            {TICKS.map((t, i) => (
+              <line
+                key={i}
+                x1={t.x1}
+                y1={t.y1}
+                x2={t.x2}
+                y2={t.y2}
+                stroke="url(#seal-grad)"
+                strokeWidth="1.2"
+                opacity=".5"
+              />
+            ))}
             <circle cx="100" cy="100" r="84" fill="none" stroke="url(#seal-grad)" strokeWidth="3" />
             <circle cx="100" cy="100" r="58" fill="none" stroke="url(#seal-grad)" strokeWidth="1" strokeDasharray="3 6" opacity=".55" />
 
