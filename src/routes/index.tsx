@@ -2,13 +2,18 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import mascote from "@/assets/mascote.png";
 import owlIcon from "@/assets/owl-icon.png";
+import qrCafezinho from "@/assets/qr-cafezinho.png.asset.json";
 import { buildBookmarklet } from "@/lib/bookmarklet";
 import { InstallationGuide } from "@/components/installation-guide";
 import { BrowserCarousel } from "@/components/browser-carousel";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
+import { Check, Copy, Github, Linkedin, QrCode, Sparkles } from "lucide-react";
 
-const PIX_KEY = "seu-pix@email.com";
+const PIX_KEY = "02f1c965-4f88-4396-a8ca-8bab9e280f0f";
+const PIX_CODE = "00020101021126580014br.gov.bcb.pix013602f1c965-4f88-4396-a8ca-8bab9e280f0f5204000053039865802BR5921LUCAS W C DE CARVALHO6007PALHOCA62070503***6304591A";
+const LINKEDIN_URL = "https://www.linkedin.com/in/lucaascarvalho/";
+const GITHUB_URL = "";
+const LOVABLE_URL = "https://lovable.dev";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -33,7 +38,12 @@ const features = [
 
 function Index() {
   const ref = useRef<HTMLAnchorElement>(null);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<"" | "key" | "code">("");
+  const copy = (text: string, kind: "key" | "code") => {
+    navigator.clipboard.writeText(text);
+    setCopied(kind);
+    setTimeout(() => setCopied(""), 2000);
+  };
   useEffect(() => {
     ref.current?.setAttribute("href", buildBookmarklet(window.location.origin));
   }, []);
