@@ -102,9 +102,9 @@ function Index() {
 
       <InstallationGuide />
 
-      <section id="quem" className="mx-auto max-w-4xl scroll-mt-8 px-6 py-16">
-        <div className="glass rounded-3xl p-8 md:p-10">
-          <div className="grid items-center gap-8 md:grid-cols-[11rem_1fr]">
+      <section id="cafe" className="mx-auto max-w-4xl scroll-mt-8 px-6 pb-24">
+        <div className="glass shadow-glow overflow-hidden rounded-3xl">
+          <div className="grid items-center gap-8 p-8 md:grid-cols-[11rem_1fr] md:p-10">
             <img
               src={fotoAutor.url}
               alt="Lucas Curvello"
@@ -125,12 +125,8 @@ function Index() {
               </p>
             </div>
           </div>
-        </div>
-      </section>
 
-      <section id="cafe" className="mx-auto max-w-4xl scroll-mt-8 px-6 pb-24">
-        <div className="glass shadow-glow overflow-hidden rounded-3xl">
-          <div className="grid items-center gap-10 p-8 md:grid-cols-[13.5rem_1fr] md:p-10">
+          <div className="grid items-center gap-10 border-t border-border p-8 md:grid-cols-[13.5rem_1fr] md:p-10">
             <img
               src={qrCafezinho.url}
               width={216}
