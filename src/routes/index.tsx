@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import mascote from "@/assets/mascote.png";
 import owlIcon from "@/assets/owl-icon.png";
@@ -166,8 +166,10 @@ function Index() {
             </div>
           </div>
         </div>
-        <p className="mt-10 text-center text-xs text-muted-foreground">
-          Feito com carinho · <Link to="/relatorio" className="underline">exemplo de relatório</Link>
+        <p className="mx-auto mt-10 max-w-2xl text-center text-xs leading-relaxed text-muted-foreground">
+          © 2026 Lucas Curvello · Coruja Insights foi idealizada, desenhada e desenvolvida por ele, de forma
+          independente, como projeto pessoal de estudo e sem fins comerciais — sem qualquer vínculo com o Instagram
+          ou a Meta.
         </p>
       </section>
     </main>
