@@ -1,5 +1,7 @@
 import { Check, Lock } from "lucide-react";
 
+const GITHUB_URL = "https://github.com/lucaaascurvello";
+
 const PROMESAS = ["Não pede senha", "Não guarda nada", "Não publica nada", "Só vê o que você vê"];
 
 export function SecuritySeal() {
@@ -24,7 +26,15 @@ export function SecuritySeal() {
             ))}
           </ul>
           <p className="mt-2.5 text-xs text-muted-foreground/70">
-            Autodeclaração de um projeto de estudo — o código do favorito está aberto para conferir.
+            Todo o projeto é código aberto e está disponível no GitHub:{" "}
+            <a
+              href={GITHUB_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="text-seal underline decoration-seal/40 underline-offset-4 hover:decoration-seal"
+            >
+              github.com/lucaaascurvello
+            </a>
           </p>
         </div>
       </div>
