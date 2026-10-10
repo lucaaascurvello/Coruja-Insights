@@ -8,6 +8,18 @@ const PROMESAS: { t: string; d: string }[] = [
   { t: "Só vê o que você vê", d: "Se um dado não aparece para a sua conta, a corujinha também não tem como ler." },
 ];
 
+// Coordenadas das travas do selo, arredondadas para o HTML servido e o do navegador baterem.
+const round = (n: number) => Math.round(n * 100) / 100;
+const TICKS = Array.from({ length: 36 }, (_, i) => {
+  const a = (i / 36) * Math.PI * 2;
+  return {
+    x1: round(100 + Math.cos(a) * 88),
+    y1: round(100 + Math.sin(a) * 88),
+    x2: round(100 + Math.cos(a) * 94),
+    y2: round(100 + Math.sin(a) * 94),
+  };
+});
+
 export function SecuritySeal() {
   return (
     <div className="glass shadow-glow overflow-hidden rounded-3xl p-7 md:p-9">
