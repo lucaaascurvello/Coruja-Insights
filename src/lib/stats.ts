@@ -78,7 +78,7 @@ export function computeStats(input: { followers: number; likesHidden?: boolean; 
   const recent = posts.slice(0, 6), prev = posts.slice(6, 12);
   const ra = group(recent).avgInteractions, pa = group(prev).avgInteractions;
 
-  const wd = best(posts, (p) => (p.ts ? DIAS[br(p.ts).getUTCDay()] : null));
+  const wd = best(posts, (p) => (p.ts ? (DIAS[br(p.ts).getUTCDay()] ?? null) : null));
   const ts = best(posts, (p) => (p.ts ? (FAIXAS.find((f) => br(p.ts!).getUTCHours() >= f.from && br(p.ts!).getUTCHours() < f.to)?.faixa ?? null) : null));
   const hasTag = (p: Post) => /#\w/.test(p.caption || "");
   const hasQ = (p: Post) => /\?/.test(p.caption || "");
