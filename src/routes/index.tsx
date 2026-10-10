@@ -7,7 +7,7 @@ import { buildBookmarklet } from "@/lib/bookmarklet";
 import { InstallationGuide } from "@/components/installation-guide";
 import { BrowserCarousel } from "@/components/browser-carousel";
 import { Button } from "@/components/ui/button";
-import { Check, Copy, Github, Linkedin, QrCode, Sparkles } from "lucide-react";
+import { Check, Copy, Github, Linkedin, Sparkles } from "lucide-react";
 
 const PIX_KEY = "02f1c965-4f88-4396-a8ca-8bab9e280f0f";
 const PIX_CODE = "00020101021126580014br.gov.bcb.pix013602f1c965-4f88-4396-a8ca-8bab9e280f0f5204000053039865802BR5921LUCAS W C DE CARVALHO6007PALHOCA62070503***6304591A";
@@ -112,45 +112,53 @@ function Index() {
 
       <section id="cafe" className="mx-auto max-w-4xl scroll-mt-8 px-6 pb-24">
         <div className="glass shadow-glow overflow-hidden rounded-3xl">
-          <div className="grid items-center gap-8 p-8 md:grid-cols-[13.5rem_1fr] md:p-10">
-            <div className="bg-brand shadow-glow mx-auto rounded-[1.75rem] p-2">
-              <img
-                src={qrCafezinho.url}
-                width={200}
-                height={200}
-                alt="QR Code Pix para pagar um cafezinho"
-                className="h-48 w-48 rounded-3xl"
-              />
-            </div>
-            <div className="min-w-0 text-center md:text-left">
+          <div className="grid items-center gap-10 p-8 md:grid-cols-[13.5rem_1fr] md:p-10">
+            <img
+              src={qrCafezinho.url}
+              width={216}
+              height={216}
+              alt="QR Code Pix para pagar um cafezinho"
+              className="mx-auto h-[13.5rem] w-[13.5rem] rounded-2xl"
+            />
+            <div className="min-w-0">
               <span className="font-mono text-xs text-accent">APOIE O PROJETO</span>
               <h2 className="mt-3 text-3xl font-bold">Pague um cafezinho ☕</h2>
               <p className="mt-3 text-muted-foreground">
                 Gostou da corujinha? Qualquer valor via Pix ajuda a mantê-la acordada e o projeto no ar.
               </p>
-              <div className="mt-6 flex flex-wrap justify-center gap-3 md:justify-start">
-                <Button onClick={() => copy(PIX_KEY, "key")}>
-                  {copied === "key" ? <Check /> : <Copy />}
-                  {copied === "key" ? "Chave copiada" : "Copiar chave Pix"}
-                </Button>
-                <Button variant="outline" onClick={() => copy(PIX_CODE, "code")}>
-                  <QrCode />
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <Button onClick={() => copy(PIX_CODE, "code")}>
+                  {copied === "code" ? <Check /> : <Copy />}
                   {copied === "code" ? "Código copiado" : "Copiar código Pix"}
                 </Button>
+                <span className="text-xs text-muted-foreground">ou escaneie o QR no app do banco</span>
               </div>
-              <p className="mt-4 break-all font-mono text-xs text-muted-foreground">{PIX_KEY}</p>
+              <div className="mt-5 flex items-center gap-2 rounded-xl border border-border bg-secondary px-3 py-2">
+                <span className="shrink-0 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">chave</span>
+                <code className="min-w-0 flex-1 truncate font-mono text-xs text-foreground">{PIX_KEY}</code>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7 shrink-0"
+                  onClick={() => copy(PIX_KEY, "key")}
+                  aria-label="Copiar chave Pix"
+                >
+                  {copied === "key" ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                </Button>
+              </div>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border px-8 py-5 md:px-10">
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="font-mono text-xs text-muted-foreground">ONDE ME ACHAR</span>
               {GITHUB_URL && (
-                <Button asChild variant="outline">
-                  <a href={GITHUB_URL} target="_blank" rel="noreferrer"><Github />Ver no GitHub</a>
+                <Button asChild variant="outline" size="sm">
+                  <a href={GITHUB_URL} target="_blank" rel="noreferrer"><Github className="h-3.5 w-3.5" />GitHub</a>
                 </Button>
               )}
-              <Button asChild variant="outline">
-                <a href={LINKEDIN_URL} target="_blank" rel="noreferrer"><Linkedin />LinkedIn</a>
+              <Button asChild variant="outline" size="sm">
+                <a href={LINKEDIN_URL} target="_blank" rel="noreferrer"><Linkedin className="h-3.5 w-3.5" />LinkedIn</a>
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
