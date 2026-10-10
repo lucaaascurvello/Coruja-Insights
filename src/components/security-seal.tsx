@@ -1,110 +1,32 @@
-import { Check, ShieldCheck } from "lucide-react";
-import owlIcon from "@/assets/owl-icon.png";
+import { Check, Lock } from "lucide-react";
 
-const PROMESAS: { t: string; d: string }[] = [
-  { t: "Não pede a sua senha", d: "Ela usa a aba em que você já entrou. Nada de digitar credencial em lugar nenhum." },
-  { t: "Não guarda nada", d: "Fechou a aba, o que foi lido desaparece. Sem histórico, sem cadastro, sem e-mail." },
-  { t: "Não publica nada", d: "Ela lê e mostra. Não curte, não comenta, não posta, não segue ninguém sozinha." },
-  { t: "Só vê o que você vê", d: "Se um dado não aparece para a sua conta, a corujinha também não tem como ler." },
-];
-
-// Coordenadas das travas do selo, arredondadas para o HTML servido e o do navegador baterem.
-const round = (n: number) => Math.round(n * 100) / 100;
-const TICKS = Array.from({ length: 36 }, (_, i) => {
-  const a = (i / 36) * Math.PI * 2;
-  return {
-    x1: round(100 + Math.cos(a) * 88),
-    y1: round(100 + Math.sin(a) * 88),
-    x2: round(100 + Math.cos(a) * 94),
-    y2: round(100 + Math.sin(a) * 94),
-  };
-});
-
-const ARC_TOP = { fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13, letterSpacing: 2.6, fill: "var(--accent)" };
-const ARC_BOTTOM = { fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 11.5, letterSpacing: 4.6, fill: "var(--accent)" };
+const PROMESAS = ["Não pede senha", "Não guarda nada", "Não publica nada", "Só vê o que você vê"];
 
 export function SecuritySeal() {
   return (
-    <div className="glass shadow-glow overflow-hidden rounded-3xl">
-      <div className="flex flex-col items-center gap-8 p-7 md:flex-row md:items-center md:gap-10 md:p-9">
-        <div className="relative h-56 w-56 shrink-0">
-          <svg viewBox="0 0 200 200" className="h-full w-full" role="img" aria-label="Selo de segurança da Coruja Insights">
-            <defs>
-              <linearGradient id="seal-grad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" style={{ stopColor: "var(--glow)" }} />
-                <stop offset="55%" style={{ stopColor: "var(--ring)" }} />
-                <stop offset="100%" style={{ stopColor: "var(--coral)" }} />
-              </linearGradient>
-              <radialGradient id="seal-core">
-                <stop offset="0%" style={{ stopColor: "var(--glow)", stopOpacity: 0.32 }} />
-                <stop offset="100%" style={{ stopColor: "var(--glow)", stopOpacity: 0 }} />
-              </radialGradient>
-              {/* arco de cima: 9h → 12h → 3h */}
-              <path id="seal-arc-top" d="M100,100 m-70,0 a70,70 0 1,1 140,0" />
-              {/* arco de baixo: 9h → 6h → 3h, na mesma distância do anel externo */}
-              <path id="seal-arc-bottom" d="M100,100 m-80,0 a80,80 0 1,0 160,0" />
-            </defs>
-
-            <circle cx="100" cy="100" r="95" fill="none" stroke="url(#seal-grad)" strokeWidth="1" opacity=".45" />
-            {TICKS.map((t, i) => (
-              <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} stroke="url(#seal-grad)" strokeWidth="1.2" opacity=".5" />
-            ))}
-            <circle cx="100" cy="100" r="84" fill="none" stroke="url(#seal-grad)" strokeWidth="3" />
-            <circle cx="30" cy="100" r="2.6" fill="url(#seal-grad)" />
-            <circle cx="170" cy="100" r="2.6" fill="url(#seal-grad)" />
-            <circle cx="100" cy="100" r="50" fill="url(#seal-core)" />
-            <circle cx="100" cy="100" r="50" fill="none" stroke="url(#seal-grad)" strokeWidth="1" strokeDasharray="3 6" opacity=".55" />
-
-            <text textAnchor="middle" style={ARC_TOP}>
-              <textPath href="#seal-arc-top" startOffset="50%">CORUJA INSIGHTS</textPath>
-            </text>
-            <text textAnchor="middle" style={ARC_BOTTOM}>
-              <textPath href="#seal-arc-bottom" startOffset="50%">SEM GUARDAR NADA</textPath>
-            </text>
-          </svg>
-
-          <img
-            src={owlIcon}
-            alt=""
-            className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_0_16px_var(--glow)]"
-          />
-        </div>
+    <div className="glass rounded-2xl px-6 py-5">
+      <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
+        <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-seal/35 bg-seal/10">
+          <Lock className="h-5 w-5 text-seal" />
+          <span className="bg-seal absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-background">
+            <Check className="h-2.5 w-2.5 text-seal-foreground" />
+          </span>
+        </span>
 
         <div className="min-w-0">
-          <span className="flex items-center gap-2">
-            <span className="bg-brand flex h-6 w-6 shrink-0 items-center justify-center rounded-full shadow-glow">
-              <ShieldCheck className="h-3.5 w-3.5 text-primary-foreground" />
-            </span>
-            <span className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-accent">Selo de segurança</span>
-          </span>
-          <h2 className="mt-1.5 text-2xl font-bold">O que a corujinha promete — e você pode conferir</h2>
-
-          <ul className="mt-5 grid gap-3 sm:grid-cols-2">
+          <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-seal">Selo de segurança</span>
+          <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-1.5">
             {PROMESAS.map((p) => (
-              <li key={p.t} className="flex gap-2.5">
-                <span className="bg-brand mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
-                  <Check className="h-3 w-3 text-primary-foreground" />
-                </span>
-                <span>
-                  <span className="font-display text-sm font-semibold">{p.t}</span>
-                  <span className="mt-0.5 block text-sm leading-relaxed text-muted-foreground">{p.d}</span>
-                </span>
+              <li key={p} className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Check className="h-3.5 w-3.5 shrink-0 text-seal" />
+                {p}
               </li>
             ))}
           </ul>
+          <p className="mt-2.5 text-xs text-muted-foreground/70">
+            Autodeclaração de um projeto de estudo — o código do favorito está aberto para conferir.
+          </p>
         </div>
-      </div>
-
-      <div className="border-t border-border p-7 md:p-9">
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          Para o texto do relatório, vão para a IA o nome do perfil, a bio e os números das publicações lidas.
-          Nada disso fica guardado depois, e nenhuma das suas listas sai do seu navegador.
-        </p>
-        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-          Autodeclaração, não certificação: a Coruja Insights é um projeto de estudo, sem auditoria de empresa
-          externa. A garantia de verdade é o comportamento — e o código do favorito está inteiro no endereço dele,
-          pronto para você colar em uma aba e ler.
-        </p>
       </div>
     </div>
   );

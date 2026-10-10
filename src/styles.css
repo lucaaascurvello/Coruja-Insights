@@ -35,6 +35,8 @@
   --color-ring: var(--ring);
   --color-glow: var(--glow);
   --color-coral: var(--coral);
+  --color-seal: var(--seal);
+  --color-seal-foreground: var(--seal-foreground);
 }
 
 :root {
@@ -55,6 +57,8 @@
   --accent-foreground: oklch(0.16 0.025 320);
   --coral: oklch(0.8 0.15 70);
   --glow: oklch(0.5 0.2 310);
+  --seal: oklch(0.75 0.15 155);
+  --seal-foreground: oklch(0.17 0.04 155);
   --destructive: oklch(0.65 0.22 25);
   --destructive-foreground: oklch(0.98 0 0);
   --border: oklch(1 0 0 / 9%);
