@@ -113,7 +113,7 @@ function Index() {
               className="shadow-glow mx-auto h-44 w-44 rounded-3xl border border-border object-cover"
             />
             <div>
-              <span className="font-mono text-xs uppercase tracking-[0.18em] text-accent">Um projeto caseiro 🏡</span>
+              <span className="font-mono text-xs uppercase tracking-[0.18em] text-accent">Um projeto caseiro</span>
               <h2 className="mt-2 text-3xl font-bold">Oi, sou <span className="text-gradient">Lucas Curvello</span></h2>
               <p className="mt-1 font-display text-lg">Analista de Redes Sociais e curioso por vibe code.</p>
               <p className="mt-4 text-sm text-muted-foreground">
