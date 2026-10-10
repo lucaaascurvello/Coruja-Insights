@@ -150,8 +150,8 @@ function Index() {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border px-8 py-5 md:px-10">
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="font-mono text-xs text-muted-foreground">ONDE ME ACHAR</span>
+            <span className="font-mono text-xs text-muted-foreground">ONDE ME ACHAR</span>
+            <div className="flex flex-wrap items-center gap-2">
               {GITHUB_URL && (
                 <Button asChild variant="outline" size="sm">
                   <a href={GITHUB_URL} target="_blank" rel="noreferrer"><Github className="h-3.5 w-3.5" />GitHub</a>
@@ -160,10 +160,10 @@ function Index() {
               <Button asChild variant="outline" size="sm">
                 <a href={LINKEDIN_URL} target="_blank" rel="noreferrer"><Linkedin className="h-3.5 w-3.5" />LinkedIn</a>
               </Button>
+              <p className="text-xs text-muted-foreground">
+                Criado com <a href={LOVABLE_URL} target="_blank" rel="noreferrer" className="font-semibold text-foreground underline decoration-primary underline-offset-4">Lovable</a>
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Criado com <a href={LOVABLE_URL} target="_blank" rel="noreferrer" className="font-semibold text-foreground underline decoration-primary underline-offset-4">Lovable</a>
-            </p>
           </div>
         </div>
         <p className="mt-10 text-center text-xs text-muted-foreground">
