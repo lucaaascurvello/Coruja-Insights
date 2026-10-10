@@ -1,2 +1,3 @@
 - [x] Recolor the existing owl with the Instagram palette.
 - [x] Add an illustrated, usable installation tutorial and verify it in the browser.
+- [x] Add a "como funciona" page explaining data capture, analysis and the knowledge base, reachable from the developer card.
