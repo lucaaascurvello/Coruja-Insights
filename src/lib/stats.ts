@@ -65,21 +65,21 @@ export function computeStats(input: { followers: number; likesHidden?: boolean; 
   const vals = posts.map(inter);
   const avg = n ? vals.reduce((a, b) => a + b, 0) / n : 0;
   const sorted = [...vals].sort((a, b) => a - b);
-  const median = n ? (n % 2 ? sorted[(n - 1) / 2] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2) : 0;
+  const median = n ? (n % 2 ? (sorted[(n - 1) / 2] ?? 0) : ((sorted[n / 2 - 1] ?? 0) + (sorted[n / 2] ?? 0)) / 2) : 0;
   const sd = n ? Math.sqrt(vals.reduce((a, v) => a + (v - avg) ** 2, 0) / n) : 0;
   const likes = posts.reduce((a, p) => a + (p.likes || 0), 0);
   const comments = posts.reduce((a, p) => a + (p.comments || 0), 0);
 
   const tss = posts.map((p) => p.ts || 0).filter(Boolean);
   let gap = 0;
-  for (let i = 1; i < tss.length; i++) gap = Math.max(gap, tss[i - 1] - tss[i]);
-  const spanDays = tss.length > 1 ? (tss[0] - tss[tss.length - 1]) / 86400 : 0;
+  for (let i = 1; i < tss.length; i++) gap = Math.max(gap, (tss[i - 1] ?? 0) - (tss[i] ?? 0));
+  const spanDays = tss.length > 1 ? ((tss[0] ?? 0) - (tss[tss.length - 1] ?? 0)) / 86400 : 0;
 
   const recent = posts.slice(0, 6), prev = posts.slice(6, 12);
   const ra = group(recent).avgInteractions, pa = group(prev).avgInteractions;
 
   const wd = best(posts, (p) => (p.ts ? DIAS[br(p.ts).getUTCDay()] : null));
-  const ts = best(posts, (p) => (p.ts ? FAIXAS.find((f) => br(p.ts!).getUTCHours() >= f.from && br(p.ts!).getUTCHours() < f.to)!.faixa : null));
+  const ts = best(posts, (p) => (p.ts ? (FAIXAS.find((f) => br(p.ts!).getUTCHours() >= f.from && br(p.ts!).getUTCHours() < f.to)?.faixa ?? null) : null));
   const hasTag = (p: Post) => /#\w/.test(p.caption || "");
   const hasQ = (p: Post) => /\?/.test(p.caption || "");
 
@@ -95,7 +95,7 @@ export function computeStats(input: { followers: number; likesHidden?: boolean; 
     formats: { reels: group(posts.filter((p) => p.video)), fotos: group(posts.filter((p) => !p.video)) },
     postsPerWeek: spanDays >= 1 ? r1(((tss.length - 1) / spanDays) * 7) : null,
     longestGapDays: tss.length > 1 ? Math.round(gap / 86400) : null,
-    daysSinceLastPost: tss.length ? Math.floor((now / 1000 - tss[0]) / 86400) : null,
+    daysSinceLastPost: tss.length ? Math.floor((now / 1000 - (tss[0] ?? 0)) / 86400) : null,
     trendPct: hidden || recent.length < 6 || prev.length < 6 || !pa ? null : Math.round(((ra - pa) / pa) * 100),
     bestWeekday: hidden || !wd ? null : { dia: wd.k, posts: wd.g.posts, avgInteractions: wd.g.avgInteractions },
     bestTimeSlot: hidden || !ts ? null : { faixa: ts.k, posts: ts.g.posts, avgInteractions: ts.g.avgInteractions },
