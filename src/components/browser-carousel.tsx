@@ -55,10 +55,6 @@ export function BrowserCarousel() {
           <LogoRow hidden />
         </div>
       </div>
-
-      <p className="mt-4 text-center text-xs text-muted-foreground">
-        Se o seu navegador tem barra de favoritos, a coruja voa. Passe o mouse por cima para pausar.
-      </p>
     </section>
   );
 }
