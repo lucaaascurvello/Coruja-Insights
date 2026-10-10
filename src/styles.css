@@ -97,10 +97,15 @@
 }
 @utility animate-float { animation: float 6s ease-in-out infinite; }
 @utility animate-rise { animation: rise 0.8s cubic-bezier(.2,.7,.2,1) both; }
+@utility animate-glow { animation: glow 2.8s ease-in-out infinite; }
 
 @keyframes float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-14px) } }
 @keyframes rise { from { opacity: 0; transform: translateY(18px) } to { opacity: 1; transform: none } }
 @keyframes marquee { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+@keyframes glow {
+  0%, 100% { box-shadow: var(--shadow-glow); transform: scale(1); }
+  50% { box-shadow: 0 0 46px -6px color-mix(in oklab, var(--coral) 65%, transparent); transform: scale(1.04); }
+}
 
 .marquee {
   overflow: hidden;
@@ -128,7 +133,7 @@
 }
 .installation-drag-path svg { position: absolute; top: -6px; right: -8px; }
 @media (prefers-reduced-motion: reduce) {
-  .animate-float, .animate-rise { animation: none; }
+  .animate-float, .animate-rise, .animate-glow { animation: none; }
   .marquee-track { animation: none; }
   .marquee { overflow-x: auto; }
 }
