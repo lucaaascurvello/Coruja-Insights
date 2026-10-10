@@ -10,8 +10,7 @@ import { BrowserCarousel } from "@/components/browser-carousel";
 import { Button } from "@/components/ui/button";
 import { Check, Copy, Github, Linkedin, Sparkles } from "lucide-react";
 
-const PIX_KEY = "02f1c965-4f88-4396-a8ca-8bab9e280f0f";
-const PIX_CODE = "00020101021126580014br.gov.bcb.pix013602f1c965-4f88-4396-a8ca-8bab9e280f0f5204000053039865802BR5921LUCAS W C DE CARVALHO6007PALHOCA62070503***6304591A";
+const PIX_CODE =  "00020101021126580014br.gov.bcb.pix013602f1c965-4f88-4396-a8ca-8bab9e280f0f5204000053039865802BR5921LUCAS W C DE CARVALHO6007PALHOCA62070503***6304591A";
 const LINKEDIN_URL = "https://www.linkedin.com/in/lucaascarvalho/";
 const GITHUB_URL = "https://github.com/lucaaascurvello";
 const LOVABLE_URL = "https://lovable.dev";
@@ -39,11 +38,11 @@ const features = [
 
 function Index() {
   const ref = useRef<HTMLAnchorElement>(null);
-  const [copied, setCopied] = useState<"" | "key" | "code">("");
-  const copy = (text: string, kind: "key" | "code") => {
+  const [copied, setCopied] = useState(false);
+  const copy = (text: string) => {
     navigator.clipboard.writeText(text);
-    setCopied(kind);
-    setTimeout(() => setCopied(""), 2000);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
   useEffect(() => {
     ref.current?.setAttribute("href", buildBookmarklet(window.location.origin));
@@ -141,24 +140,11 @@ function Index() {
                 Gostou da corujinha? Qualquer valor via Pix ajuda a mantê-la acordada e o projeto no ar.
               </p>
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                <Button onClick={() => copy(PIX_CODE, "code")}>
-                  {copied === "code" ? <Check /> : <Copy />}
-                  {copied === "code" ? "Código copiado" : "Copiar código Pix"}
+                <Button onClick={() => copy(PIX_CODE)}>
+                  {copied ? <Check /> : <Copy />}
+                  {copied ? "Código copiado" : "Copiar código Pix"}
                 </Button>
                 <span className="text-xs text-muted-foreground">ou escaneie o QR no app do banco</span>
-              </div>
-              <div className="mt-5 flex items-center gap-2 rounded-xl border border-border bg-secondary px-3 py-2">
-                <span className="shrink-0 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">chave</span>
-                <code className="min-w-0 flex-1 truncate font-mono text-xs leading-none text-foreground">{PIX_KEY}</code>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-7 w-7 shrink-0"
-                  onClick={() => copy(PIX_KEY, "key")}
-                  aria-label="Copiar chave Pix"
-                >
-                  {copied === "key" ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                </Button>
               </div>
             </div>
           </div>
