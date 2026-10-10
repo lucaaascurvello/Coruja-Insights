@@ -81,7 +81,7 @@ export function InstallationGuide() {
               </div>
             </div>
           </BrowserFrame>
-          <div className="mt-5 flex gap-3"><span className="font-mono text-lg text-primary">03</span><div><h3 className="font-semibold">Abra o Instagram e clique</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">Entre na sua conta, abra um perfil e espere as publicações aparecerem. Clique em 🦉 Coruja Insights na barra. Para ver quem não segue de volta, abra seu próprio perfil.</p></div></div>
+          <div className="mt-5 flex gap-3"><span className="font-mono text-lg text-primary">03</span><div><h3 className="font-semibold">Abra o Instagram e clique</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">Entre na sua contado instagram, abra um perfil e espere as publicações aparecerem. Clique em 🦉 Coruja Insights na barra. Para ver quem não segue de volta, abra seu próprio perfil.</p></div></div>
         </li>
       </ol>
     </section>
