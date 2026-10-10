@@ -2,13 +2,18 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import mascote from "@/assets/mascote.png";
 import owlIcon from "@/assets/owl-icon.png";
+import qrCafezinho from "@/assets/qr-cafezinho.png.asset.json";
 import { buildBookmarklet } from "@/lib/bookmarklet";
 import { InstallationGuide } from "@/components/installation-guide";
 import { BrowserCarousel } from "@/components/browser-carousel";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
+import { Check, Copy, Github, Linkedin, Sparkles } from "lucide-react";
 
-const PIX_KEY = "seu-pix@email.com";
+const PIX_KEY = "02f1c965-4f88-4396-a8ca-8bab9e280f0f";
+const PIX_CODE = "00020101021126580014br.gov.bcb.pix013602f1c965-4f88-4396-a8ca-8bab9e280f0f5204000053039865802BR5921LUCAS W C DE CARVALHO6007PALHOCA62070503***6304591A";
+const LINKEDIN_URL = "https://www.linkedin.com/in/lucaascarvalho/";
+const GITHUB_URL: string = "";
+const LOVABLE_URL = "https://lovable.dev";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -33,7 +38,12 @@ const features = [
 
 function Index() {
   const ref = useRef<HTMLAnchorElement>(null);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<"" | "key" | "code">("");
+  const copy = (text: string, kind: "key" | "code") => {
+    navigator.clipboard.writeText(text);
+    setCopied(kind);
+    setTimeout(() => setCopied(""), 2000);
+  };
   useEffect(() => {
     ref.current?.setAttribute("href", buildBookmarklet(window.location.origin));
   }, []);
@@ -100,17 +110,61 @@ function Index() {
         </p>
       </section>
 
-      <section id="cafe" className="mx-auto max-w-xl px-6 pb-24">
-        <div className="glass shadow-glow rounded-3xl p-8 text-center">
-          <div className="text-4xl">☕</div>
-          <h2 className="mt-3 text-2xl font-bold">Pague um cafezinho</h2>
-          <p className="mt-2 text-sm text-muted-foreground">Gostou? Qualquer valor via Pix ajuda a manter a corujinha acordada.</p>
-          <button
-            onClick={() => { navigator.clipboard.writeText(PIX_KEY); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-            className="mt-6 w-full rounded-2xl border border-border bg-secondary px-4 py-4 font-mono text-sm transition hover:border-primary"
-          >
-            {copied ? "Chave Pix copiada ✓" : `Pix: ${PIX_KEY}  ·  copiar`}
-          </button>
+      <section id="cafe" className="mx-auto max-w-4xl scroll-mt-8 px-6 pb-24">
+        <div className="glass shadow-glow overflow-hidden rounded-3xl">
+          <div className="grid items-center gap-10 p-8 md:grid-cols-[13.5rem_1fr] md:p-10">
+            <img
+              src={qrCafezinho.url}
+              width={216}
+              height={216}
+              alt="QR Code Pix para pagar um cafezinho"
+              className="mx-auto h-[13.5rem] w-[13.5rem] rounded-2xl"
+            />
+            <div className="min-w-0">
+              <span className="font-mono text-xs text-accent">APOIE O PROJETO</span>
+              <h2 className="mt-3 text-3xl font-bold">Pague um cafezinho ☕</h2>
+              <p className="mt-3 text-muted-foreground">
+                Gostou da corujinha? Qualquer valor via Pix ajuda a mantê-la acordada e o projeto no ar.
+              </p>
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <Button onClick={() => copy(PIX_CODE, "code")}>
+                  {copied === "code" ? <Check /> : <Copy />}
+                  {copied === "code" ? "Código copiado" : "Copiar código Pix"}
+                </Button>
+                <span className="text-xs text-muted-foreground">ou escaneie o QR no app do banco</span>
+              </div>
+              <div className="mt-5 flex items-center gap-2 rounded-xl border border-border bg-secondary px-3 py-2">
+                <span className="shrink-0 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">chave</span>
+                <code className="min-w-0 flex-1 truncate font-mono text-xs leading-none text-foreground">{PIX_KEY}</code>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7 shrink-0"
+                  onClick={() => copy(PIX_KEY, "key")}
+                  aria-label="Copiar chave Pix"
+                >
+                  {copied === "key" ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border px-8 py-5 md:px-10">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="font-mono text-xs text-muted-foreground">ONDE ME ACHAR</span>
+              {GITHUB_URL && (
+                <Button asChild variant="outline" size="sm">
+                  <a href={GITHUB_URL} target="_blank" rel="noreferrer"><Github className="h-3.5 w-3.5" />GitHub</a>
+                </Button>
+              )}
+              <Button asChild variant="outline" size="sm">
+                <a href={LINKEDIN_URL} target="_blank" rel="noreferrer"><Linkedin className="h-3.5 w-3.5" />LinkedIn</a>
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Criado com <a href={LOVABLE_URL} target="_blank" rel="noreferrer" className="font-semibold text-foreground underline decoration-primary underline-offset-4">Lovable</a>
+            </p>
+          </div>
         </div>
         <p className="mt-10 text-center text-xs text-muted-foreground">
           Feito com carinho · <Link to="/relatorio" className="underline">exemplo de relatório</Link>
