@@ -21,12 +21,12 @@ const TICKS = Array.from({ length: 36 }, (_, i) => {
 });
 
 const ARC_TOP = { fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13, letterSpacing: 2.6, fill: "var(--accent)" };
-const ARC_BOTTOM = { fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 11, letterSpacing: 2.2, fill: "var(--muted-foreground)" };
+const ARC_BOTTOM = { fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 11.5, letterSpacing: 3.2, fill: "var(--accent)", opacity: 0.82 };
 
 export function SecuritySeal() {
   return (
     <div className="glass shadow-glow overflow-hidden rounded-3xl p-7 md:p-9">
-      <div className="flex flex-col items-center gap-8 md:flex-row md:items-start md:gap-10">
+      <div className="flex flex-col items-center gap-8 md:flex-row md:items-center md:gap-10">
         <div className="relative h-48 w-48 shrink-0">
           <svg viewBox="0 0 200 200" className="h-full w-full" role="img" aria-label="Selo de segurança da Coruja Insights">
             <defs>
