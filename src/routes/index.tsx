@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import mascote from "@/assets/mascote.png";
+import owlIcon from "@/assets/owl-icon.png";
 import { buildBookmarklet } from "@/lib/bookmarklet";
 import { InstallationGuide } from "@/components/installation-guide";
 import { BrowserCarousel } from "@/components/browser-carousel";
@@ -41,7 +42,7 @@ function Index() {
     <main className="min-h-screen overflow-hidden">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-2 font-display font-bold">
-          <span className="h-3 w-3 rounded-full bg-brand shadow-glow" /> Coruja Insights
+          <img src={owlIcon} alt="" width={22} height={22} className="h-[22px] w-[22px] shrink-0 drop-shadow-[0_0_10px_var(--glow)]" /> Coruja Insights
         </div>
         <a href="#cafe" className="text-sm text-muted-foreground transition hover:text-foreground">☕ Cafezinho</a>
       </header>
