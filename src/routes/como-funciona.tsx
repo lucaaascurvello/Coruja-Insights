@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SecuritySeal } from "@/components/security-seal";
 import { BENCHMARKS, KNOWLEDGE, SOURCES } from "@/lib/ig-knowledge";
 
 export const Route = createFileRoute("/como-funciona")({
@@ -116,6 +117,10 @@ function ComoFunciona() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="mx-auto max-w-3xl px-6 pb-12">
+        <SecuritySeal />
       </section>
 
       {STEPS.map((s) => (
