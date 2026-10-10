@@ -55,7 +55,7 @@ function Relatorio() {
   }, [d]);
 
   const download = () => {
-    const html = `<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Relatório @${d.username}</title><style>body{font-family:system-ui;max-width:760px;margin:40px auto;padding:0 20px;color:#1a2230}h1{margin:0}h2{margin-top:28px;color:#0a8aa0}li{margin:6px 0}</style>` +
+    const html = `<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Relatório @${d.username}</title><link rel="icon" type="image/png" href="${location.origin}/favicon.png"><style>body{font-family:system-ui;max-width:760px;margin:40px auto;padding:0 20px;color:#1a2230}h1{margin:0}h2{margin-top:28px;color:#0a8aa0}li{margin:6px 0}</style>` +
       document.getElementById("report")!.innerHTML + "</html>";
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([html], { type: "text/html" }));
