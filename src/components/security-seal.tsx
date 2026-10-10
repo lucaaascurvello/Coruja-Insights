@@ -21,12 +21,12 @@ const TICKS = Array.from({ length: 36 }, (_, i) => {
 });
 
 const ARC_TOP = { fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13, letterSpacing: 2.6, fill: "var(--accent)" };
-const ARC_BOTTOM = { fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 11.5, letterSpacing: 3.2, fill: "var(--accent)", opacity: 0.82 };
+const ARC_BOTTOM = { fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 11.5, letterSpacing: 3.2, fill: "var(--accent)" };
 
 export function SecuritySeal() {
   return (
-    <div className="glass shadow-glow overflow-hidden rounded-3xl p-7 md:p-9">
-      <div className="flex flex-col items-center gap-8 md:flex-row md:items-center md:gap-10">
+    <div className="glass shadow-glow overflow-hidden rounded-3xl">
+      <div className="flex flex-col items-center gap-8 p-7 md:flex-row md:items-center md:gap-10 md:p-9">
         <div className="relative h-48 w-48 shrink-0">
           <svg viewBox="0 0 200 200" className="h-full w-full" role="img" aria-label="Selo de segurança da Coruja Insights">
             <defs>
@@ -41,8 +41,8 @@ export function SecuritySeal() {
               </radialGradient>
               {/* arco de cima: 9h → 12h → 3h */}
               <path id="seal-arc-top" d="M100,100 m-70,0 a70,70 0 1,1 140,0" />
-              {/* arco de baixo: 9h → 6h → 3h, para o texto sair na vertical */}
-              <path id="seal-arc-bottom" d="M100,100 m-65,0 a65,65 0 1,0 130,0" />
+              {/* arco de baixo: 9h → 6h → 3h, na mesma distância do anel externo */}
+              <path id="seal-arc-bottom" d="M100,100 m-80,0 a80,80 0 1,0 160,0" />
             </defs>
 
             <circle cx="100" cy="100" r="95" fill="none" stroke="url(#seal-grad)" strokeWidth="1" opacity=".45" />
@@ -52,8 +52,8 @@ export function SecuritySeal() {
             <circle cx="100" cy="100" r="84" fill="none" stroke="url(#seal-grad)" strokeWidth="3" />
             <circle cx="30" cy="100" r="2.6" fill="url(#seal-grad)" />
             <circle cx="170" cy="100" r="2.6" fill="url(#seal-grad)" />
-            <circle cx="100" cy="100" r="52" fill="url(#seal-core)" />
-            <circle cx="100" cy="100" r="52" fill="none" stroke="url(#seal-grad)" strokeWidth="1" strokeDasharray="3 6" opacity=".55" />
+            <circle cx="100" cy="100" r="50" fill="url(#seal-core)" />
+            <circle cx="100" cy="100" r="50" fill="none" stroke="url(#seal-grad)" strokeWidth="1" strokeDasharray="3 6" opacity=".55" />
 
             <text textAnchor="middle" style={ARC_TOP}>
               <textPath href="#seal-arc-top" startOffset="50%">CORUJA INSIGHTS</textPath>
@@ -66,10 +66,10 @@ export function SecuritySeal() {
           <img
             src={owlIcon}
             alt=""
-            className="absolute left-1/2 top-[25%] h-14 w-14 -translate-x-1/2 drop-shadow-[0_0_14px_var(--glow)]"
+            className="absolute left-1/2 top-[23%] h-14 w-14 -translate-x-1/2 drop-shadow-[0_0_14px_var(--glow)]"
           />
-          <span className="bg-brand absolute left-1/2 top-[58%] flex h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full border border-background/70 shadow-glow">
-            <ShieldCheck className="h-4 w-4 text-primary-foreground" />
+          <span className="bg-brand absolute left-1/2 top-[56%] flex h-6 w-6 -translate-x-1/2 items-center justify-center rounded-full border border-background/70 shadow-glow">
+            <ShieldCheck className="h-3.5 w-3.5 text-primary-foreground" />
           </span>
         </div>
 
@@ -90,18 +90,19 @@ export function SecuritySeal() {
               </li>
             ))}
           </ul>
-
-          <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
-            Para o texto do relatório, vão para a IA o nome do perfil, a bio e os números das publicações lidas.
-            Nada disso fica guardado depois, e nenhuma das suas listas sai do seu navegador.
-          </p>
-
-          <p className="mt-4 border-t border-border pt-4 text-xs leading-relaxed text-muted-foreground">
-            Autodeclaração, não certificação: a Coruja Insights é um projeto de estudo, sem auditoria de empresa
-            externa. A garantia de verdade é o comportamento — e o código do favorito está inteiro no endereço dele,
-            pronto para você colar em uma aba e ler.
-          </p>
         </div>
+      </div>
+
+      <div className="border-t border-border p-7 md:p-9">
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          Para o texto do relatório, vão para a IA o nome do perfil, a bio e os números das publicações lidas.
+          Nada disso fica guardado depois, e nenhuma das suas listas sai do seu navegador.
+        </p>
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+          Autodeclaração, não certificação: a Coruja Insights é um projeto de estudo, sem auditoria de empresa
+          externa. A garantia de verdade é o comportamento — e o código do favorito está inteiro no endereço dele,
+          pronto para você colar em uma aba e ler.
+        </p>
       </div>
     </div>
   );
