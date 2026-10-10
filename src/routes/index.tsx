@@ -135,7 +135,7 @@ function Index() {
               </div>
               <div className="mt-5 flex items-center gap-2 rounded-xl border border-border bg-secondary px-3 py-2">
                 <span className="shrink-0 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">chave</span>
-                <code className="min-w-0 flex-1 truncate font-mono text-xs text-foreground">{PIX_KEY}</code>
+                <code className="min-w-0 flex-1 truncate font-mono text-xs leading-none text-foreground">{PIX_KEY}</code>
                 <Button
                   size="icon"
                   variant="ghost"
