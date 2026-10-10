@@ -12,7 +12,7 @@ import { Check, Copy, Github, Linkedin, QrCode, Sparkles } from "lucide-react";
 const PIX_KEY = "02f1c965-4f88-4396-a8ca-8bab9e280f0f";
 const PIX_CODE = "00020101021126580014br.gov.bcb.pix013602f1c965-4f88-4396-a8ca-8bab9e280f0f5204000053039865802BR5921LUCAS W C DE CARVALHO6007PALHOCA62070503***6304591A";
 const LINKEDIN_URL = "https://www.linkedin.com/in/lucaascarvalho/";
-const GITHUB_URL = "";
+const GITHUB_URL: string = "";
 const LOVABLE_URL = "https://lovable.dev";
 
 export const Route = createFileRoute("/")({
@@ -110,17 +110,53 @@ function Index() {
         </p>
       </section>
 
-      <section id="cafe" className="mx-auto max-w-xl px-6 pb-24">
-        <div className="glass shadow-glow rounded-3xl p-8 text-center">
-          <div className="text-4xl">☕</div>
-          <h2 className="mt-3 text-2xl font-bold">Pague um cafezinho</h2>
-          <p className="mt-2 text-sm text-muted-foreground">Gostou? Qualquer valor via Pix ajuda a manter a corujinha acordada.</p>
-          <button
-            onClick={() => { navigator.clipboard.writeText(PIX_KEY); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-            className="mt-6 w-full rounded-2xl border border-border bg-secondary px-4 py-4 font-mono text-sm transition hover:border-primary"
-          >
-            {copied ? "Chave Pix copiada ✓" : `Pix: ${PIX_KEY}  ·  copiar`}
-          </button>
+      <section id="cafe" className="mx-auto max-w-4xl scroll-mt-8 px-6 pb-24">
+        <div className="glass shadow-glow overflow-hidden rounded-3xl">
+          <div className="grid items-center gap-8 p-8 md:grid-cols-[13.5rem_1fr] md:p-10">
+            <div className="bg-brand shadow-glow mx-auto rounded-[1.75rem] p-2">
+              <img
+                src={qrCafezinho.url}
+                width={200}
+                height={200}
+                alt="QR Code Pix para pagar um cafezinho"
+                className="h-48 w-48 rounded-3xl"
+              />
+            </div>
+            <div className="min-w-0 text-center md:text-left">
+              <span className="font-mono text-xs text-accent">APOIE O PROJETO</span>
+              <h2 className="mt-3 text-3xl font-bold">Pague um cafezinho ☕</h2>
+              <p className="mt-3 text-muted-foreground">
+                Gostou da corujinha? Qualquer valor via Pix ajuda a mantê-la acordada e o projeto no ar.
+              </p>
+              <div className="mt-6 flex flex-wrap justify-center gap-3 md:justify-start">
+                <Button onClick={() => copy(PIX_KEY, "key")}>
+                  {copied === "key" ? <Check /> : <Copy />}
+                  {copied === "key" ? "Chave copiada" : "Copiar chave Pix"}
+                </Button>
+                <Button variant="outline" onClick={() => copy(PIX_CODE, "code")}>
+                  <QrCode />
+                  {copied === "code" ? "Código copiado" : "Copiar código Pix"}
+                </Button>
+              </div>
+              <p className="mt-4 break-all font-mono text-xs text-muted-foreground">{PIX_KEY}</p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border px-8 py-5 md:px-10">
+            <div className="flex flex-wrap gap-3">
+              {GITHUB_URL && (
+                <Button asChild variant="outline">
+                  <a href={GITHUB_URL} target="_blank" rel="noreferrer"><Github />Ver no GitHub</a>
+                </Button>
+              )}
+              <Button asChild variant="outline">
+                <a href={LINKEDIN_URL} target="_blank" rel="noreferrer"><Linkedin />LinkedIn</a>
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Criado com <a href={LOVABLE_URL} target="_blank" rel="noreferrer" className="font-semibold text-foreground underline decoration-primary underline-offset-4">Lovable</a>
+            </p>
+          </div>
         </div>
         <p className="mt-10 text-center text-xs text-muted-foreground">
           Feito com carinho · <Link to="/relatorio" className="underline">exemplo de relatório</Link>
