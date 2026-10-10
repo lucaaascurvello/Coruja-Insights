@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowDown, Bookmark, Check, ChevronRight, Globe, Grip, MousePointer2, PanelTop, Star } from "lucide-react";
+import { ArrowDown, Bookmark, Check, Globe, Grip, MousePointer2, PanelTop, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { buildBookmarklet } from "@/lib/bookmarklet";
 import mascote from "@/assets/mascote.png";
@@ -85,11 +85,7 @@ export function InstallationGuide() {
         </li>
       </ol>
 
-      <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-6">
-        <p className="flex max-w-2xl items-start gap-2 text-sm text-muted-foreground"><Bookmark className="mt-0.5 h-4 w-4 shrink-0 text-accent" />Já tinha instalado? Apague o favorito antigo e arraste novamente para receber a versão atualizada.</p>
-        <Button asChild variant="outline"><a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Abrir Instagram<ChevronRight /></a></Button>
-      </div>
-      <p className="mt-4 text-xs leading-relaxed text-muted-foreground">Instalação por arrastar disponível em navegadores de computador. No celular, a barra de favoritos e a execução desse tipo de favorito variam conforme o navegador.</p>
+      <p className="mt-8 text-xs leading-relaxed text-muted-foreground">Instalação por arrastar disponível em navegadores de computador. No celular, a barra de favoritos e a execução desse tipo de favorito variam conforme o navegador.</p>
     </section>
   );
 }
