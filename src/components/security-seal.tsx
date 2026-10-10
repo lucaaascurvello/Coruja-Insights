@@ -20,52 +20,55 @@ const TICKS = Array.from({ length: 36 }, (_, i) => {
   };
 });
 
+const ARC_TOP = { fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13, letterSpacing: 2.6, fill: "var(--accent)" };
+const ARC_BOTTOM = { fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 11, letterSpacing: 2.2, fill: "var(--muted-foreground)" };
+
 export function SecuritySeal() {
   return (
     <div className="glass shadow-glow overflow-hidden rounded-3xl p-7 md:p-9">
       <div className="flex flex-col items-center gap-8 md:flex-row md:items-start md:gap-10">
-        <div className="relative h-44 w-44 shrink-0">
-          <svg viewBox="0 0 200 200" className="h-full w-full" role="img" aria-label="Selo Coruja Insights">
+        <div className="relative h-48 w-48 shrink-0">
+          <svg viewBox="0 0 200 200" className="h-full w-full" role="img" aria-label="Selo de segurança da Coruja Insights">
             <defs>
               <linearGradient id="seal-grad" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" style={{ stopColor: "var(--glow)" }} />
                 <stop offset="55%" style={{ stopColor: "var(--ring)" }} />
                 <stop offset="100%" style={{ stopColor: "var(--coral)" }} />
               </linearGradient>
-              <path id="seal-ring" d="M100,100 m-71,0 a71,71 0 1,1 142,0 a71,71 0 1,1 -142,0" />
+              <radialGradient id="seal-core">
+                <stop offset="0%" style={{ stopColor: "var(--glow)", stopOpacity: 0.32 }} />
+                <stop offset="100%" style={{ stopColor: "var(--glow)", stopOpacity: 0 }} />
+              </radialGradient>
+              {/* arco de cima: 9h → 12h → 3h */}
+              <path id="seal-arc-top" d="M100,100 m-70,0 a70,70 0 1,1 140,0" />
+              {/* arco de baixo: 9h → 6h → 3h, para o texto sair na vertical */}
+              <path id="seal-arc-bottom" d="M100,100 m-65,0 a65,65 0 1,0 130,0" />
             </defs>
 
             <circle cx="100" cy="100" r="95" fill="none" stroke="url(#seal-grad)" strokeWidth="1" opacity=".45" />
             {TICKS.map((t, i) => (
-              <line
-                key={i}
-                x1={t.x1}
-                y1={t.y1}
-                x2={t.x2}
-                y2={t.y2}
-                stroke="url(#seal-grad)"
-                strokeWidth="1.2"
-                opacity=".5"
-              />
+              <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} stroke="url(#seal-grad)" strokeWidth="1.2" opacity=".5" />
             ))}
             <circle cx="100" cy="100" r="84" fill="none" stroke="url(#seal-grad)" strokeWidth="3" />
-            <circle cx="100" cy="100" r="58" fill="none" stroke="url(#seal-grad)" strokeWidth="1" strokeDasharray="3 6" opacity=".55" />
+            <circle cx="30" cy="100" r="2.6" fill="url(#seal-grad)" />
+            <circle cx="170" cy="100" r="2.6" fill="url(#seal-grad)" />
+            <circle cx="100" cy="100" r="52" fill="url(#seal-core)" />
+            <circle cx="100" cy="100" r="52" fill="none" stroke="url(#seal-grad)" strokeWidth="1" strokeDasharray="3 6" opacity=".55" />
 
-            <text
-              style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, letterSpacing: 1.8, fill: "var(--accent)" }}
-            >
-              <textPath href="#seal-ring" startOffset="1%">
-                CORUJA INSIGHTS · SEM GUARDAR NADA
-              </textPath>
+            <text textAnchor="middle" style={ARC_TOP}>
+              <textPath href="#seal-arc-top" startOffset="50%">CORUJA INSIGHTS</textPath>
+            </text>
+            <text textAnchor="middle" style={ARC_BOTTOM}>
+              <textPath href="#seal-arc-bottom" startOffset="50%">SEM GUARDAR NADA</textPath>
             </text>
           </svg>
 
           <img
             src={owlIcon}
             alt=""
-            className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-[58%] drop-shadow-[0_0_14px_var(--glow)]"
+            className="absolute left-1/2 top-[25%] h-14 w-14 -translate-x-1/2 drop-shadow-[0_0_14px_var(--glow)]"
           />
-          <span className="bg-brand absolute bottom-[26%] left-1/2 flex h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full border border-background/70 shadow-glow">
+          <span className="bg-brand absolute left-1/2 top-[58%] flex h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full border border-background/70 shadow-glow">
             <ShieldCheck className="h-4 w-4 text-primary-foreground" />
           </span>
         </div>
