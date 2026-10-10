@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import mascote from "@/assets/mascote.png";
 import qrCafezinho from "@/assets/qr-cafezinho.png.asset.json";
@@ -7,7 +7,7 @@ import { buildBookmarklet } from "@/lib/bookmarklet";
 import { InstallationGuide } from "@/components/installation-guide";
 import { BrowserCarousel } from "@/components/browser-carousel";
 import { Button } from "@/components/ui/button";
-import { Check, Copy, Github, Linkedin, Sparkles } from "lucide-react";
+import { ArrowRight, Check, Copy, Github, Linkedin, Sparkles } from "lucide-react";
 
 const PIX_CODE = "00020101021126580014br.gov.bcb.pix013602f1c965-4f88-4396-a8ca-8bab9e280f0f5204000053039865802BR5921LUCAS W C DE CARVALHO6007PALHOCA62070503***6304591A";
 const LINKEDIN_URL = "https://www.linkedin.com/in/lucaascarvalho/";
@@ -118,6 +118,13 @@ function Index() {
                 A Coruja Insights é um projeto feito em casa, para fins de estudo e para ajudar quem precisa dessas ferramentas de forma gratuita.
                 Ela lê apenas dados públicos que o próprio Instagram mostra a você.
               </p>
+              <div className="mt-6">
+                <Button asChild variant="outline" size="sm">
+                  <Link to="/como-funciona">
+                    Saiba mais: como a ferramenta funciona <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
 
