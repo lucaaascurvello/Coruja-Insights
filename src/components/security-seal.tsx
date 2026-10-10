@@ -1,6 +1,6 @@
 import { Check, Lock } from "lucide-react";
 
-const GITHUB_URL = "https://github.com/lucaaascurvello";
+const GITHUB_URL = "https://github.com/lucaaascurvello/Coruja-Insights";
 
 const PROMESAS = ["Não pede senha", "Não guarda nada", "Não publica nada", "Só vê o que você vê"];
 
@@ -33,7 +33,7 @@ export function SecuritySeal() {
               rel="noreferrer"
               className="text-seal underline decoration-seal/40 underline-offset-4 hover:decoration-seal"
             >
-              github.com/lucaaascurvello
+              github.com/lucaaascurvello/Coruja-Insights
             </a>
           </p>
         </div>
