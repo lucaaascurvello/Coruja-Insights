@@ -32,7 +32,7 @@ const features = [
   ["📊", "Engajamento real", "Taxa de engajamento, média de interações e a publicação que mais bombou."],
   ["💬", "Quem mais interage", "Os seguidores que mais comentam e o comentário mais relevante."],
   ["🧠", "Insights com IA", "Público estimado (gênero, regiões) e dicas práticas para crescer."],
-  ["👀", "Não te seguem de volta", "A cereja do bolo: veja quem você segue que não te segue, e pare de seguir com um clique."],
+  ["👀", "Não te seguem de volta", "Veja quem você segue que não te segue de volta, e pare de seguir com um clique."],
 ];
 
 function Index() {
@@ -113,13 +113,10 @@ function Index() {
             <div>
               <span className="font-mono text-xs uppercase tracking-[0.18em] text-accent">Um projeto caseiro</span>
               <h2 className="mt-2 text-3xl font-bold">Oi, sou <span className="text-gradient">Lucas Curvello</span></h2>
-              <p className="mt-1 font-display text-lg">Analista de Redes Sociais e curioso por vibe code.</p>
+              <p className="mt-1 font-display text-lg">Analista de Redes Sociais</p>
               <p className="mt-4 text-sm text-muted-foreground">
                 A Coruja Insights é um projeto feito em casa, para fins de estudo e para ajudar quem precisa dessas ferramentas de forma gratuita.
-                Ela lê apenas dados públicos que o próprio Instagram mostra a você. Nenhum dado é guardado: ao fechar, tudo some.
-              </p>
-              <p className="mt-3 text-sm text-muted-foreground">
-                Estimativas de público (gênero e regiões) são feitas por IA e servem só como referência. Não tem vínculo com o Instagram/Meta.
+                Ela lê apenas dados públicos que o próprio Instagram mostra a você.
               </p>
             </div>
           </div>
