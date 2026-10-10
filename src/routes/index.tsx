@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import mascote from "@/assets/mascote.png";
 import owlIcon from "@/assets/owl-icon.png";
 import qrCafezinho from "@/assets/qr-cafezinho.png.asset.json";
+import fotoAutor from "@/assets/lucas-curvello.jpg.asset.json";
 import { buildBookmarklet } from "@/lib/bookmarklet";
 import { InstallationGuide } from "@/components/installation-guide";
 import { BrowserCarousel } from "@/components/browser-carousel";
@@ -101,13 +102,30 @@ function Index() {
 
       <InstallationGuide />
 
-      <section className="mx-auto max-w-3xl px-6 py-16 text-center">
-        <h2 className="text-3xl font-bold">Um projeto caseiro 🏡</h2>
-        <p className="mt-4 text-muted-foreground">
-          A Coruja Insights é um projeto feito em casa, para fins de estudo e para ajudar quem precisa dessas ferramentas de forma gratuita.
-          Ela lê apenas dados públicos que o próprio Instagram mostra a você. Nenhum dado é guardado: ao fechar, tudo some.
-          Estimativas de público (gênero e regiões) são feitas por IA e servem só como referência. Não tem vínculo com o Instagram/Meta.
-        </p>
+      <section id="quem" className="mx-auto max-w-4xl scroll-mt-8 px-6 py-16">
+        <div className="glass rounded-3xl p-8 md:p-10">
+          <div className="grid items-center gap-8 md:grid-cols-[11rem_1fr]">
+            <img
+              src={fotoAutor.url}
+              alt="Lucas Curvello"
+              width={640}
+              height={640}
+              className="shadow-glow mx-auto h-44 w-44 rounded-3xl border border-border object-cover"
+            />
+            <div>
+              <span className="font-mono text-xs uppercase tracking-[0.18em] text-accent">Um projeto caseiro 🏡</span>
+              <h2 className="mt-2 text-3xl font-bold">Oi, sou <span className="text-gradient">Lucas Curvello</span></h2>
+              <p className="mt-1 font-display text-lg">Analista de Redes Sociais e curioso por vibe code.</p>
+              <p className="mt-4 text-sm text-muted-foreground">
+                A Coruja Insights é um projeto feito em casa, para fins de estudo e para ajudar quem precisa dessas ferramentas de forma gratuita.
+                Ela lê apenas dados públicos que o próprio Instagram mostra a você. Nenhum dado é guardado: ao fechar, tudo some.
+              </p>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Estimativas de público (gênero e regiões) são feitas por IA e servem só como referência. Não tem vínculo com o Instagram/Meta.
+              </p>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section id="cafe" className="mx-auto max-w-4xl scroll-mt-8 px-6 pb-24">
