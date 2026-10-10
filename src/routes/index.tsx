@@ -48,7 +48,7 @@ function Index() {
       <section className="relative mx-auto grid max-w-6xl items-center gap-10 px-6 pb-20 pt-10 md:grid-cols-2">
         <div className="grid-bg pointer-events-none absolute inset-0 -z-10 opacity-40 [mask-image:radial-gradient(circle,black,transparent_70%)]" />
         <div className="animate-rise">
-          <span className="glass inline-block rounded-full px-3 py-1 font-mono text-xs text-primary">100% gratuito · nada é salvo</span>
+          <span className="bg-brand shadow-glow animate-glow inline-flex items-center gap-2 rounded-full px-5 py-2 font-display text-sm font-bold uppercase tracking-wide text-primary-foreground">✨ 100% gratuito</span>
           <h1 className="mt-5 text-5xl font-bold leading-tight md:text-6xl">
             Seu Instagram, <span className="text-gradient">analisado</span> por uma corujinha esperta.
           </h1>
