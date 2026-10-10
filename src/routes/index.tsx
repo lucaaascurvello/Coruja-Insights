@@ -53,7 +53,7 @@ function Index() {
         <span className="font-display text-sm font-medium tracking-wide">
           Coruja <span className="text-muted-foreground">Insights</span>
         </span>
-        <a href="#cafe" className="text-sm text-muted-foreground transition hover:text-foreground">Cafezinho</a>
+        <a href="#cafe" className="text-sm text-muted-foreground transition hover:text-foreground">Conheça o desenvolvedor</a>
       </header>
 
       <section className="relative mx-auto grid max-w-6xl items-center gap-10 px-6 pb-20 pt-10 md:grid-cols-2">
