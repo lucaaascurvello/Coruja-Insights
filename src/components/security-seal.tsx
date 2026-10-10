@@ -21,13 +21,13 @@ const TICKS = Array.from({ length: 36 }, (_, i) => {
 });
 
 const ARC_TOP = { fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13, letterSpacing: 2.6, fill: "var(--accent)" };
-const ARC_BOTTOM = { fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 11.5, letterSpacing: 3.2, fill: "var(--accent)" };
+const ARC_BOTTOM = { fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 11.5, letterSpacing: 4.6, fill: "var(--accent)" };
 
 export function SecuritySeal() {
   return (
     <div className="glass shadow-glow overflow-hidden rounded-3xl">
       <div className="flex flex-col items-center gap-8 p-7 md:flex-row md:items-center md:gap-10 md:p-9">
-        <div className="relative h-48 w-48 shrink-0">
+        <div className="relative h-56 w-56 shrink-0">
           <svg viewBox="0 0 200 200" className="h-full w-full" role="img" aria-label="Selo de segurança da Coruja Insights">
             <defs>
               <linearGradient id="seal-grad" x1="0" y1="0" x2="1" y2="1">
@@ -66,15 +66,17 @@ export function SecuritySeal() {
           <img
             src={owlIcon}
             alt=""
-            className="absolute left-1/2 top-[23%] h-14 w-14 -translate-x-1/2 drop-shadow-[0_0_14px_var(--glow)]"
+            className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_0_16px_var(--glow)]"
           />
-          <span className="bg-brand absolute left-1/2 top-[56%] flex h-6 w-6 -translate-x-1/2 items-center justify-center rounded-full border border-background/70 shadow-glow">
-            <ShieldCheck className="h-3.5 w-3.5 text-primary-foreground" />
-          </span>
         </div>
 
         <div className="min-w-0">
-          <span className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-accent">Selo de segurança</span>
+          <span className="flex items-center gap-2">
+            <span className="bg-brand flex h-6 w-6 shrink-0 items-center justify-center rounded-full shadow-glow">
+              <ShieldCheck className="h-3.5 w-3.5 text-primary-foreground" />
+            </span>
+            <span className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-accent">Selo de segurança</span>
+          </span>
           <h2 className="mt-1.5 text-2xl font-bold">O que a corujinha promete — e você pode conferir</h2>
 
           <ul className="mt-5 grid gap-3 sm:grid-cols-2">
