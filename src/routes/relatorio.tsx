@@ -31,14 +31,24 @@ function Relatorio() {
   const [loading, setLoading] = useState(false);
   const [aiProg, setAiProg] = useState(0);
 
+  const [noOpener, setNoOpener] = useState(false);
+  const [waitProg, setWaitProg] = useState(5);
+
   useEffect(() => {
+    if (!window.opener) { setNoOpener(true); return; }
+    let got = false;
+    const ping = () => { try { window.opener?.postMessage("coruja:ready", "https://www.instagram.com"); } catch { /* ignore */ } };
     const onMsg = (e: MessageEvent) => {
       if (e.data?.type !== "coruja:data") return;
+      got = true;
       setD(e.data.payload);
     };
     window.addEventListener("message", onMsg);
-    window.opener?.postMessage("coruja:ready", "https://www.instagram.com");
-    return () => window.removeEventListener("message", onMsg);
+    ping();
+    const iv = setInterval(() => { if (!got) ping(); }, 150);
+    const bar = setInterval(() => setWaitProg((p) => (p < 30 ? p + 2 : p)), 200);
+    const stop = setTimeout(() => { if (!got) setNoOpener(true); }, 15000);
+    return () => { window.removeEventListener("message", onMsg); clearInterval(iv); clearInterval(bar); clearTimeout(stop); };
   }, []);
 
   useEffect(() => {
@@ -73,6 +83,18 @@ function Relatorio() {
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 2000);
   };
+
+  if (!d && !noOpener) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
+        <img src={mascote} alt="Coruja" width={1024} height={1024} className="animate-float w-40" />
+        <p className="mt-6 animate-pulse text-primary">Carregando, aguarde alguns instantes…</p>
+        <div className="mt-3 h-2 w-full max-w-sm overflow-hidden rounded-full bg-muted">
+          <div className="bg-brand h-2 rounded-full transition-all duration-500" style={{ width: `${waitProg}%` }} />
+        </div>
+      </main>
+    );
+  }
 
   if (!d) {
     return (
