@@ -1,4 +1,4 @@
-const sources = ["Meta · Instagram Creators", "Rival IQ", "Socialinsider", "HypeAuditor", "Hootsuite", "Later", "Sprout Social", "HubSpot"];
+const sources = ["Meta · Instagram Creators", "Rival IQ", "Socialinsider", "HypeAuditor", "Hootsuite", "Later"];
 
 function Row({ hidden = false }: { hidden?: boolean }) {
   return (
