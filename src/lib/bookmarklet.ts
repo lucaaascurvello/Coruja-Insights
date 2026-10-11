@@ -197,7 +197,7 @@ function corujaScript(ORIGIN: string, theme: string) {
   @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
   .h{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--border)}
   .h b{font-size:15px}.h span{font-size:11px;color:var(--muted-foreground)}
-  .owl{font-size:22px;line-height:1;filter:drop-shadow(0 0 8px color-mix(in oklab,var(--primary) 55%,transparent));animation:bob 3s ease-in-out infinite}@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}#pl,#st,#eta{display:none}.tip{margin-top:12px;font-size:11px;line-height:1.5;color:var(--muted-foreground);display:flex;gap:6px}
+  .owl{font-size:22px;line-height:1;filter:drop-shadow(0 0 8px color-mix(in oklab,var(--primary) 55%,transparent));animation:bob 3s ease-in-out infinite}@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}#eta{display:none}.tip{margin-top:12px;font-size:11px;line-height:1.5;color:var(--muted-foreground);display:flex;gap:6px}
   .x{margin-left:auto;background:none;border:0;color:var(--muted-foreground);font-size:20px;cursor:pointer}
   .b{padding:16px 18px}
   .g{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -231,6 +231,7 @@ function corujaScript(ORIGIN: string, theme: string) {
     const b = root.querySelector("#pb") as HTMLElement | null;
     if (b) b.style.width = p + "%";
     const l = root.querySelector("#pl");
+    if (l) l.textContent = t || "Carregando, aguarde alguns instantes…";
   };
   (window as any).__corujaProg = prog;
   const $ = (s: string) => root.querySelector(s) as HTMLElement;
@@ -372,7 +373,7 @@ function corujaScript(ORIGIN: string, theme: string) {
 
   async function nonFollowers(id: string, totals?: { followers?: number; following?: number }) {
     const box = $("#nfl");
-    box.innerHTML = `<div class="l">Carregando, aguarde alguns instantes…</div><div id="st" style="display:none"></div><div class="bar"><i id="nb" style="width:3%"></i></div><div id="eta" style="display:none"></div>`;
+    box.innerHTML = `<div class="l" id="st">Carregando, aguarde alguns instantes…</div><div class="bar"><i id="nb" style="width:3%"></i></div><div id="eta" style="display:none"></div>`;
     // Time-remaining estimate based on the real speed measured so far (smoothed).
     const fmt = (s: number) => { s = Math.max(0, Math.round(s)); const m = Math.floor(s / 60); return m ? `${m} min ${String(s % 60).padStart(2, "0")} s` : `${s} s`; };
     const t0 = Date.now();

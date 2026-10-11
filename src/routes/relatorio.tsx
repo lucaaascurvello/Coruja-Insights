@@ -152,8 +152,6 @@ function Relatorio() {
               <p className="mt-1 text-muted-foreground">É gratuito e libera o Instagram Insights: alcance, salvamentos, compartilhamentos e público por idade, gênero e cidade — dados que deixam esta análise bem mais precisa.</p></li>}</ul>
           {ai.descartados > 0 && <p className="mt-3 text-xs text-muted-foreground">{ai.descartados} sugestão(ões) da IA foram descartadas por citar números que não batem com os dados.</p>}
           {st.sample < 8 && <p className="mt-3 text-xs text-accent">Amostra pequena ({st.sample} posts): trate as conclusões com cautela.</p>}
-          <p className="mt-8 text-xs text-muted-foreground">Gênero e localização do público só ficam disponíveis no Instagram Insights (conta Profissional) — não estimamos para não inventar.</p>
-          <p className="mt-2 text-xs text-muted-foreground">Referências: {ai.sources.join(" · ")}.</p>
         </div>); })()}
       </div>
       <SourcesCarousel />
