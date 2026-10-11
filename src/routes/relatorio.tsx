@@ -28,8 +28,8 @@ function Relatorio() {
   const [d, setD] = useState<Data | null>(null);
   const [ai, setAi] = useState<AiReport | null>(null);
   const [err, setErr] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [aiProg, setAiProg] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [aiProg, setAiProg] = useState(8);
 
   const [noOpener, setNoOpener] = useState(false);
   const [waitProg, setWaitProg] = useState(5);
