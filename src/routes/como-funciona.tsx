@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SecuritySeal } from "@/components/security-seal";
+import { SourcesCarousel } from "@/components/sources-carousel";
 import openaiLogo from "@/assets/openai.svg";
 import { BENCHMARKS, KNOWLEDGE, SOURCES } from "@/lib/ig-knowledge";
 
@@ -211,6 +212,7 @@ function ComoFunciona() {
               São estudos públicos de mercado, com números aproximados e que mudam de ano para ano. Por isso
               aparecem como referência de comparação, nunca como veredito sobre o seu perfil.
             </p>
+            <SourcesCarousel className="mt-8" />
           </div>
         </div>
       </section>
