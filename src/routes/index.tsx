@@ -96,6 +96,13 @@ function Index() {
             </div>
           ))}
         </div>
+        <div className="mt-8">
+          <Button asChild variant="outline">
+            <Link to="/como-funciona">
+              Saiba mais: como a ferramenta funciona <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </Button>
+        </div>
       </section>
 
       <InstallationGuide />
