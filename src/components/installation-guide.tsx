@@ -30,7 +30,7 @@ export function InstallationGuide() {
         <div>
           <span className="font-mono text-xs text-accent">PRIMEIRO PASSO</span>
           <h2 className="mt-3 text-3xl font-bold">Sua coruja, a um clique.</h2>
-          <p className="mt-3 max-w-xl text-muted-foreground">Salve na barra de favoritos do computador. Sem baixar arquivos e sem passar pela loja de extensões.</p>
+          <p className="mt-3 max-w-xl text-muted-foreground">Salve na barra de favoritos do seu navegador. Sem baixar arquivos e sem passar pela loja de extensões.</p>
         </div>
         <div className="flex flex-wrap gap-1 rounded-lg border border-border p-1" aria-label="Escolha seu navegador">
           {([ ["chrome", "Chrome / Edge / outros"], ["firefox", "Firefox"], ["safari", "Safari"] ] as const).map(([value, label]) => (
