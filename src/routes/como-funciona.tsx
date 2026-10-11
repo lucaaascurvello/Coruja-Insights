@@ -245,5 +245,7 @@ function ComoFunciona() {
             </Button>
           </div>
         </div>
+      </section>
+    </main>
   );
 }
