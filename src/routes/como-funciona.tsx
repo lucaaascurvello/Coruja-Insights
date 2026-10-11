@@ -211,6 +211,7 @@ function ComoFunciona() {
               São estudos públicos de mercado, com números aproximados e que mudam de ano para ano. Por isso
               aparecem como referência de comparação, nunca como veredito sobre o seu perfil.
             </p>
+            <SourcesCarousel className="mt-8" />
           </div>
         </div>
       </section>

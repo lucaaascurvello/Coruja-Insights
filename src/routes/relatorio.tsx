@@ -137,7 +137,8 @@ function Relatorio() {
             ["Melhor horário (Brasília)", st.bestTimeSlot ? `${st.bestTimeSlot.faixa} (${st.bestTimeSlot.posts} posts)` : "amostra pequena"],
           ];
           return (<div className="animate-rise">
-          <h2 className="mt-10 text-xl font-bold">Resumo</h2><p className="text-muted-foreground">{ai.resumo}</p>
+          <span className="mt-10 inline-flex items-center gap-2 rounded-full border border-border bg-secondary/60 px-3 py-1.5 text-xs font-medium text-foreground"><img src={openaiLogo} alt="Logo da OpenAI" className="h-4 w-4" />Feito com GPT-6 Astra · OpenAI</span>
+          <h2 className="mt-4 text-xl font-bold">Resumo</h2><p className="text-muted-foreground">{ai.resumo}</p>
           {ai.benchmark && <p className="glass mt-4 rounded-2xl p-4 text-sm">Referência de mercado para contas com {ai.benchmark.faixa}: {ai.benchmark.min}% a {ai.benchmark.max}%. Seu engajamento está <b className="text-primary">{ai.benchmark.posicao} da média</b>.</p>}
           <h2 className="mt-8 text-xl font-bold">Fatos do perfil</h2>
           <p className="text-xs text-muted-foreground">Calculados direto das publicações, sem IA.</p>
