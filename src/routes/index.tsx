@@ -31,7 +31,7 @@ export const Route = createFileRoute("/")({
 const features = [
   ["📊", "Engajamento real", "Taxa de engajamento, média de interações e a publicação que mais bombou."],
   ["💬", "Quem mais interage", "Os seguidores que mais comentam e o comentário mais relevante."],
-  ["🧠", "Insights com IA", "Público estimado (gênero, regiões) e dicas práticas para crescer."],
+  ["🧠", "Insights com IA", "Analise seu perfil, entenda seu engajamento e descubra oportunidades para crescer no Instagram com recomendações baseadas em dados reais."],
   ["👀", "Não te seguem de volta", "Veja quem você segue que não te segue de volta, e pare de seguir com um clique."],
 ];
 
@@ -64,7 +64,7 @@ function Index() {
             Seu Instagram, <span className="text-gradient">analisado</span> por uma corujinha esperta.
           </h1>
           <p className="mt-5 max-w-md text-lg text-muted-foreground">
-            Abra qualquer perfil, clique no favorito e receba um mini relatório profissional na hora.
+            Abra o seu perfil, clique no favorito e receba um mini relatório profissional na hora.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <a
@@ -122,8 +122,7 @@ function Index() {
               <h2 className="mt-2 text-3xl font-bold">Oi, sou <span className="text-gradient">Lucas Curvello</span></h2>
               <p className="mt-1 font-display text-lg">Analista de Redes Sociais</p>
               <p className="mt-4 text-sm text-muted-foreground">
-                A Coruja Insights é um projeto feito em casa, para fins de estudo e para ajudar quem precisa dessas ferramentas de forma gratuita.
-                Ela lê apenas dados públicos que o próprio Instagram mostra a você.
+                A Coruja Insights é um projeto independente, desenvolvido para fins de estudo e para oferecer ferramentas gratuitas a quem precisa. A plataforma utiliza exclusivamente dados públicos disponibilizados pelo próprio Instagram, sem acessar informações privadas dos usuários.
               </p>
               <div className="mt-6">
                 <Button asChild variant="outline" size="sm">
