@@ -1,26 +1,107 @@
-# Insta Insights Pro
+# 🦉 Coruja Insights
 
-Crie um site/extensão compatível para qualquer navegador, onde a ideia principal é ela ser executada dentro do perfil do instagram, a extesão ao ser executada abre um menu onde gera uma analise bem profissional sobre o perfil da pessoa de acordo com os dados públicos e disponíveis (taxa de engajamento, usuários mais engajados com o meu perfil, total seguidores, publicação que mais engajou, comentário mais relevante e isights de melhora do perfil, analise dos seguidores % de homem, mulher, estados e afins) essa parte pode ter uma ia integrada que faz essa micro analise porém não amarzena ela gera um mini relatório que a pessoa pode baixar no momento, após fechar a extensão não fica salvo, caso a conta não seja business não tem problema gera a analise de acordo com o que dá porém uma mensagem de recomendação aparece. A extensão também vai ter uma funcionalidade muito interessante, diria que é acereja do bolo onde o usuário pode saber quem são as pessoas que ele segue porém, não segue o perfil dela no instagram, dando até mesmo opção de parar de seguir essas pessoas. O design do site e do menu da extesão deve ser minimalista porém bem digital, com animções suaves e elegantes, quero que seja um personagem e tenha a imagem de algo bonitinho porém profissional. Lembrando que no site a pessoa pode simplesmente clicar em um botão e essa extesão é instalada no navegado, caso isso não de para fazer pode salvar nos favoritos. No site explique a ideia e como usar, também explique que é um projeto caseiro para fins de estudos e para ajudar pessoas que precisam dessas ferramentas e forma gratuita, e que caso queiram pagar o famoso "cafezinho" terá uma opação de pagarem um piu
+**Seu Instagram, analisado por uma corujinha esperta.**
 
-This project was built with [Lovable](https://lovable.dev).
+A Coruja Insights é uma ferramenta gratuita que ajuda você a entender melhor o desempenho de um perfil no Instagram, identificar oportunidades de melhoria e descobrir quem não segue você de volta.
 
-**Live app**: https://follow-focus-ai.lovable.app
+Com análises de métricas públicas e inteligência artificial, a ferramenta transforma dados em insights práticos para ajudar você a tomar decisões melhores sobre seu conteúdo.
 
-## Build with Lovable
+🌐 **Acesse o projeto:** [coruja-insights.lovable.app](https://coruja-insights.lovable.app/)
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/eea32ea1-0e4d-4b91-8af3-45759bb8780f).
+## ✨ Funcionalidades
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+- **📊 Análise de engajamento:** calcule a taxa de engajamento estimada, a média de interações e identifique tendências de desempenho.
+- **🔥 Desempenho das publicações:** descubra quais publicações tiveram mais interações e compare resultados entre formatos de conteúdo.
+- **💬 Seguidores mais engajados:** identifique usuários que mais interagem com as publicações analisadas e destaque comentários relevantes.
+- **🧠 Insights com inteligência artificial:** receba sugestões personalizadas de melhorias, com base nos números coletados e em referências de mercado.
+- **📈 Oportunidades de crescimento:** encontre pontos fortes, possíveis problemas de consistência e oportunidades para aprimorar sua estratégia de conteúdo.
+- **👀 Quem não segue de volta:** compare as listas de seguidores e seguindo para identificar contas que você segue, mas que não seguem você de volta.
+- **🔄 Deixar de seguir:** permita deixar de seguir uma conta diretamente pela ferramenta, com confirmação da ação.
 
-## Development
+## 🚀 Como usar
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+A Coruja Insights não precisa ser instalada como uma extensão tradicional. Ela funciona por meio de um favorito especial do navegador, também conhecido como *bookmarklet*.
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+1. Acesse o [site oficial](https://coruja-insights.lovable.app/).
+2. Siga as instruções para adicionar o favorito Coruja Insights à barra de favoritos do seu navegador.
+3. Abra o Instagram e acesse o perfil que deseja analisar.
+4. Clique no favorito da Coruja Insights e aguarde a leitura das informações disponíveis.
+5. Consulte seu relatório e as recomendações geradas.
+
+Para consultar quem não segue você de volta, abra o seu próprio perfil no Instagram antes de executar a ferramenta.
+
+**Navegadores compatíveis:** Chrome, Edge, Firefox, Safari, Brave, Opera e Vivaldi. O funcionamento pode variar conforme as limitações de cada navegador e do próprio Instagram.
+
+📖 [Confira o guia completo de funcionamento](https://coruja-insights.lovable.app/como-funciona).
+
+## 🔍 Como funciona
+
+A ferramenta lê as informações que já estão disponíveis na página do Instagram aberta pelo usuário. Os dados são processados por código para calcular as métricas, e a inteligência artificial utiliza os resultados para elaborar as recomendações.
+
+O objetivo é gerar análises fundamentadas em dados observados, evitando conclusões sem evidências.
+
+### Privacidade e transparência
+
+A Coruja Insights foi desenvolvida para funcionar sem exigir a senha do Instagram ou criar uma conta na plataforma.
+
+- Não solicita sua senha.
+- Não publica conteúdo, não curte publicações e não baixa fotos.
+- Não mantém histórico das análises nem armazena listas de seguidores em um banco de dados.
+- Utiliza informações que estão disponíveis para a conta na página do Instagram.
+- Envia à inteligência artificial os números calculados necessários para produzir o relatório, conforme explicado na documentação do projeto.
+
+A ferramenta depende das informações disponibilizadas pelo Instagram. Limites de acesso, dados ocultos e restrições da plataforma podem afetar os resultados.
+
+### ⚠️ Limitações importantes
+
+- A taxa de engajamento calculada com curtidas, comentários e seguidores é uma estimativa baseada em dados públicos, não a mesma métrica do painel oficial do Instagram.
+- Alcance, salvamentos, compartilhamentos e dados demográficos privados não podem ser obtidos quando não estão disponíveis.
+- Contas pessoais podem oferecer menos informações do que contas profissionais.
+- As recomendações da IA dependem da quantidade e da qualidade dos dados coletados.
+
+A Coruja Insights não estima gênero ou localização dos seguidores a partir de nomes. A proposta é priorizar informações verificáveis em vez de apresentar suposições como fatos.
+
+## 💚 Um projeto independente
+
+A Coruja Insights é um projeto pessoal, desenvolvido de forma independente para fins de estudo, experimentação e aprendizado. A ideia é disponibilizar gratuitamente ferramentas de análise que possam ajudar criadores de conteúdo, profissionais de redes sociais e qualquer pessoa interessada em compreender melhor seu perfil.
+
+O projeto também representa uma oportunidade de explorar desenvolvimento web, análise de dados, automação e inteligência artificial aplicados a um problema real.
+
+### ☕ Apoie o projeto
+
+Gostou da Corujinha? Você pode contribuir com um cafezinho via Pix para apoiar a continuidade e a evolução do projeto.
+
+Toda contribuição é voluntária e ajuda a manter a iniciativa viva.
+
+[☕ Acesse o site para apoiar o projeto](https://coruja-insights.lovable.app/).
+
+## 🛠️ Tecnologias e desenvolvimento
+
+O projeto foi desenvolvido com o auxílio do [Lovable](https://lovable.dev/), com código versionado no GitHub.
+
+O repositório é público para que outras pessoas possam conhecer a implementação e acompanhar a evolução da ferramenta.
+
+### Executar localmente
+
+Pré-requisitos: Node.js e npm instalados.
+
+```bash
+git clone https://github.com/lucaaascurvello/Coruja-Insights.git
+cd Coruja-Insights
+npm install
 npm run dev
 ```
+
+O endereço local será informado pelo Vite no terminal após a inicialização.
+
+## ⚖️ Aviso legal
+
+A Coruja Insights é um projeto independente, sem vínculo, patrocínio ou afiliação oficial com o Instagram ou a Meta. Instagram é uma marca da Meta Platforms, Inc.
+
+O funcionamento da ferramenta está sujeito às condições de acesso, à disponibilidade dos dados e às limitações impostas pelo Instagram.
+
+---
+
+**Desenvolvido por Lucas Curvello** 🦉
+
+[🌐 Projeto oficial](https://coruja-insights.lovable.app/) · [💻 Repositório no GitHub](https://github.com/lucaaascurvello/Coruja-Insights)
