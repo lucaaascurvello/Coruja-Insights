@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SecuritySeal } from "@/components/security-seal";
+import { SourcesCarousel } from "@/components/sources-carousel";
 import openaiLogo from "@/assets/openai.svg";
 import { BENCHMARKS, KNOWLEDGE, SOURCES } from "@/lib/ig-knowledge";
 
