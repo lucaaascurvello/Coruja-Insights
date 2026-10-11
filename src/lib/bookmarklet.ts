@@ -226,12 +226,11 @@ function corujaScript(ORIGIN: string, theme: string) {
   @media(prefers-reduced-motion:reduce){.p,.l,.owl,.bar i{animation:none}.btn,.bar i{transition:none}}
   </style>
   <div class="p"><div class="h"><div class="owl">🦉</div><div><b>Coruja Insights</b><br><span>@${esc(username)}</span></div><button class="x" id="x">×</button></div>
-  <div class="b" id="b"><div class="l" id="pl">Coletando dados públicos do perfil…</div><div class="bar"><i id="pb" style="width:6%"></i></div></div></div>`;
+  <div class="b" id="b"><div class="l" id="pl">Carregando, aguarde alguns instantes…</div><div class="bar"><i id="pb" style="width:6%"></i></div></div></div>`;
   const prog = (p: number, t?: string) => {
     const b = root.querySelector("#pb") as HTMLElement | null;
     if (b) b.style.width = p + "%";
     const l = root.querySelector("#pl");
-    if (l && t) l.textContent = t;
   };
   (window as any).__corujaProg = prog;
   const $ = (s: string) => root.querySelector(s) as HTMLElement;
@@ -373,7 +372,7 @@ function corujaScript(ORIGIN: string, theme: string) {
 
   async function nonFollowers(id: string, totals?: { followers?: number; following?: number }) {
     const box = $("#nfl");
-    box.innerHTML = `<div class="l" id="st">Lendo quem você segue…</div><div class="bar"><i id="nb" style="width:3%"></i></div><div class="l" id="eta">Calculando tempo…</div>`;
+    box.innerHTML = `<div class="l">Carregando, aguarde alguns instantes…</div><div id="st" style="display:none"></div><div class="bar"><i id="nb" style="width:3%"></i></div><div id="eta" style="display:none"></div>`;
     // Time-remaining estimate based on the real speed measured so far (smoothed).
     const fmt = (s: number) => { s = Math.max(0, Math.round(s)); const m = Math.floor(s / 60); return m ? `${m} min ${String(s % 60).padStart(2, "0")} s` : `${s} s`; };
     const t0 = Date.now();
@@ -526,9 +525,8 @@ function corujaScript(ORIGIN: string, theme: string) {
       const total = fmt((Date.now() - t0) / 1000);
       const pic = (u: any) => u.profile_pic_url || u.hd_profile_pic_url_info?.url || "";
       const byId: Record<string, any> = {}; for (const u of list) byId[uid(u)] = u;
-      box.innerHTML = `<h4>${list.length} não te seguem de volta</h4><div class="l" style="animation:none">Conferi ${NF.read || 0} perfis que você segue.</div>` + list.map((u) =>
-        `<div class="row"><span class="av">${esc(String(u.username || "?").charAt(0).toUpperCase())}<img data-pk="${esc(uid(u))}" data-src="${esc(pic(u))}" alt="" style="opacity:0"></span><a target="_blank" href="/${esc(u.username)}/">@${esc(u.username)}${u.full_name ? `<small> ${esc(u.full_name)}</small>` : ""}</a><button class="u" data-id="${esc(uid(u))}">Deixar de seguir</button></div>`).join("") +
-        `<div class="tip"><span>💡</span><span><b>Dica:</b> deixe de seguir aos poucos — muitas de uma vez podem gerar pausas temporárias no Instagram.</span></div>`;
+      box.innerHTML = `<h4>${list.length} não te seguem de volta</h4><div class="l" style="animation:none">Conferi ${NF.read || 0} perfis que você segue.</div>` + `<div class="tip"><span>💡</span><span><b>Dica:</b> deixe de seguir aos poucos — muitas de uma vez podem gerar pausas temporárias no Instagram.</span></div>` + list.map((u) =>
+        `<div class="row"><span class="av">${esc(String(u.username || "?").charAt(0).toUpperCase())}<img data-pk="${esc(uid(u))}" data-src="${esc(pic(u))}" alt="" style="opacity:0"></span><a target="_blank" href="/${esc(u.username)}/">@${esc(u.username)}${u.full_name ? `<small> ${esc(u.full_name)}</small>` : ""}</a><button class="u" data-id="${esc(uid(u))}">Deixar de seguir</button></div>`).join("");
       // Photos: loaded from the tool's own code (Instagram blocks inline handlers), with two fallbacks.
       const blobs: string[] = (W.__corujaBlobs ||= []);
       let infoQ = Promise.resolve();

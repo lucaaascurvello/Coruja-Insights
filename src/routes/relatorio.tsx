@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import mascote from "@/assets/mascote.png";
+import { Download } from "lucide-react";
+import { SourcesCarousel } from "@/components/sources-carousel";
 import { analyzeProfile, type AiReport } from "@/lib/analyze.functions";
 
 export const Route = createFileRoute("/relatorio")({
@@ -55,12 +57,20 @@ function Relatorio() {
   }, [d]);
 
   const download = () => {
-    const html = `<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Relatório @${d.username}</title><link rel="icon" type="image/png" href="${location.origin}/favicon.png"><style>body{font-family:system-ui;max-width:760px;margin:40px auto;padding:0 20px;color:#1a2230}h1{margin:0}h2{margin-top:28px;color:#0a8aa0}li{margin:6px 0}</style>` +
-      document.getElementById("report")!.innerHTML + "</html>";
+    if (!d || !ai) return;
+    const el = document.getElementById("report");
+    if (!el) return;
+    const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+      .map((n) => (n.tagName === "LINK" ? `<link rel="stylesheet" href="${(n as HTMLLinkElement).href}">` : n.outerHTML)).join("");
+    const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Relatório @${d.username} — Coruja Insights</title><link rel="icon" type="image/png" href="${location.origin}/favicon.png">${styles}</head><body><main class="mx-auto max-w-3xl px-6 py-10"><p class="font-display font-bold">🦉 Coruja Insights</p><div class="mt-8">${el.innerHTML}</div></main></body></html>`;
+    const url = URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" }));
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([html], { type: "text/html" }));
+    a.href = url;
     a.download = `relatorio-${d.username}.html`;
+    document.body.appendChild(a);
     a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
   };
 
   if (!d) {
@@ -78,16 +88,12 @@ function Relatorio() {
     <main className="mx-auto max-w-3xl px-6 py-10">
       <div className="flex items-center justify-between">
         <span className="font-display font-bold">🦉 Coruja Insights</span>
-        <button onClick={download} disabled={!ai} className="bg-brand rounded-xl px-4 py-2 text-sm font-bold text-primary-foreground disabled:opacity-40">Baixar relatório</button>
+        <button type="button" onClick={download} disabled={!ai} className="bg-brand group inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-primary-foreground transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-105 hover:shadow-glow active:scale-95 disabled:pointer-events-none disabled:opacity-40"><Download className="h-4 w-4 transition-transform duration-300 group-hover:translate-y-0.5" />Baixar relatório</button>
       </div>
 
       <div id="report" className="animate-rise mt-8">
         <h1 className="text-4xl font-bold">@{d.username}</h1>
         <p className="text-muted-foreground">{d.fullName} {d.category ? `· ${d.category}` : ""}</p>
-
-        {!d.isBusiness && (
-          <p className="mt-4 rounded-2xl border border-accent/40 bg-accent/10 p-4 text-sm">💡 Conta não Profissional: análise feita só com dados públicos. Recomendamos migrar para conta Profissional/Business.</p>
-        )}
 
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[["Seguidores", fmt(d.followers)], ["Engajamento", `${d.engagementRate}%`], ["Média interações", fmt(d.avgInteractions)], ["Publicações", fmt(d.postsCount)]].map(([k, v]) => (
@@ -107,7 +113,7 @@ function Relatorio() {
 
         {loading && (
           <div className="mt-10">
-            <p className="animate-pulse text-primary">A coruja está analisando com IA…</p>
+            <p className="animate-pulse text-primary">Carregando, aguarde alguns instantes…</p>
             <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
               <div className="bg-brand h-2 rounded-full transition-all duration-700" style={{ width: `${aiProg}%` }} />
             </div>
@@ -141,14 +147,17 @@ function Relatorio() {
           <h2 className="mt-8 text-xl font-bold">Recomendações</h2>
           <ul className="mt-2 space-y-3">{ai.melhorias.map((m) => <li key={m.acao} className="glass rounded-xl p-4 text-sm">
             <div className="flex items-start justify-between gap-3"><b>{m.acao}</b><span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">{conf[m.confianca]}</span></div>
-            <p className="mt-1 text-muted-foreground">{m.motivo}</p><p className="mt-1 text-xs text-accent">Dado: {m.evidencia}</p></li>)}</ul>
+            <p className="mt-1 text-muted-foreground">{m.motivo}</p><p className="mt-1 text-xs text-accent">Dado: {m.evidencia}</p></li>)}
+            {!d.isBusiness && <li className="glass rounded-xl p-4 text-sm"><b>Migre para conta Profissional (Business ou Criador)</b>
+              <p className="mt-1 text-muted-foreground">É gratuito e libera o Instagram Insights: alcance, salvamentos, compartilhamentos e público por idade, gênero e cidade — dados que deixam esta análise bem mais precisa.</p></li>}</ul>
           {ai.descartados > 0 && <p className="mt-3 text-xs text-muted-foreground">{ai.descartados} sugestão(ões) da IA foram descartadas por citar números que não batem com os dados.</p>}
           {st.sample < 8 && <p className="mt-3 text-xs text-accent">Amostra pequena ({st.sample} posts): trate as conclusões com cautela.</p>}
           <p className="mt-8 text-xs text-muted-foreground">Gênero e localização do público só ficam disponíveis no Instagram Insights (conta Profissional) — não estimamos para não inventar.</p>
           <p className="mt-2 text-xs text-muted-foreground">Referências: {ai.sources.join(" · ")}.</p>
         </div>); })()}
       </div>
-      <p className="mt-12 text-center text-xs text-muted-foreground">Nada foi salvo. Ao fechar esta aba, o relatório some.</p>
+      <SourcesCarousel />
+      <p className="mx-auto mt-10 max-w-xl text-center text-xs text-muted-foreground">Por privacidade, este relatório não é armazenado em nenhum servidor e deixa de existir ao fechar esta aba. Para guardar sua análise, clique em <b className="text-foreground">Baixar relatório</b> antes de sair.</p>
     </main>
   );
 }
