@@ -1,3 +1,4 @@
+import openaiLogo from "@/assets/openai.svg";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import mascote from "@/assets/mascote.png";
