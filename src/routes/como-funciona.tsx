@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SecuritySeal } from "@/components/security-seal";
+import openaiLogo from "@/assets/openai.svg";
 import { BENCHMARKS, KNOWLEDGE, SOURCES } from "@/lib/ig-knowledge";
 
 export const Route = createFileRoute("/como-funciona")({
@@ -24,7 +25,7 @@ const RESUMO = [
   ["A conta vem antes", "Os números são calculados por código. A IA só comenta o que já foi medido."],
 ];
 
-type Item = { t: string; d: string };
+type Item = { t: string; d: string; ai?: boolean };
 type Step = { n: string; label: string; title: string; lead: string; items: Item[] };
 
 const STEPS: Step[] = [
@@ -60,7 +61,7 @@ const STEPS: Step[] = [
     items: [
       { t: "Passo 1 · A matemática", d: "Código puro calcula: quantos posts foram lidos, o número típico de interações, se os resultados variam muito, comentários a cada 100 curtidas, posts por semana, a maior pausa sem postar, se as interações estão subindo ou caindo, Reels contra fotos, e o melhor dia e a melhor faixa de horário — estes dois últimos só quando pelo menos 3 posts sustentam a média." },
       { t: "Passo 2 · A comparação", d: "A sua taxa de engajamento é posicionada na faixa de referência de contas do mesmo tamanho: abaixo, dentro ou acima da média." },
-      { t: "Passo 3 · A IA", d: "O modelo recebe apenas os números calculados, a base de conhecimento e a referência de mercado. Ele devolve pontos fortes e melhorias, e cada item precisa citar o número que o sustenta, além de um nível de confiança: alta, média ou baixa." },
+      { t: "Passo 3 · A IA", ai: true, d: "A análise e a redação dos insights são feitas pelo GPT-6 Astra, da OpenAI. O modelo recebe apenas os números calculados, a base de conhecimento e a referência de mercado. Ele devolve pontos fortes e melhorias, e cada item precisa citar o número que o sustenta, além de um nível de confiança: alta, média ou baixa." },
       { t: "Passo 4 · O filtro", d: "Antes de chegar ao relatório, toda evidência é conferida. Se o número citado na dica não bate com os seus dados, a dica é descartada — e o documento informa quantas saíram." },
     ],
   },
@@ -138,7 +139,15 @@ function ComoFunciona() {
               {s.items.map((it) => (
                 <div key={it.t} className="grid gap-1.5 p-7 md:grid-cols-[9.5rem_1fr] md:gap-6">
                   <dt className="font-display text-sm font-semibold">{it.t}</dt>
-                  <dd className="text-sm leading-relaxed text-muted-foreground">{it.d}</dd>
+                  <dd className="text-sm leading-relaxed text-muted-foreground">
+                    {it.ai && (
+                      <span className="mb-3 inline-flex items-center gap-2 rounded-full border border-border bg-secondary/60 px-3 py-1.5 text-xs font-medium text-foreground">
+                        <img src={openaiLogo} alt="Logo da OpenAI" className="h-4 w-4" />
+                        Feito com GPT-6 Astra · OpenAI
+                      </span>
+                    )}
+                    <span className="block">{it.d}</span>
+                  </dd>
                 </div>
               ))}
             </dl>
@@ -219,7 +228,15 @@ function ComoFunciona() {
             {LIMITES.map((it) => (
               <div key={it.t} className="grid gap-1.5 p-7 md:grid-cols-[9.5rem_1fr] md:gap-6">
                 <dt className="font-display text-sm font-semibold">{it.t}</dt>
-                <dd className="text-sm leading-relaxed text-muted-foreground">{it.d}</dd>
+                <dd className="text-sm leading-relaxed text-muted-foreground">
+                    {it.ai && (
+                      <span className="mb-3 inline-flex items-center gap-2 rounded-full border border-border bg-secondary/60 px-3 py-1.5 text-xs font-medium text-foreground">
+                        <img src={openaiLogo} alt="Logo da OpenAI" className="h-4 w-4" />
+                        Feito com GPT-6 Astra · OpenAI
+                      </span>
+                    )}
+                    <span className="block">{it.d}</span>
+                  </dd>
               </div>
             ))}
           </dl>
