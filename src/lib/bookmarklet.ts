@@ -197,7 +197,7 @@ function corujaScript(ORIGIN: string, theme: string) {
   @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
   .h{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--border)}
   .h b{font-size:15px}.h span{font-size:11px;color:var(--muted-foreground)}
-  .dot{width:10px;height:10px;border-radius:50%;background:var(--gradient-brand);box-shadow:var(--shadow-glow)}
+  .owl{font-size:22px;line-height:1;filter:drop-shadow(0 0 8px color-mix(in oklab,var(--primary) 55%,transparent));animation:bob 3s ease-in-out infinite}@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}#pl,#st,#eta{display:none}.tip{margin-top:12px;font-size:11px;line-height:1.5;color:var(--muted-foreground);display:flex;gap:6px}
   .x{margin-left:auto;background:none;border:0;color:var(--muted-foreground);font-size:20px;cursor:pointer}
   .b{padding:16px 18px}
   .g{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -211,8 +211,8 @@ function corujaScript(ORIGIN: string, theme: string) {
   .pr{background:var(--gradient-brand);color:var(--primary-foreground);text-shadow:var(--shadow-glow)}
   .sc{background:var(--secondary);color:var(--secondary-foreground);border:1px solid var(--border)}
   .l{font-size:12px;color:var(--muted-foreground);animation:pulse 1.4s infinite;padding:8px 0}
-  .bar{height:6px;border-radius:99px;background:var(--muted);overflow:hidden;margin:4px 0 8px}
-  .bar i{display:block;height:100%;border-radius:99px;background:var(--gradient-brand);transition:width .45s ease}
+  .bar{height:4px;border-radius:99px;background:var(--muted);overflow:hidden;margin:4px 0 8px}
+  .bar i{display:block;height:100%;border-radius:99px;background:var(--gradient-brand);background-size:200% 100%;animation:sh 1.6s linear infinite;transition:width .6s cubic-bezier(.2,.7,.2,1)}@keyframes sh{to{background-position:-200% 0}}
   .row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
   .row .av{position:relative;flex:none;width:36px;height:36px;border-radius:50%;background:var(--gradient-brand);display:grid;place-items:center;font-weight:700;color:var(--primary-foreground);overflow:hidden}
   .row .av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -223,9 +223,9 @@ function corujaScript(ORIGIN: string, theme: string) {
   h4{margin:16px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:0;color:var(--accent)}
   .post-link{color:var(--accent)}
   .btn:focus-visible,.u:focus-visible,.x:focus-visible{outline:2px solid var(--ring);outline-offset:3px}
-  @media(prefers-reduced-motion:reduce){.p,.l{animation:none}.btn,.bar i{transition:none}}
+  @media(prefers-reduced-motion:reduce){.p,.l,.owl,.bar i{animation:none}.btn,.bar i{transition:none}}
   </style>
-  <div class="p"><div class="h"><div class="dot"></div><div><b>Coruja Insights</b><br><span>@${esc(username)}</span></div><button class="x" id="x">×</button></div>
+  <div class="p"><div class="h"><div class="owl">🦉</div><div><b>Coruja Insights</b><br><span>@${esc(username)}</span></div><button class="x" id="x">×</button></div>
   <div class="b" id="b"><div class="l" id="pl">Coletando dados públicos do perfil…</div><div class="bar"><i id="pb" style="width:6%"></i></div></div></div>`;
   const prog = (p: number, t?: string) => {
     const b = root.querySelector("#pb") as HTMLElement | null;
@@ -309,17 +309,24 @@ function corujaScript(ORIGIN: string, theme: string) {
   function render(d: any) {
     body.innerHTML = `
     <div class="g">
-      <div class="c"><small>Seguidores</small><strong>${fmt(d.followers)}</strong></div>
-      <div class="c"><small>Engajamento</small><strong>${d.engagementRate == null ? "—" : d.engagementRate + "%"}</strong></div>
-      <div class="c"><small>Seguindo</small><strong>${fmt(d.following)}</strong></div>
-      <div class="c"><small>Publicações</small><strong>${fmt(d.postsCount)}</strong></div>
+      <div class="c"><small>Seguidores</small><strong data-n="${d.followers || 0}">0</strong></div>
+      <div class="c"><small>Engajamento</small><strong ${d.engagementRate == null ? "" : `data-n="${d.engagementRate}" data-d="2" data-s="%"`}>${d.engagementRate == null ? "—" : "0%"}</strong></div>
+      <div class="c"><small>Seguindo</small><strong data-n="${d.following || 0}">0</strong></div>
+      <div class="c"><small>Publicações</small><strong data-n="${d.postsCount || 0}">0</strong></div>
     </div>
     ${d.likesHidden ? `<div class="w info">O Instagram ocultou as curtidas nesta leitura, então engajamento e publicação em destaque ficam indisponíveis. O relatório com IA ainda funciona.</div>` : ""}
-    ${d.isBusiness ? "" : `<div class="w">💡 Esta conta não é Profissional/Business. A análise usa só dados públicos. Recomendamos mudar para conta Profissional para ter métricas mais completas.</div>`}
     ${d.topPost ? `<h4>Publicação que mais engajou</h4><div class="c" style="font-size:13px">❤ ${fmt(d.topPost.likes)} · 💬 ${fmt(d.topPost.comments)}<br><a class="post-link" target="_blank" href="/p/${d.topPost.code}/">Ver publicação →</a></div>` : ""}
     ${d.engagedUsers.length ? `<h4>Mais engajados</h4>${d.engagedUsers.map((x: any) => `<div class="row"><a target="_blank" href="/${esc(x.user)}/">@${esc(x.user)}</a><span>${x.count} coment.</span></div>`).join("")}` : d.commentsDone ? (d.commentsFailed ? `<div class="l" style="animation:none">Comentários indisponíveis nesta leitura (o Instagram limitou o acesso).</div>` : "") : `<div class="l">Lendo comentários…</div>`}
     <button class="btn pr" id="ai">✨ Gerar relatório completo com IA</button>
     ${d.isOwn ? `<button class="btn sc" id="nf">👀 Quem não me segue de volta</button><div id="nfl"></div>` : `<div class="w info">Para ver quem não te segue de volta, abra o <b>seu próprio</b> perfil.</div>`}`;
+    body.querySelectorAll<HTMLElement>("[data-n]").forEach((el) => {
+      const to = Number(el.dataset["n"]) || 0, dec = Number(el.dataset["d"]) || 0, suf = el.dataset["s"] || "";
+      const show = (v: number) => { el.textContent = (dec ? v.toFixed(dec).replace(".", ",") : Math.round(v).toLocaleString("pt-BR")) + suf; };
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) { show(to); return; }
+      const t0 = performance.now();
+      const step = (t: number) => { const k = Math.min(1, (t - t0) / 800); show(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    });
     $("#ai").onclick = () => openReport(d);
     const nf = root.querySelector("#nf") as HTMLElement | null;
     if (nf) nf.onclick = () => nonFollowers(d.userId, { followers: d.followers, following: d.following });
@@ -519,9 +526,9 @@ function corujaScript(ORIGIN: string, theme: string) {
       const total = fmt((Date.now() - t0) / 1000);
       const pic = (u: any) => u.profile_pic_url || u.hd_profile_pic_url_info?.url || "";
       const byId: Record<string, any> = {}; for (const u of list) byId[uid(u)] = u;
-      box.innerHTML = `<h4>${list.length} não te seguem de volta</h4><div class="l">Concluído em ${total} · Conferi ${NF.read || 0} perfis que você segue (modo ${NF.method || "?"}).</div>` + list.map((u) =>
+      box.innerHTML = `<h4>${list.length} não te seguem de volta</h4><div class="l" style="animation:none">Conferi ${NF.read || 0} perfis que você segue.</div>` + list.map((u) =>
         `<div class="row"><span class="av">${esc(String(u.username || "?").charAt(0).toUpperCase())}<img data-pk="${esc(uid(u))}" data-src="${esc(pic(u))}" alt="" style="opacity:0"></span><a target="_blank" href="/${esc(u.username)}/">@${esc(u.username)}${u.full_name ? `<small> ${esc(u.full_name)}</small>` : ""}</a><button class="u" data-id="${esc(uid(u))}">Deixar de seguir</button></div>`).join("") +
-        `<div class="w">Vá com calma: deixar de seguir muitas contas rápido pode fazer o Instagram limitar sua conta temporariamente.</div>`;
+        `<div class="tip"><span>💡</span><span><b>Dica:</b> deixe de seguir aos poucos — muitas de uma vez podem gerar pausas temporárias no Instagram.</span></div>`;
       // Photos: loaded from the tool's own code (Instagram blocks inline handlers), with two fallbacks.
       const blobs: string[] = (W.__corujaBlobs ||= []);
       let infoQ = Promise.resolve();
