@@ -245,9 +245,6 @@ function ComoFunciona() {
             </Button>
           </div>
         </div>
-        <p className="mt-8 text-center text-xs leading-relaxed text-muted-foreground">
-          Página de estudo do projeto Coruja Insights — sem vínculo com o Instagram ou a Meta.
-        </p>
       </section>
     </main>
   );
