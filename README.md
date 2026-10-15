@@ -104,4 +104,4 @@ O funcionamento da ferramenta está sujeito às condições de acesso, à dispon
 
 **Desenvolvido por Lucas Curvello** 🦉
 
-[🌐 Projeto oficial](https://coruja-insights.lovable.app/) · [💻 Repositório no GitHub](https://github.com/lucaaascurvello/Coruja-Insights)
+[🌐 Projeto oficial](https://coruja-insights.lovable.app/)
