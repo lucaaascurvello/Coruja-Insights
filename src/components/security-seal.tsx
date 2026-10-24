@@ -16,7 +16,9 @@ export function SecuritySeal() {
         </span>
 
         <div className="min-w-0">
-          <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-seal">Selo de segurança</span>
+          <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-seal">
+            Selo de segurança
+          </span>
           <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-1.5">
             {PROMESAS.map((p) => (
               <li key={p} className="flex items-center gap-1.5 text-sm text-muted-foreground">

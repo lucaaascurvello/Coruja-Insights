@@ -3,7 +3,13 @@ import { computeStats, evidenceIsGrounded, allowedNumbers } from "./stats";
 import { benchmarkPosition } from "./ig-knowledge";
 
 const day = 86400;
-const mk = (n: number, f: (i: number) => any) => Array.from({ length: n }, (_, i) => ({ likes: 0, comments: 0, ts: 1_700_000_000 - i * day, ...f(i) }));
+const mk = (n: number, f: (i: number) => any) =>
+  Array.from({ length: n }, (_, i) => ({
+    likes: 0,
+    comments: 0,
+    ts: 1_700_000_000 - i * day,
+    ...f(i),
+  }));
 
 describe("stats", () => {
   it("engajamento = média de interações / seguidores", () => {

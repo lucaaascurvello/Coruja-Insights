@@ -9,7 +9,8 @@ import { BrowserCarousel } from "@/components/browser-carousel";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Check, Copy, Github, Linkedin, Sparkles } from "lucide-react";
 
-const PIX_CODE = "00020101021126580014br.gov.bcb.pix013602f1c965-4f88-4396-a8ca-8bab9e280f0f5204000053039865802BR5921LUCAS W C DE CARVALHO6007PALHOCA62070503***6304591A";
+const PIX_CODE =
+  "00020101021126580014br.gov.bcb.pix013602f1c965-4f88-4396-a8ca-8bab9e280f0f5204000053039865802BR5921LUCAS W C DE CARVALHO6007PALHOCA62070503***6304591A";
 const LINKEDIN_URL = "https://www.linkedin.com/in/lucaascarvalho/";
 const GITHUB_URL = "https://github.com/lucaaascurvello";
 const LOVABLE_URL = "https://lovable.dev";
@@ -18,9 +19,17 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Coruja Insights — Análise grátis do seu Instagram" },
-      { name: "description", content: "Ferramenta gratuita que analisa seu perfil do Instagram com IA e mostra quem não te segue de volta." },
+      {
+        name: "description",
+        content:
+          "Ferramenta gratuita que analisa seu perfil do Instagram com IA e mostra quem não te segue de volta.",
+      },
       { property: "og:title", content: "Coruja Insights — Análise grátis do seu Instagram" },
-      { property: "og:description", content: "Engajamento, melhores posts, público e quem não te segue de volta. Grátis e sem salvar nada." },
+      {
+        property: "og:description",
+        content:
+          "Engajamento, melhores posts, público e quem não te segue de volta. Grátis e sem salvar nada.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -29,10 +38,22 @@ export const Route = createFileRoute("/")({
 });
 
 const features = [
-  ["📊", "Engajamento real", "Taxa de engajamento, média de interações e a publicação que mais bombou."],
+  [
+    "📊",
+    "Engajamento real",
+    "Taxa de engajamento, média de interações e a publicação que mais bombou.",
+  ],
   ["💬", "Quem mais interage", "Os seguidores que mais comentam e o comentário mais relevante."],
-  ["🧠", "Insights com IA", "Analise seu perfil, entenda seu engajamento e descubra oportunidades para crescer no Instagram com recomendações baseadas em dados reais."],
-  ["👀", "Não te seguem de volta", "Veja quem você segue que não te segue de volta, e pare de seguir com um clique."],
+  [
+    "🧠",
+    "Insights com IA",
+    "Analise seu perfil, entenda seu engajamento e descubra oportunidades para crescer no Instagram com recomendações baseadas em dados reais.",
+  ],
+  [
+    "👀",
+    "Não te seguem de volta",
+    "Veja quem você segue que não te segue de volta, e pare de seguir com um clique.",
+  ],
 ];
 
 function Index() {
@@ -53,15 +74,21 @@ function Index() {
         <span className="font-display text-sm font-medium tracking-wide">
           Coruja <span className="text-muted-foreground">Insights</span>
         </span>
-        <a href="#cafe" className="text-sm text-muted-foreground transition hover:text-foreground">Conheça o desenvolvedor</a>
+        <a href="#cafe" className="text-sm text-muted-foreground transition hover:text-foreground">
+          Conheça o desenvolvedor
+        </a>
       </header>
 
       <section className="relative mx-auto grid max-w-6xl items-center gap-10 px-6 pb-20 pt-10 md:grid-cols-2">
         <div className="grid-bg pointer-events-none absolute inset-0 -z-10 opacity-40 [mask-image:radial-gradient(circle,black,transparent_70%)]" />
         <div className="animate-rise">
-          <span className="bg-brand shadow-glow animate-glow inline-flex items-center gap-2 rounded-full px-5 py-2 font-display text-sm font-bold uppercase tracking-wide text-primary-foreground"><Sparkles className="h-4 w-4 shrink-0" aria-hidden="true" />100% gratuito</span>
+          <span className="bg-brand shadow-glow animate-glow inline-flex items-center gap-2 rounded-full px-5 py-2 font-display text-sm font-bold uppercase tracking-wide text-primary-foreground">
+            <Sparkles className="h-4 w-4 shrink-0" aria-hidden="true" />
+            100% gratuito
+          </span>
           <h1 className="mt-5 text-5xl font-bold leading-tight md:text-6xl">
-            Seu Instagram, <span className="text-gradient">analisado</span> por uma corujinha esperta.
+            Seu Instagram, <span className="text-gradient">analisado</span> por uma corujinha
+            esperta.
           </h1>
           <p className="mt-5 max-w-md text-lg text-muted-foreground">
             Abra o seu perfil, clique no favorito e receba um mini relatório profissional na hora.
@@ -70,26 +97,46 @@ function Index() {
             <a
               ref={ref}
               href="#"
-              onClick={(e) => { e.preventDefault(); document.getElementById("instalar")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); }}
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("instalar")?.scrollIntoView({
+                  behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+                    ? "auto"
+                    : "smooth",
+                });
+              }}
               className="bg-brand shadow-glow rounded-2xl px-6 py-4 font-display font-bold text-primary-foreground transition hover:-translate-y-0.5"
             >
               🦉 Coruja Insights
             </a>
-            <span className="text-sm text-muted-foreground">← arraste para a barra de favoritos</span>
+            <span className="text-sm text-muted-foreground">
+              ← arraste para a barra de favoritos
+            </span>
           </div>
-          <Button asChild variant="link" className="mt-3 h-auto p-0 text-muted-foreground"><a href="#instalar">Ver como instalar, passo a passo →</a></Button>
+          <Button asChild variant="link" className="mt-3 h-auto p-0 text-muted-foreground">
+            <a href="#instalar">Ver como instalar, passo a passo →</a>
+          </Button>
         </div>
-        <img src={mascote} alt="Mascote coruja analista" width={1024} height={1024} className="animate-float mx-auto w-80 drop-shadow-2xl md:w-[26rem]" />
+        <img
+          src={mascote}
+          alt="Mascote coruja analista"
+          width={1024}
+          height={1024}
+          className="animate-float mx-auto w-80 drop-shadow-2xl md:w-[26rem]"
+        />
       </section>
 
       <BrowserCarousel />
-
 
       <section className="mx-auto max-w-6xl px-6 py-16">
         <h2 className="text-3xl font-bold">O que ela faz</h2>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {features.map(([i, t, d], k) => (
-            <div key={t} className="glass animate-rise rounded-3xl p-6 transition hover:-translate-y-1 hover:shadow-glow" style={{ animationDelay: `${k * 90}ms` }}>
+            <div
+              key={t}
+              className="glass animate-rise rounded-3xl p-6 transition hover:-translate-y-1 hover:shadow-glow"
+              style={{ animationDelay: `${k * 90}ms` }}
+            >
               <div className="text-3xl">{i}</div>
               <h3 className="mt-4 font-semibold">{t}</h3>
               <p className="mt-2 text-sm text-muted-foreground">{d}</p>
@@ -118,11 +165,18 @@ function Index() {
               className="shadow-glow mx-auto h-44 w-44 rounded-3xl border border-border object-cover"
             />
             <div>
-              <span className="font-mono text-xs uppercase tracking-[0.18em] text-accent">Um projeto caseiro</span>
-              <h2 className="mt-2 text-3xl font-bold">Oi, sou <span className="text-gradient">Lucas Curvello</span></h2>
+              <span className="font-mono text-xs uppercase tracking-[0.18em] text-accent">
+                Um projeto caseiro
+              </span>
+              <h2 className="mt-2 text-3xl font-bold">
+                Oi, sou <span className="text-gradient">Lucas Curvello</span>
+              </h2>
               <p className="mt-1 font-display text-lg">Analista de Redes Sociais</p>
               <p className="mt-4 text-sm text-muted-foreground">
-                A Coruja Insights é um projeto independente, desenvolvido para fins de estudo e para oferecer ferramentas gratuitas a quem precisa. A plataforma utiliza exclusivamente dados públicos disponibilizados pelo próprio Instagram, sem acessar informações privadas dos usuários.
+                A Coruja Insights é um projeto independente, desenvolvido para fins de estudo e para
+                oferecer ferramentas gratuitas a quem precisa. A plataforma utiliza exclusivamente
+                dados públicos disponibilizados pelo próprio Instagram, sem acessar informações
+                privadas dos usuários.
               </p>
               <div className="mt-6">
                 <Button asChild variant="outline" size="sm">
@@ -146,14 +200,17 @@ function Index() {
               <span className="font-mono text-xs text-accent">APOIE O PROJETO</span>
               <h2 className="mt-3 text-3xl font-bold">Pague um cafezinho ☕</h2>
               <p className="mt-3 text-muted-foreground">
-                Gostou da corujinha? Qualquer valor via Pix ajuda a mantê-la acordada e o projeto no ar.
+                Gostou da corujinha? Qualquer valor via Pix ajuda a mantê-la acordada e o projeto no
+                ar.
               </p>
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <Button onClick={() => copy(PIX_CODE)}>
                   {copied ? <Check /> : <Copy />}
                   {copied ? "Código copiado" : "Copiar código Pix"}
                 </Button>
-                <span className="text-xs text-muted-foreground">ou escaneie o QR no app do banco</span>
+                <span className="text-xs text-muted-foreground">
+                  ou escaneie o QR no app do banco
+                </span>
               </div>
             </div>
           </div>
@@ -163,22 +220,36 @@ function Index() {
             <div className="flex flex-wrap items-center gap-2">
               {GITHUB_URL && (
                 <Button asChild variant="outline" size="sm">
-                  <a href={GITHUB_URL} target="_blank" rel="noreferrer"><Github className="h-3.5 w-3.5" />GitHub</a>
+                  <a href={GITHUB_URL} target="_blank" rel="noreferrer">
+                    <Github className="h-3.5 w-3.5" />
+                    GitHub
+                  </a>
                 </Button>
               )}
               <Button asChild variant="outline" size="sm">
-                <a href={LINKEDIN_URL} target="_blank" rel="noreferrer"><Linkedin className="h-3.5 w-3.5" />LinkedIn</a>
+                <a href={LINKEDIN_URL} target="_blank" rel="noreferrer">
+                  <Linkedin className="h-3.5 w-3.5" />
+                  LinkedIn
+                </a>
               </Button>
               <p className="text-xs text-muted-foreground">
-                Criado com <a href={LOVABLE_URL} target="_blank" rel="noreferrer" className="font-semibold text-foreground underline decoration-primary underline-offset-4">Lovable</a>
+                Criado com{" "}
+                <a
+                  href={LOVABLE_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-semibold text-foreground underline decoration-primary underline-offset-4"
+                >
+                  Lovable
+                </a>
               </p>
             </div>
           </div>
         </div>
         <p className="mx-auto mt-10 max-w-2xl text-center text-xs leading-relaxed text-muted-foreground">
-          © 2026 Lucas Curvello · Coruja Insights foi idealizada, desenhada e desenvolvida por ele, de forma
-          independente, como projeto pessoal de estudo e sem fins comerciais — sem qualquer vínculo com o Instagram
-          ou a Meta.
+          © 2026 Lucas Curvello · Coruja Insights foi idealizada, desenhada e desenvolvida por ele,
+          de forma independente, como projeto pessoal de estudo e sem fins comerciais — sem qualquer
+          vínculo com o Instagram ou a Meta.
         </p>
       </section>
     </main>
