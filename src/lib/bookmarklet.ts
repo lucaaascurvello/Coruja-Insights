@@ -8,19 +8,29 @@ function corujaScript(ORIGIN: string, theme: string) {
     alert("Abra um perfil no instagram.com e clique no favorito novamente.");
     return;
   }
-  if (W.__coruja) { W.__coruja.remove(); W.__coruja = null; }
+  if (W.__coruja) {
+    W.__coruja.remove();
+    W.__coruja = null;
+  }
   const username = location.pathname.split("/").filter(Boolean)[0];
   if (!username || ["explore", "reels", "direct", "p", "stories", "accounts"].includes(username)) {
     alert("Abra a página de um perfil (ex: instagram.com/seuusuario).");
     return;
   }
-  const H: Record<string, string> = { "x-ig-app-id": "936619743392459", "x-requested-with": "XMLHttpRequest" };
+  const H: Record<string, string> = {
+    "x-ig-app-id": "936619743392459",
+    "x-requested-with": "XMLHttpRequest",
+  };
   const csrf = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || "";
   const viewerId = (document.cookie.match(/ds_user_id=([^;]+)/) || [])[1] || "";
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
   H["x-csrftoken"] = csrf;
   H["x-asbd-id"] = "129477";
-  try { H["x-ig-www-claim"] = sessionStorage.getItem("www-claim-v2") || "0"; } catch { H["x-ig-www-claim"] = "0"; }
+  try {
+    H["x-ig-www-claim"] = sessionStorage.getItem("www-claim-v2") || "0";
+  } catch {
+    H["x-ig-www-claim"] = "0";
+  }
   const get = async (u: string, tries = 4): Promise<any> => {
     let last = 0;
     for (let i = 0; i < tries; i++) {
@@ -45,7 +55,14 @@ function corujaScript(ORIGIN: string, theme: string) {
     if (suf) v = v.replace(",", ".");
     else v = v.replace(/[.,](?=\d{3}(\D|$))/g, "").replace(",", ".");
     const n = parseFloat(v) || 0;
-    const mult = suf === "k" || suf === "mil" ? 1e3 : suf === "m" || suf === "mi" ? 1e6 : suf === "b" ? 1e9 : 1;
+    const mult =
+      suf === "k" || suf === "mil"
+        ? 1e3
+        : suf === "m" || suf === "mi"
+          ? 1e6
+          : suf === "b"
+            ? 1e9
+            : 1;
     return Math.round(n * mult);
   };
   // Read data already embedded on the page (no network = no 429)
@@ -55,20 +72,30 @@ function corujaScript(ORIGIN: string, theme: string) {
     const seen = new Set<string>();
     const walk = (o: any, depth: number) => {
       if (!o || typeof o !== "object" || depth > 40) return;
-      if (Array.isArray(o)) { for (const x of o) walk(x, depth + 1); return; }
+      if (Array.isArray(o)) {
+        for (const x of o) walk(x, depth + 1);
+        return;
+      }
       if (o.username === username && (o.follower_count != null || o.edge_followed_by)) {
         user = { ...(user || {}), ...o };
       }
       const code = o.code || o.shortcode;
-      if (code && (o.like_count != null || o.comment_count != null || o.edge_liked_by) && !seen.has(code)) {
+      if (
+        code &&
+        (o.like_count != null || o.comment_count != null || o.edge_liked_by) &&
+        !seen.has(code)
+      ) {
         const owner = o.user?.username || o.owner?.username;
         if (!owner || owner === username) {
           seen.add(code);
           media.push({
             node: {
-              id: String(o.pk || o.id || "").split("_")[0], shortcode: code,
+              id: String(o.pk || o.id || "").split("_")[0],
+              shortcode: code,
               edge_liked_by: { count: o.like_count ?? o.edge_liked_by?.count ?? 0 },
-              edge_media_to_comment: { count: o.comment_count ?? o.edge_media_to_comment?.count ?? 0 },
+              edge_media_to_comment: {
+                count: o.comment_count ?? o.edge_media_to_comment?.count ?? 0,
+              },
               video_view_count: o.play_count || o.view_count || o.video_view_count || 0,
               is_video: o.media_type === 2 || !!o.is_video,
               taken_at_timestamp: o.taken_at || o.taken_at_timestamp,
@@ -82,12 +109,19 @@ function corujaScript(ORIGIN: string, theme: string) {
     document.querySelectorAll('script[type="application/json"]').forEach((s) => {
       const t = s.textContent || "";
       if (!t.includes(username)) return;
-      try { walk(JSON.parse(t), 0); } catch {}
+      try {
+        walk(JSON.parse(t), 0);
+      } catch {}
     });
     // DOM / meta fallback
-    const meta = (document.querySelector('meta[property="og:description"]') as HTMLMetaElement)?.content
-      || (document.querySelector('meta[name="description"]') as HTMLMetaElement)?.content || "";
-    const pick = (re: RegExp) => { const m = meta.match(re); return m ? num(m[1] || "") : 0; };
+    const meta =
+      (document.querySelector('meta[property="og:description"]') as HTMLMetaElement)?.content ||
+      (document.querySelector('meta[name="description"]') as HTMLMetaElement)?.content ||
+      "";
+    const pick = (re: RegExp) => {
+      const m = meta.match(re);
+      return m ? num(m[1] || "") : 0;
+    };
     const header = document.querySelector("header");
     const hdr = (re: RegExp) => {
       const links = header ? Array.from(header.querySelectorAll("a, li, span")) : [];
@@ -100,66 +134,110 @@ function corujaScript(ORIGIN: string, theme: string) {
       }
       return 0;
     };
-    const followers = user?.follower_count ?? user?.edge_followed_by?.count
-      ?? (pick(/([\d.,]+\s*(?:k|m|mil|mi)?)\s*(?:followers|seguidores)/i) || hdr(/seguidores|followers/i));
-    const following = user?.following_count ?? user?.edge_follow?.count
-      ?? (pick(/([\d.,]+\s*(?:k|m|mil|mi)?)\s*(?:following|seguindo)/i) || hdr(/seguindo|following/i));
-    const postsCount = user?.media_count ?? user?.edge_owner_to_timeline_media?.count
-      ?? (pick(/([\d.,]+\s*(?:k|m|mil|mi)?)\s*(?:posts|publicaç)/i) || hdr(/publicaç|posts/i));
+    const followers =
+      user?.follower_count ??
+      user?.edge_followed_by?.count ??
+      (pick(/([\d.,]+\s*(?:k|m|mil|mi)?)\s*(?:followers|seguidores)/i) ||
+        hdr(/seguidores|followers/i));
+    const following =
+      user?.following_count ??
+      user?.edge_follow?.count ??
+      (pick(/([\d.,]+\s*(?:k|m|mil|mi)?)\s*(?:following|seguindo)/i) || hdr(/seguindo|following/i));
+    const postsCount =
+      user?.media_count ??
+      user?.edge_owner_to_timeline_media?.count ??
+      (pick(/([\d.,]+\s*(?:k|m|mil|mi)?)\s*(?:posts|publicaç)/i) || hdr(/publicaç|posts/i));
     // Grid scan: always merge counts found in alt / aria-label / visible text
-    const cnt = (tx: string, re: RegExp) => { const m = tx.match(re); return m ? num(m[1] || "") : 0; };
+    const cnt = (tx: string, re: RegExp) => {
+      const m = tx.match(re);
+      return m ? num(m[1] || "") : 0;
+    };
     const byCode: Record<string, any> = {};
     media.forEach((m) => (byCode[m.node.shortcode] = m));
     document.querySelectorAll('main a[href*="/p/"], main a[href*="/reel/"]').forEach((a) => {
-      const code = (a.getAttribute("href") || "").split("/").filter(Boolean).find((_, i, arr) => arr[i - 1] === "p" || arr[i - 1] === "reel");
+      const code = (a.getAttribute("href") || "")
+        .split("/")
+        .filter(Boolean)
+        .find((_, i, arr) => arr[i - 1] === "p" || arr[i - 1] === "reel");
       if (!code) return;
       const alt = a.querySelector("img")?.getAttribute("alt") || "";
-      const tx = [alt, a.getAttribute("aria-label") || "", (a as HTMLElement).innerText || "", a.querySelector("[aria-label]")?.getAttribute("aria-label") || ""].join(" ");
+      const tx = [
+        alt,
+        a.getAttribute("aria-label") || "",
+        (a as HTMLElement).innerText || "",
+        a.querySelector("[aria-label]")?.getAttribute("aria-label") || "",
+      ].join(" ");
       const likes = cnt(tx, /([\d.,]+\s*(?:mil|mi|k|m)?)\s*(?:curtidas?|likes?)/i);
       const comments = cnt(tx, /([\d.,]+\s*(?:mil|mi|k|m)?)\s*(?:coment[aá]rios?|comments?)/i);
       const isVideo = (a.getAttribute("href") || "").includes("/reel/");
       let m = byCode[code];
       if (!m) {
-        m = { node: { id: "", shortcode: code, is_video: isVideo, edge_liked_by: { count: 0 }, edge_media_to_comment: { count: 0 }, edge_media_to_caption: { edges: [{ node: { text: alt } }] } } };
-        byCode[code] = m; seen.add(code); media.push(m);
+        m = {
+          node: {
+            id: "",
+            shortcode: code,
+            is_video: isVideo,
+            edge_liked_by: { count: 0 },
+            edge_media_to_comment: { count: 0 },
+            edge_media_to_caption: { edges: [{ node: { text: alt } }] },
+          },
+        };
+        byCode[code] = m;
+        seen.add(code);
+        media.push(m);
       }
       if (!m.node.edge_liked_by.count && likes) m.node.edge_liked_by.count = likes;
-      if (!m.node.edge_media_to_comment.count && comments) m.node.edge_media_to_comment.count = comments;
+      if (!m.node.edge_media_to_comment.count && comments)
+        m.node.edge_media_to_comment.count = comments;
     });
     const html = document.documentElement.innerHTML;
     const un = username.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const idMatch = html.match(/"profile_id":"(\d+)"|profilePage_(\d+)/)
-      || html.match(new RegExp(`"username":"${un}"[^}]{0,400}?"id":"?(\\d+)`))
-      || html.match(new RegExp(`"id":"?(\\d+)"?,"username":"${un}"`));
+    const idMatch =
+      html.match(/"profile_id":"(\d+)"|profilePage_(\d+)/) ||
+      html.match(new RegExp(`"username":"${un}"[^}]{0,400}?"id":"?(\\d+)`)) ||
+      html.match(new RegExp(`"id":"?(\\d+)"?,"username":"${un}"`));
     const id = user?.pk || user?.id || (idMatch && (idMatch[1] || idMatch[2])) || "";
     if (!followers && !user) return null;
     return {
-      id: String(id), full_name: user?.full_name || (document.title.split("(")[0] || "").trim(), biography: user?.biography || "",
+      id: String(id),
+      full_name: user?.full_name || (document.title.split("(")[0] || "").trim(),
+      biography: user?.biography || "",
       category_name: user?.category_name || user?.category || "",
-      is_business_account: user?.is_business_account || user?.is_business, is_professional_account: user?.is_professional_account,
+      is_business_account: user?.is_business_account || user?.is_business,
+      is_professional_account: user?.is_professional_account,
       is_private: user?.is_private,
-      edge_followed_by: { count: followers }, edge_follow: { count: following },
+      edge_followed_by: { count: followers },
+      edge_follow: { count: following },
       edge_owner_to_timeline_media: { count: postsCount, edges: media.slice(0, 24) },
     };
   };
-  const hasLikes = (p: any) => p?.edge_owner_to_timeline_media.edges.some((e: any) => e.node.edge_liked_by.count > 0);
+  const hasLikes = (p: any) =>
+    p?.edge_owner_to_timeline_media.edges.some((e: any) => e.node.edge_liked_by.count > 0);
   // Read each post's public page meta ("123 likes, 4 comments") — same as opening the post normally
   const enrichFromPosts = async (p: any) => {
     const edges = p.edge_owner_to_timeline_media.edges.slice(0, 12);
     for (let i = 0; i < edges.length; i++) {
       const n = edges[i].node;
       try {
-        (window as any).__corujaProg?.(15 + Math.round((i / edges.length) * 22), `Lendo curtidas das publicações… (${i + 1}/${edges.length})`);
+        (window as any).__corujaProg?.(
+          15 + Math.round((i / edges.length) * 22),
+          `Lendo curtidas das publicações… (${i + 1}/${edges.length})`,
+        );
         const r = await fetch(`/p/${n.shortcode}/`, { credentials: "include" });
         if (r.ok) {
           const h = await r.text();
-          const m = h.match(/<meta[^>]+(?:property="og:description"|name="description")[^>]+content="([^"]+)"/i);
+          const m = h.match(
+            /<meta[^>]+(?:property="og:description"|name="description")[^>]+content="([^"]+)"/i,
+          );
           const d = (m?.[1] || "").replace(/&#064;|&#x40;/g, "@");
           const l = d.match(/([\d.,]+\s*(?:mil|mi|k|m)?)\s*(?:curtidas?|likes?)/i);
           const c = d.match(/([\d.,]+\s*(?:mil|mi|k|m)?)\s*(?:coment[aá]rios?|comments?)/i);
           if (l) n.edge_liked_by.count = num(l[1] || "");
           if (c) n.edge_media_to_comment.count = num(c[1] || "");
-          if (!n.id) { const id = h.match(/"media_id":"(\d+)"|instagram:\/\/media\?id=(\d+)/); if (id) n.id = id[1] || id[2]; }
+          if (!n.id) {
+            const id = h.match(/"media_id":"(\d+)"|instagram:\/\/media\?id=(\d+)/);
+            if (id) n.id = id[1] || id[2];
+          }
         }
       } catch {}
       await sleep(350);
@@ -169,7 +247,9 @@ function corujaScript(ORIGIN: string, theme: string) {
     const p = fromPage();
     if (p && p.id && hasLikes(p)) return p;
     try {
-      const u = (await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`, 1)).data.user;
+      const u = (
+        await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`, 1)
+      ).data.user;
       if (u && (hasLikes(u) || !p)) return u;
       if (u && p && !p.id) p.id = u.id;
     } catch (e) {
@@ -181,7 +261,11 @@ function corujaScript(ORIGIN: string, theme: string) {
     return p;
   };
   const fmt = (n: number) => (n || 0).toLocaleString("pt-BR");
-  const esc = (s: any) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" } as any)[c]);
+  const esc = (s: any) =>
+    String(s ?? "").replace(
+      /[&<>"]/g,
+      (c) => (({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }) as any)[c],
+    );
 
   const host = document.createElement("div");
   host.style.cssText = "position:fixed;top:20px;right:20px;z-index:2147483647;";
@@ -235,7 +319,12 @@ function corujaScript(ORIGIN: string, theme: string) {
   };
   (window as any).__corujaProg = prog;
   const $ = (s: string) => root.querySelector(s) as HTMLElement;
-  $("#x").onclick = () => { host.remove(); W.__coruja = null; (W.__corujaBlobs || []).forEach((b: string) => URL.revokeObjectURL(b)); W.__corujaBlobs = []; };
+  $("#x").onclick = () => {
+    host.remove();
+    W.__coruja = null;
+    (W.__corujaBlobs || []).forEach((b: string) => URL.revokeObjectURL(b));
+    W.__corujaBlobs = [];
+  };
   const body = $("#b");
 
   (async () => {
@@ -255,48 +344,91 @@ function corujaScript(ORIGIN: string, theme: string) {
         caption: (e.node.edge_media_to_caption?.edges?.[0]?.node?.text || "").slice(0, 200),
       }));
       const followers = u.edge_followed_by?.count || 0;
-      const likesHidden = !!u.likesHidden || (posts.length > 0 && posts.every((p: any) => p.likes + p.comments === 0));
-      const avg = posts.length ? posts.reduce((a: number, p: any) => a + p.likes + p.comments, 0) / posts.length : 0;
+      const likesHidden =
+        !!u.likesHidden ||
+        (posts.length > 0 && posts.every((p: any) => p.likes + p.comments === 0));
+      const avg = posts.length
+        ? posts.reduce((a: number, p: any) => a + p.likes + p.comments, 0) / posts.length
+        : 0;
       const er = followers ? (avg / followers) * 100 : 0;
-      const top = [...posts].sort((a: any, b: any) => b.likes + b.comments - (a.likes + a.comments))[0];
+      const top = [...posts].sort(
+        (a: any, b: any) => b.likes + b.comments - (a.likes + a.comments),
+      )[0];
       data = {
-        username, fullName: u.full_name, bio: u.biography, category: u.category_name,
-        followers, following: u.edge_follow?.count || 0, postsCount: u.edge_owner_to_timeline_media?.count || 0,
-        isBusiness: !!(u.is_business_account || u.is_professional_account), isPrivate: !!u.is_private,
-        isOwn: (viewerId && String(viewerId) === String(u.id))
-          || !!document.querySelector('a[href*="/accounts/edit"]')
-          || Array.from(document.querySelectorAll("header a, header button, header span")).some((el) => /editar perfil|edit profile/i.test((el as HTMLElement).textContent || "")),
+        username,
+        fullName: u.full_name,
+        bio: u.biography,
+        category: u.category_name,
+        followers,
+        following: u.edge_follow?.count || 0,
+        postsCount: u.edge_owner_to_timeline_media?.count || 0,
+        isBusiness: !!(u.is_business_account || u.is_professional_account),
+        isPrivate: !!u.is_private,
+        isOwn:
+          (viewerId && String(viewerId) === String(u.id)) ||
+          !!document.querySelector('a[href*="/accounts/edit"]') ||
+          Array.from(document.querySelectorAll("header a, header button, header span")).some((el) =>
+            /editar perfil|edit profile/i.test((el as HTMLElement).textContent || ""),
+          ),
         userId: u.id,
         likesHidden,
-        engagementRate: likesHidden ? null : +er.toFixed(2), avgInteractions: likesHidden ? null : Math.round(avg), posts, topPost: likesHidden ? null : top || null,
-        engagedUsers: [], topComment: null, followerNames: [],
+        engagementRate: likesHidden ? null : +er.toFixed(2),
+        avgInteractions: likesHidden ? null : Math.round(avg),
+        posts,
+        topPost: likesHidden ? null : top || null,
+        engagedUsers: [],
+        topComment: null,
+        followerNames: [],
       };
       render(data);
       // comments of top posts
       const users: Record<string, number> = {};
       let best: any = null;
-      const topCommented = [...posts].filter((p: any) => p.id).sort((a: any, b: any) => b.comments - a.comments).slice(0, 5);
-      let ci = 0, commentsOk = false;
+      const topCommented = [...posts]
+        .filter((p: any) => p.id)
+        .sort((a: any, b: any) => b.comments - a.comments)
+        .slice(0, 5);
+      let ci = 0,
+        commentsOk = false;
       for (const p of topCommented) {
-        prog(45 + Math.round((ci++ / Math.max(1, topCommented.length)) * 35), `Lendo comentários… (${ci}/${topCommented.length})`);
+        prog(
+          45 + Math.round((ci++ / Math.max(1, topCommented.length)) * 35),
+          `Lendo comentários… (${ci}/${topCommented.length})`,
+        );
         try {
-          const c = await get(`/api/v1/media/${p.id}/comments/?can_support_threading=true&permalink_enabled=false`);
+          const c = await get(
+            `/api/v1/media/${p.id}/comments/?can_support_threading=true&permalink_enabled=false`,
+          );
           commentsOk = true;
           for (const cm of c.comments || []) {
-            const n = cm.user?.username; if (n && n !== username) users[n] = (users[n] || 0) + 1;
-            if (!best || (cm.comment_like_count || 0) > best.likes) best = { user: n, text: (cm.text || "").slice(0, 300), likes: cm.comment_like_count || 0, post: p.code };
+            const n = cm.user?.username;
+            if (n && n !== username) users[n] = (users[n] || 0) + 1;
+            if (!best || (cm.comment_like_count || 0) > best.likes)
+              best = {
+                user: n,
+                text: (cm.text || "").slice(0, 300),
+                likes: cm.comment_like_count || 0,
+                post: p.code,
+              };
           }
         } catch {}
         await sleep(400);
       }
-      data.engagedUsers = Object.entries(users).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([user, count]) => ({ user, count }));
+      data.engagedUsers = Object.entries(users)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8)
+        .map(([user, count]) => ({ user, count }));
       data.topComment = best;
       data.commentsDone = true;
       data.commentsFailed = !commentsOk;
       prog(85, "Lendo amostra de seguidores…");
       try {
-        const f = await get(`/api/v1/friendships/${u.id}/followers/?count=100&search_surface=follow_list_page`);
-        data.followerNames = (f.users || []).map((x: any) => x.full_name || x.username).slice(0, 100);
+        const f = await get(
+          `/api/v1/friendships/${u.id}/followers/?count=100&search_surface=follow_list_page`,
+        );
+        data.followerNames = (f.users || [])
+          .map((x: any) => x.full_name || x.username)
+          .slice(0, 100);
       } catch {}
       prog(100, "Análise pronta! ✨");
       await sleep(500);
@@ -320,16 +452,29 @@ function corujaScript(ORIGIN: string, theme: string) {
     <button class="btn pr" id="ai">✨ Gerar relatório completo com IA</button>
     ${d.isOwn ? `<button class="btn sc" id="nf">👀 Quem não me segue de volta</button><div id="nfl"></div>` : `<div class="w info">Para ver quem não te segue de volta, abra o <b>seu próprio</b> perfil.</div>`}`;
     body.querySelectorAll<HTMLElement>("[data-n]").forEach((el) => {
-      const to = Number(el.dataset["n"]) || 0, dec = Number(el.dataset["d"]) || 0, suf = el.dataset["s"] || "";
-      const show = (v: number) => { el.textContent = (dec ? v.toFixed(dec).replace(".", ",") : Math.round(v).toLocaleString("pt-BR")) + suf; };
-      if (matchMedia("(prefers-reduced-motion: reduce)").matches) { show(to); return; }
+      const to = Number(el.dataset["n"]) || 0,
+        dec = Number(el.dataset["d"]) || 0,
+        suf = el.dataset["s"] || "";
+      const show = (v: number) => {
+        el.textContent =
+          (dec ? v.toFixed(dec).replace(".", ",") : Math.round(v).toLocaleString("pt-BR")) + suf;
+      };
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        show(to);
+        return;
+      }
       const t0 = performance.now();
-      const step = (t: number) => { const k = Math.min(1, (t - t0) / 800); show(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
+      const step = (t: number) => {
+        const k = Math.min(1, (t - t0) / 800);
+        show(to * (1 - Math.pow(1 - k, 3)));
+        if (k < 1) requestAnimationFrame(step);
+      };
       requestAnimationFrame(step);
     });
     $("#ai").onclick = () => openReport(d);
     const nf = root.querySelector("#nf") as HTMLElement | null;
-    if (nf) nf.onclick = () => nonFollowers(d.userId, { followers: d.followers, following: d.following });
+    if (nf)
+      nf.onclick = () => nonFollowers(d.userId, { followers: d.followers, following: d.following });
   }
 
   function openReport(d: any) {
@@ -343,82 +488,154 @@ function corujaScript(ORIGIN: string, theme: string) {
   }
 
   async function listRest(id: string, kind: string, cb: (n: number) => void) {
-    const out: any[] = []; let max = "";
+    const out: any[] = [];
+    let max = "";
     for (let i = 0; i < 100; i++) {
-      const r = await get(`/api/v1/friendships/${id}/${kind}/?count=200${max ? "&max_id=" + max : ""}`, 3);
-      out.push(...(r.users || [])); cb(out.length);
-      if (!r.next_max_id) break; max = r.next_max_id; await sleep(300);
+      const r = await get(
+        `/api/v1/friendships/${id}/${kind}/?count=200${max ? "&max_id=" + max : ""}`,
+        3,
+      );
+      out.push(...(r.users || []));
+      cb(out.length);
+      if (!r.next_max_id) break;
+      max = r.next_max_id;
+      await sleep(300);
     }
     return out;
   }
   async function listGql(id: string, kind: string, cb: (n: number) => void) {
-    const hash = kind === "followers" ? "c76146de99bb02f6415203be841dd25a" : "d04b0a864b4b54837c0d870b0e77e076";
+    const hash =
+      kind === "followers"
+        ? "c76146de99bb02f6415203be841dd25a"
+        : "d04b0a864b4b54837c0d870b0e77e076";
     const key = kind === "followers" ? "edge_followed_by" : "edge_follow";
-    const out: any[] = []; let after = "";
+    const out: any[] = [];
+    let after = "";
     for (let i = 0; i < 100; i++) {
-      const vars = JSON.stringify({ id, include_reel: true, fetch_mutual: false, first: 50, ...(after ? { after } : {}) });
-      const r = await get(`/graphql/query/?query_hash=${hash}&variables=${encodeURIComponent(vars)}`, 3);
+      const vars = JSON.stringify({
+        id,
+        include_reel: true,
+        fetch_mutual: false,
+        first: 50,
+        ...(after ? { after } : {}),
+      });
+      const r = await get(
+        `/graphql/query/?query_hash=${hash}&variables=${encodeURIComponent(vars)}`,
+        3,
+      );
       const e = r?.data?.user?.[key];
       if (!e) throw new Error("HTTP 404");
-      out.push(...e.edges.map((x: any) => ({ pk: x.node.id, username: x.node.username, profile_pic_url: x.node.profile_pic_url })));
+      out.push(
+        ...e.edges.map((x: any) => ({
+          pk: x.node.id,
+          username: x.node.username,
+          profile_pic_url: x.node.profile_pic_url,
+        })),
+      );
       cb(out.length);
-      if (!e.page_info?.has_next_page) break; after = e.page_info.end_cursor; await sleep(1200);
+      if (!e.page_info?.has_next_page) break;
+      after = e.page_info.end_cursor;
+      await sleep(1200);
     }
     return out;
   }
   async function listAll(id: string, kind: string, cb: (n: number) => void) {
-    try { return await listRest(id, kind, cb); }
-    catch { return await listGql(id, kind, cb); }
+    try {
+      return await listRest(id, kind, cb);
+    } catch {
+      return await listGql(id, kind, cb);
+    }
   }
 
   async function nonFollowers(id: string, totals?: { followers?: number; following?: number }) {
     const box = $("#nfl");
     box.innerHTML = `<div class="l" id="st">Carregando, aguarde alguns instantes…</div><div class="bar"><i id="nb" style="width:3%"></i></div><div id="eta" style="display:none"></div>`;
     // Time-remaining estimate based on the real speed measured so far (smoothed).
-    const fmt = (s: number) => { s = Math.max(0, Math.round(s)); const m = Math.floor(s / 60); return m ? `${m} min ${String(s % 60).padStart(2, "0")} s` : `${s} s`; };
+    const fmt = (s: number) => {
+      s = Math.max(0, Math.round(s));
+      const m = Math.floor(s / 60);
+      return m ? `${m} min ${String(s % 60).padStart(2, "0")} s` : `${s} s`;
+    };
     const t0 = Date.now();
-    let curP = 3, lastP = 3, lastT = t0, rate = 0, shownEta = 0;
+    let curP = 3,
+      lastP = 3,
+      lastT = t0,
+      rate = 0,
+      shownEta = 0;
     const etaEl = () => root.querySelector("#eta") as HTMLElement | null;
     const tick = setInterval(() => {
-      const el = etaEl(); if (!el) { clearInterval(tick); return; }
-      const now = Date.now(), el_s = (now - t0) / 1000;
+      const el = etaEl();
+      if (!el) {
+        clearInterval(tick);
+        return;
+      }
+      const now = Date.now(),
+        el_s = (now - t0) / 1000;
       const stTxt = (root.querySelector("#st") as HTMLElement | null)?.textContent || "";
-      if (curP > lastP) { const r = (curP - lastP) / ((now - lastT) / 1000); rate = rate ? rate * 0.8 + r * 0.2 : r; lastP = curP; lastT = now; }
+      if (curP > lastP) {
+        const r = (curP - lastP) / ((now - lastT) / 1000);
+        rate = rate ? rate * 0.8 + r * 0.2 : r;
+        lastP = curP;
+        lastT = now;
+      }
       const avg = (curP - 3) / Math.max(1, el_s);
       const sp = rate && avg ? (rate + avg) / 2 : avg;
-      if (el_s < 4 || sp <= 0) { el.textContent = `Calculando tempo… · Decorrido: ${fmt(el_s)}`; return; }
+      if (el_s < 4 || sp <= 0) {
+        el.textContent = `Calculando tempo… · Decorrido: ${fmt(el_s)}`;
+        return;
+      }
       let eta = (100 - curP) / sp;
-      const pm = stTxt.match(/em (\d+) s/); if (/pausa/i.test(stTxt) && pm) eta += Number(pm[1]);
+      const pm = stTxt.match(/em (\d+) s/);
+      if (/pausa/i.test(stTxt) && pm) eta += Number(pm[1]);
       shownEta = shownEta ? Math.max(0, Math.min(eta, shownEta * 0.7 + eta * 0.3)) : eta;
-      el.textContent = /pausa/i.test(stTxt) ? `Pausa do Instagram · Tempo restante: ~${fmt(shownEta)} · Decorrido: ${fmt(el_s)}` : `Tempo restante: ~${fmt(shownEta)} · Decorrido: ${fmt(el_s)}`;
+      el.textContent = /pausa/i.test(stTxt)
+        ? `Pausa do Instagram · Tempo restante: ~${fmt(shownEta)} · Decorrido: ${fmt(el_s)}`
+        : `Tempo restante: ~${fmt(shownEta)} · Decorrido: ${fmt(el_s)}`;
     }, 1000);
     try {
       // On your own profile, the login cookie holds the exact account ID.
       if (viewerId) id = viewerId;
       if (!id) {
-        const u = (await get(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(String(username))}`, 2)).data.user;
+        const u = (
+          await get(
+            `/api/v1/users/web_profile_info/?username=${encodeURIComponent(String(username))}`,
+            2,
+          )
+        ).data.user;
         id = u?.id ? String(u.id) : "";
         if (!id) throw new Error("ID do perfil não encontrado");
       }
       const st = () => root.querySelector("#st") as HTMLElement;
-      const nb = (p: number) => { curP = Math.max(curP, p); const b = root.querySelector("#nb") as HTMLElement | null; if (b) b.style.width = p + "%"; };
+      const nb = (p: number) => {
+        curP = Math.max(curP, p);
+        const b = root.querySelector("#nb") as HTMLElement | null;
+        if (b) b.style.width = p + "%";
+      };
       const totFollowing = Number(totals?.following) || 0;
       const totFollowers = Number(totals?.followers) || 0;
       const of = (n: number, t: number) => `${n}${t ? " de " + t : ""}`;
       const uid = (u: any) => String(u.pk ?? u.pk_id ?? u.id ?? "");
       const uname = (u: any) => String(u.username || "").toLowerCase();
       const tok = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || csrf;
-      const onFollowing = (n: number) => { st().textContent = `Lendo quem você segue… ${of(n, totFollowing)}`; nb(Math.min(90, 3 + (totFollowing ? (n / totFollowing) * 87 : n / 20))); };
+      const onFollowing = (n: number) => {
+        st().textContent = `Lendo quem você segue… ${of(n, totFollowing)}`;
+        nb(Math.min(90, 3 + (totFollowing ? (n / totFollowing) * 87 : n / 20)));
+      };
       let list: any[] | null = null;
       // Progress is kept while this Instagram tab stays open, so "Tentar de novo" resumes instead of restarting.
       const W = window as any;
-      const NF = (W.__corujaNF = W.__corujaNF && W.__corujaNF.id === id ? W.__corujaNF : { id, a: {}, back: {} });
+      const NF = (W.__corujaNF =
+        W.__corujaNF && W.__corujaNF.id === id ? W.__corujaNF : { id, a: {}, back: {} });
       const fetchPage = async (url: string) => {
         for (let t = 0; t < 4; t++) {
-          try { return await get(url, 2); }
-          catch (e: any) {
+          try {
+            return await get(url, 2);
+          } catch (e: any) {
             if (t === 3) throw e;
-            for (let s = 20; s > 0; s--) { st().textContent = `O Instagram pediu uma pausa — continuando em ${s} s…`; await sleep(1000); }
+            for (let s = 20; s > 0; s--) {
+              st().textContent = `O Instagram pediu uma pausa — continuando em ${s} s…`;
+              await sleep(1000);
+            }
           }
         }
       };
@@ -429,34 +646,77 @@ function corujaScript(ORIGIN: string, theme: string) {
         const S = (NF.a[hash] ||= { out: [], after: "", done: false, bad: false });
         if (S.bad) continue;
         while (!S.done) {
-          const vars = JSON.stringify({ id, include_reel: true, fetch_mutual: false, first: 50, ...(S.after ? { after: S.after } : {}) });
+          const vars = JSON.stringify({
+            id,
+            include_reel: true,
+            fetch_mutual: false,
+            first: 50,
+            ...(S.after ? { after: S.after } : {}),
+          });
           let e: any;
           try {
-            const r = S.out.length ? await fetchPage(`/graphql/query/?query_hash=${hash}&variables=${encodeURIComponent(vars)}`) : await get(`/graphql/query/?query_hash=${hash}&variables=${encodeURIComponent(vars)}`, 2);
+            const r = S.out.length
+              ? await fetchPage(
+                  `/graphql/query/?query_hash=${hash}&variables=${encodeURIComponent(vars)}`,
+                )
+              : await get(
+                  `/graphql/query/?query_hash=${hash}&variables=${encodeURIComponent(vars)}`,
+                  2,
+                );
             e = r?.data?.user?.edge_follow;
           } catch (err) {
-            if (S.out.length) throw new Error(`o Instagram pausou a leitura em ${S.out.length} de ${totFollowing || "?"} — o progresso foi guardado`);
+            if (S.out.length)
+              throw new Error(
+                `o Instagram pausou a leitura em ${S.out.length} de ${totFollowing || "?"} — o progresso foi guardado`,
+              );
           }
-          if (!e) { S.bad = true; break; }
-          const page = e.edges.map((x: any) => ({ pk: x.node.id, username: x.node.username, full_name: x.node.full_name, profile_pic_url: x.node.profile_pic_url, fv: x.node.follows_viewer }));
-          if (!S.out.length && page.length && !page.some((u: any) => typeof u.fv === "boolean")) { S.bad = true; break; }
+          if (!e) {
+            S.bad = true;
+            break;
+          }
+          const page = e.edges.map((x: any) => ({
+            pk: x.node.id,
+            username: x.node.username,
+            full_name: x.node.full_name,
+            profile_pic_url: x.node.profile_pic_url,
+            fv: x.node.follows_viewer,
+          }));
+          if (!S.out.length && page.length && !page.some((u: any) => typeof u.fv === "boolean")) {
+            S.bad = true;
+            break;
+          }
           S.out.push(...page);
           onFollowing(S.out.length);
-          if (!e.page_info?.has_next_page) S.done = true; else { S.after = e.page_info.end_cursor; await sleep(350); }
+          if (!e.page_info?.has_next_page) S.done = true;
+          else {
+            S.after = e.page_info.end_cursor;
+            await sleep(350);
+          }
         }
         if (S.done) {
           const known = S.out.filter((u: any) => typeof u.fv === "boolean").length;
           // Only trust it if the whole list came back (an empty or short answer means Instagram cut it off)
-          const complete = S.out.length > 0 && (!totFollowing || S.out.length >= totFollowing * 0.9);
-          if (complete && known >= S.out.length * 0.95) { list = S.out.filter((u: any) => u.fv === false); NF.method = "A"; NF.read = S.out.length; break; }
+          const complete =
+            S.out.length > 0 && (!totFollowing || S.out.length >= totFollowing * 0.9);
+          if (complete && known >= S.out.length * 0.95) {
+            list = S.out.filter((u: any) => u.fv === false);
+            NF.method = "A";
+            NF.read = S.out.length;
+            break;
+          }
           S.bad = true;
         }
       }
 
       if (!list) {
-        const following: any[] = NF.following || (NF.following = await listAll(id, "following", onFollowing));
-        if (!following.length || (totFollowing && following.length < totFollowing * 0.9)) { NF.following = null; throw new Error(`li só ${following.length} de ${totFollowing} perfis que você segue`); }
-        NF.method = "B"; NF.read = following.length;
+        const following: any[] =
+          NF.following || (NF.following = await listAll(id, "following", onFollowing));
+        if (!following.length || (totFollowing && following.length < totFollowing * 0.9)) {
+          NF.following = null;
+          throw new Error(`li só ${following.length} de ${totFollowing} perfis que você segue`);
+        }
+        NF.method = "B";
+        NF.read = following.length;
         const ids = following.map(uid).filter(Boolean);
         const back: Record<string, boolean> = NF.back;
         // Strategy B: ask about 100 people at a time — only trusted when Instagram sends the "follows you" field.
@@ -468,50 +728,110 @@ function corujaScript(ORIGIN: string, theme: string) {
             st().textContent = `Conferindo em grupo… ${Math.min(i + 100, ids.length)} de ${ids.length}`;
             nb(40 + Math.round((i / ids.length) * 20));
             try {
-              const r = await fetch("/api/v1/friendships/show_many/", { method: "POST", credentials: "include", headers: { ...H, "x-csrftoken": tok, "content-type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ user_ids: chunk.join(",") }).toString() });
+              const r = await fetch("/api/v1/friendships/show_many/", {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                  ...H,
+                  "x-csrftoken": tok,
+                  "content-type": "application/x-www-form-urlencoded",
+                },
+                body: new URLSearchParams({ user_ids: chunk.join(",") }).toString(),
+              });
               if (!r.ok) break;
               const fs = (await r.json())?.friendship_statuses || {};
               let got = 0;
-              for (const k of chunk) if (fs[k] && typeof fs[k].followed_by === "boolean") { back[k] = fs[k].followed_by; got++; }
+              for (const k of chunk)
+                if (fs[k] && typeof fs[k].followed_by === "boolean") {
+                  back[k] = fs[k].followed_by;
+                  got++;
+                }
               if (!got) break; // this endpoint doesn't tell us — stop using it
               await sleep(400);
-            } catch { break; }
+            } catch {
+              break;
+            }
           }
         }
         // Strategy C: small accounts can compare with the full followers list.
-        if (ids.some((k: string) => !(k in back)) && totFollowers && totFollowers <= 15000 && !NF.followersTried) {
+        if (
+          ids.some((k: string) => !(k in back)) &&
+          totFollowers &&
+          totFollowers <= 15000 &&
+          !NF.followersTried
+        ) {
           NF.followersTried = true;
-          const followers = await listAll(id, "followers", (n) => { st().textContent = `Lendo seus seguidores… ${of(n, totFollowers)}`; nb(Math.min(80, 40 + (n / totFollowers) * 40)); });
+          const followers = await listAll(id, "followers", (n) => {
+            st().textContent = `Lendo seus seguidores… ${of(n, totFollowers)}`;
+            nb(Math.min(80, 40 + (n / totFollowers) * 40));
+          });
           if (followers.length >= totFollowers * 0.95) {
-            const fIds = new Set(followers.map(uid)); const fNames = new Set(followers.map(uname));
-            for (const u of following) { const k = uid(u); if (!(k in back)) back[k] = fIds.has(k) || fNames.has(uname(u)); }
+            const fIds = new Set(followers.map(uid));
+            const fNames = new Set(followers.map(uname));
+            for (const u of following) {
+              const k = uid(u);
+              if (!(k in back)) back[k] = fIds.has(k) || fNames.has(uname(u));
+            }
           }
         }
         // Strategy D: whatever is still unknown, ask several at once (resumable).
         // Parallel workers share one pause: if Instagram asks to slow down, all stop and fewer workers continue.
         const left = following.filter((u) => !(uid(u) in back));
         const base = ids.length - left.length;
-        let fails = 0, next = 0, done = base, pauseUntil = 0, workers = 4, stop: Error | null = null;
-        const show = () => { st().textContent = `Conferindo ${done} de ${ids.length} perfis que você segue…`; nb(3 + Math.round((done / ids.length) * 96)); };
+        let fails = 0,
+          next = 0,
+          done = base,
+          pauseUntil = 0,
+          workers = 4,
+          stop: Error | null = null;
+        const show = () => {
+          st().textContent = `Conferindo ${done} de ${ids.length} perfis que você segue…`;
+          nb(3 + Math.round((done / ids.length) * 96));
+        };
         const waitPause = async () => {
-          while (Date.now() < pauseUntil) { st().textContent = `O Instagram pediu uma pausa — continuando em ${Math.ceil((pauseUntil - Date.now()) / 1000)} s… (${done} de ${ids.length})`; await sleep(1000); }
+          while (Date.now() < pauseUntil) {
+            st().textContent = `O Instagram pediu uma pausa — continuando em ${Math.ceil((pauseUntil - Date.now()) / 1000)} s… (${done} de ${ids.length})`;
+            await sleep(1000);
+          }
         };
         const worker = async (w: number) => {
           while (!stop && next < left.length) {
-            if (w >= workers) { await sleep(500); continue; }
+            if (w >= workers) {
+              await sleep(500);
+              continue;
+            }
             await waitPause();
             const u = left[next++];
             let ans: boolean | null = null;
             for (let t = 0; t < 3 && ans === null && !stop; t++) {
               try {
-                const r = await fetch(`/api/v1/friendships/show/${uid(u)}/`, { headers: { ...H, "x-csrftoken": tok }, credentials: "include" });
-                if (r.ok) { const j = await r.json(); if (typeof j?.followed_by === "boolean") ans = j.followed_by; }
-                else if (r.status === 429 || r.status === 401) { workers = Math.max(1, workers - 1); pauseUntil = Math.max(pauseUntil, Date.now() + 30000); await waitPause(); }
-              } catch { /* retry */ }
+                const r = await fetch(`/api/v1/friendships/show/${uid(u)}/`, {
+                  headers: { ...H, "x-csrftoken": tok },
+                  credentials: "include",
+                });
+                if (r.ok) {
+                  const j = await r.json();
+                  if (typeof j?.followed_by === "boolean") ans = j.followed_by;
+                } else if (r.status === 429 || r.status === 401) {
+                  workers = Math.max(1, workers - 1);
+                  pauseUntil = Math.max(pauseUntil, Date.now() + 30000);
+                  await waitPause();
+                }
+              } catch {
+                /* retry */
+              }
             }
-            if (ans === null) { if (++fails > 5) stop = new Error(`o Instagram pausou a conferência em ${done} de ${ids.length} — o progresso foi guardado`); }
-            else { back[uid(u)] = ans; fails = 0; }
-            done++; show();
+            if (ans === null) {
+              if (++fails > 5)
+                stop = new Error(
+                  `o Instagram pausou a conferência em ${done} de ${ids.length} — o progresso foi guardado`,
+                );
+            } else {
+              back[uid(u)] = ans;
+              fails = 0;
+            }
+            done++;
+            show();
             await sleep(120);
           }
         };
@@ -519,82 +839,155 @@ function corujaScript(ORIGIN: string, theme: string) {
         await Promise.all([0, 1, 2, 3].map(worker));
         if (stop) throw stop;
         list = following.filter((u) => back[uid(u)] === false);
-        if (following.length > 20 && list.length > following.length * 0.9) { W.__corujaNF = null; throw new Error("a comparação falhou"); }
+        if (following.length > 20 && list.length > following.length * 0.9) {
+          W.__corujaNF = null;
+          throw new Error("a comparação falhou");
+        }
       }
       nb(100);
       clearInterval(tick);
       const total = fmt((Date.now() - t0) / 1000);
       const pic = (u: any) => u.profile_pic_url || u.hd_profile_pic_url_info?.url || "";
-      const byId: Record<string, any> = {}; for (const u of list) byId[uid(u)] = u;
-      box.innerHTML = `<h4>${list.length} não te seguem de volta</h4><div class="l" style="animation:none">Conferi ${NF.read || 0} perfis que você segue.</div>` + `<div class="tip"><span>💡</span><span><b>Dica:</b> deixe de seguir aos poucos — muitas de uma vez podem gerar pausas temporárias no Instagram.</span></div>` + list.map((u) =>
-        `<div class="row"><span class="av">${esc(String(u.username || "?").charAt(0).toUpperCase())}<img data-pk="${esc(uid(u))}" data-src="${esc(pic(u))}" alt="" style="opacity:0"></span><a target="_blank" href="/${esc(u.username)}/">@${esc(u.username)}${u.full_name ? `<small> ${esc(u.full_name)}</small>` : ""}</a><button class="u" data-id="${esc(uid(u))}">Deixar de seguir</button></div>`).join("");
+      const byId: Record<string, any> = {};
+      for (const u of list) byId[uid(u)] = u;
+      box.innerHTML =
+        `<h4>${list.length} não te seguem de volta</h4><div class="l" style="animation:none">Conferi ${NF.read || 0} perfis que você segue.</div>` +
+        `<div class="tip"><span>💡</span><span><b>Dica:</b> deixe de seguir aos poucos — muitas de uma vez podem gerar pausas temporárias no Instagram.</span></div>` +
+        list
+          .map(
+            (u) =>
+              `<div class="row"><span class="av">${esc(
+                String(u.username || "?")
+                  .charAt(0)
+                  .toUpperCase(),
+              )}<img data-pk="${esc(uid(u))}" data-src="${esc(pic(u))}" alt="" style="opacity:0"></span><a target="_blank" href="/${esc(u.username)}/">@${esc(u.username)}${u.full_name ? `<small> ${esc(u.full_name)}</small>` : ""}</a><button class="u" data-id="${esc(uid(u))}">Deixar de seguir</button></div>`,
+          )
+          .join("");
       // Photos: loaded from the tool's own code (Instagram blocks inline handlers), with two fallbacks.
       const blobs: string[] = (W.__corujaBlobs ||= []);
       let infoQ = Promise.resolve();
-      const viaInfo = (pk: string) => (infoQ = infoQ.then(async () => {
-        try {
-          const r = await fetch(`/api/v1/users/${pk}/info/`, { headers: H, credentials: "include" });
-          if (!r.ok) return;
-          const u = (await r.json())?.user; await sleep(300);
-          (byId[pk] ||= {}).__info = u?.hd_profile_pic_url_info?.url || u?.profile_pic_url || "";
-        } catch { /* ignore */ }
-      })).then(() => byId[pk]?.__info || "");
+      const viaInfo = (pk: string) =>
+        (infoQ = infoQ.then(async () => {
+          try {
+            const r = await fetch(`/api/v1/users/${pk}/info/`, {
+              headers: H,
+              credentials: "include",
+            });
+            if (!r.ok) return;
+            const u = (await r.json())?.user;
+            await sleep(300);
+            (byId[pk] ||= {}).__info = u?.hd_profile_pic_url_info?.url || u?.profile_pic_url || "";
+          } catch {
+            /* ignore */
+          }
+        })).then(() => byId[pk]?.__info || "");
       const viaBlob = async (url: string) => {
-        try { const r = await fetch(url, { credentials: "omit", mode: "cors" }); if (!r.ok) return ""; const b = URL.createObjectURL(await r.blob()); blobs.push(b); return b; } catch { return ""; }
+        try {
+          const r = await fetch(url, { credentials: "omit", mode: "cors" });
+          if (!r.ok) return "";
+          const b = URL.createObjectURL(await r.blob());
+          blobs.push(b);
+          return b;
+        } catch {
+          return "";
+        }
       };
       const loadImg = (img: HTMLImageElement) => {
-        const pk = img.dataset["pk"] || "", src = img.dataset["src"] || "";
+        const pk = img.dataset["pk"] || "",
+          src = img.dataset["src"] || "";
         let stage = 0;
-        img.addEventListener("load", () => { img.style.opacity = "1"; });
+        img.addEventListener("load", () => {
+          img.style.opacity = "1";
+        });
         img.addEventListener("error", async () => {
           stage++;
           let next = "";
           if (stage === 1 && src) next = await viaBlob(src);
-          if (!next && stage <= 2 && pk) { stage = 2; const u = await viaInfo(pk); if (u) next = (await viaBlob(u)) || u; }
-          if (next && stage <= 2) img.src = next; else img.remove();
+          if (!next && stage <= 2 && pk) {
+            stage = 2;
+            const u = await viaInfo(pk);
+            if (u) next = (await viaBlob(u)) || u;
+          }
+          if (next && stage <= 2) img.src = next;
+          else img.remove();
         });
-        if (src) img.src = src; else img.dispatchEvent(new Event("error"));
+        if (src) img.src = src;
+        else img.dispatchEvent(new Event("error"));
       };
       const imgs = Array.from(box.querySelectorAll<HTMLImageElement>("img[data-pk]"));
       if ("IntersectionObserver" in window) {
-        const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { io.unobserve(e.target); loadImg(e.target as HTMLImageElement); } }), { rootMargin: "200px" });
+        const io = new IntersectionObserver(
+          (es) =>
+            es.forEach((e) => {
+              if (e.isIntersecting) {
+                io.unobserve(e.target);
+                loadImg(e.target as HTMLImageElement);
+              }
+            }),
+          { rootMargin: "200px" },
+        );
         imgs.forEach((i) => io.observe(i));
       } else imgs.forEach(loadImg);
-      box.querySelectorAll<HTMLButtonElement>(".u").forEach((b) => (b.onclick = async () => {
-        b.disabled = true; b.textContent = "…";
-        const uid = b.dataset["id"] || "";
-        const tok = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || csrf;
-        const hdr = { ...H, "x-csrftoken": tok, "content-type": "application/x-www-form-urlencoded" };
-        const body = new URLSearchParams({ user_id: uid, container_module: "profile", nav_chain: "" }).toString();
-        // Confirm with Instagram whether we still follow this person
-        const stillFollowing = async (): Promise<boolean | null> => {
-          try {
-            const s = await fetch(`/api/v1/friendships/show/${uid}/`, { headers: H, credentials: "include" });
-            if (!s.ok) return null;
-            const j = await s.json();
-            return typeof j.following === "boolean" ? j.following : null;
-          } catch { return null; }
-        };
-        const tryPost = async (url: string) => {
-          try {
-            const r = await fetch(url, { method: "POST", credentials: "include", headers: hdr, body });
-            const j = await r.json().catch(() => null);
-            return r.ok && j && j.status === "ok" && j.friendship_status?.following !== true;
-          } catch { return false; }
-        };
-        let ok = await tryPost(`/api/v1/friendships/destroy/${uid}/`);
-        if (!ok) ok = await tryPost(`/api/v1/web/friendships/${uid}/unfollow/`);
-        await sleep(800);
-        const still = await stillFollowing();
-        if (still === false || (ok && still === null)) {
-          b.textContent = "Feito ✓";
-          b.closest(".row")?.setAttribute("style", "opacity:.45");
-        } else {
-          b.disabled = false;
-          b.textContent = "Tentar de novo";
-          b.title = "O Instagram não confirmou. Espere alguns minutos ou deixe de seguir pelo perfil.";
-        }
-      }));
+      box.querySelectorAll<HTMLButtonElement>(".u").forEach(
+        (b) =>
+          (b.onclick = async () => {
+            b.disabled = true;
+            b.textContent = "…";
+            const uid = b.dataset["id"] || "";
+            const tok = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || csrf;
+            const hdr = {
+              ...H,
+              "x-csrftoken": tok,
+              "content-type": "application/x-www-form-urlencoded",
+            };
+            const body = new URLSearchParams({
+              user_id: uid,
+              container_module: "profile",
+              nav_chain: "",
+            }).toString();
+            // Confirm with Instagram whether we still follow this person
+            const stillFollowing = async (): Promise<boolean | null> => {
+              try {
+                const s = await fetch(`/api/v1/friendships/show/${uid}/`, {
+                  headers: H,
+                  credentials: "include",
+                });
+                if (!s.ok) return null;
+                const j = await s.json();
+                return typeof j.following === "boolean" ? j.following : null;
+              } catch {
+                return null;
+              }
+            };
+            const tryPost = async (url: string) => {
+              try {
+                const r = await fetch(url, {
+                  method: "POST",
+                  credentials: "include",
+                  headers: hdr,
+                  body,
+                });
+                const j = await r.json().catch(() => null);
+                return r.ok && j && j.status === "ok" && j.friendship_status?.following !== true;
+              } catch {
+                return false;
+              }
+            };
+            let ok = await tryPost(`/api/v1/friendships/destroy/${uid}/`);
+            if (!ok) ok = await tryPost(`/api/v1/web/friendships/${uid}/unfollow/`);
+            await sleep(800);
+            const still = await stillFollowing();
+            if (still === false || (ok && still === null)) {
+              b.textContent = "Feito ✓";
+              b.closest(".row")?.setAttribute("style", "opacity:.45");
+            } else {
+              b.disabled = false;
+              b.textContent = "Tentar de novo";
+              b.title =
+                "O Instagram não confirmou. Espere alguns minutos ou deixe de seguir pelo perfil.";
+            }
+          }),
+      );
     } catch (e: any) {
       box.innerHTML = `<div class="w">Não mostrei a lista para não te passar dados errados (${esc(e.message)}). Espere alguns minutos e clique em “Continuar” — a coruja segue de onde parou (feche a aba para apagar tudo).</div><button class="btn" id="nfr" style="margin-top:8px">Continuar</button>`;
       const rb = root.querySelector("#nfr") as HTMLButtonElement | null;
@@ -606,5 +999,10 @@ function corujaScript(ORIGIN: string, theme: string) {
 export function buildBookmarklet(origin: string) {
   const tokens = designStyles.match(/:root\s*\{([^}]+)\}/)?.[1] || "";
   const theme = `:host{${tokens}}`;
-  return "javascript:" + encodeURIComponent(`(${corujaScript.toString()})(${JSON.stringify(origin)},${JSON.stringify(theme)});void 0;`);
+  return (
+    "javascript:" +
+    encodeURIComponent(
+      `(${corujaScript.toString()})(${JSON.stringify(origin)},${JSON.stringify(theme)});void 0;`,
+    )
+  );
 }

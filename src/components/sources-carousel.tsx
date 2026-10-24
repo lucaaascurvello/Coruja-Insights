@@ -18,8 +18,18 @@ function Row({ hidden = false }: { hidden?: boolean }) {
   return (
     <ul className="flex shrink-0 items-center gap-x-3 pr-3" aria-hidden={hidden || undefined}>
       {sources.map((s) => (
-        <li key={s.name} className="glass flex items-center gap-3 rounded-2xl px-5 py-3 font-display text-sm font-semibold whitespace-nowrap transition duration-300 hover:-translate-y-0.5 hover:border-primary/60">
-          <img src={s.logo} alt={hidden ? "" : `Logo ${s.name}`} width={28} height={28} loading="lazy" className="h-7 w-7 rounded-lg bg-foreground object-contain p-0.5" />
+        <li
+          key={s.name}
+          className="glass flex items-center gap-3 rounded-2xl px-5 py-3 font-display text-sm font-semibold whitespace-nowrap transition duration-300 hover:-translate-y-0.5 hover:border-primary/60"
+        >
+          <img
+            src={s.logo}
+            alt={hidden ? "" : `Logo ${s.name}`}
+            width={28}
+            height={28}
+            loading="lazy"
+            className="h-7 w-7 rounded-lg bg-foreground object-contain p-0.5"
+          />
           {s.name}
         </li>
       ))}

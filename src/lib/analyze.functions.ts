@@ -3,7 +3,12 @@ import { createServerFn } from "@tanstack/react-start";
 import { computeStats, allowedNumbers, evidenceIsGrounded, type ProfileStats } from "./stats";
 import { KNOWLEDGE, SOURCES, BENCHMARKS, benchmarkPosition } from "./ig-knowledge";
 
-export type Insight = { acao: string; motivo: string; evidencia: string; confianca: "alta" | "media" | "baixa" };
+export type Insight = {
+  acao: string;
+  motivo: string;
+  evidencia: string;
+  confianca: "alta" | "media" | "baixa";
+};
 export type AiReport = {
   resumo: string;
   pontos_fortes: { texto: string; evidencia: string }[];
@@ -21,8 +26,29 @@ const schema = {
   required: ["resumo", "pontos_fortes", "melhorias"],
   properties: {
     resumo: str,
-    pontos_fortes: { type: "array", items: { type: "object", additionalProperties: false, required: ["texto", "evidencia"], properties: { texto: str, evidencia: str } } },
-    melhorias: { type: "array", items: { type: "object", additionalProperties: false, required: ["acao", "motivo", "evidencia", "confianca"], properties: { acao: str, motivo: str, evidencia: str, confianca: { type: "string", enum: ["alta", "media", "baixa"] } } } },
+    pontos_fortes: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["texto", "evidencia"],
+        properties: { texto: str, evidencia: str },
+      },
+    },
+    melhorias: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["acao", "motivo", "evidencia", "confianca"],
+        properties: {
+          acao: str,
+          motivo: str,
+          evidencia: str,
+          confianca: { type: "string", enum: ["alta", "media", "baixa"] },
+        },
+      },
+    },
   },
 };
 
@@ -36,9 +62,21 @@ export const analyzeProfile = createServerFn({ method: "POST" })
     const key = process.env["LOVABLE_API_KEY"];
     if (!key) return { error: "IA não configurada." };
     const d = data as any;
-    const stats = computeStats({ followers: Number(d.followers) || 0, likesHidden: !!d.likesHidden, posts: Array.isArray(d.posts) ? d.posts : [] });
+    const stats = computeStats({
+      followers: Number(d.followers) || 0,
+      likesHidden: !!d.likesHidden,
+      posts: Array.isArray(d.posts) ? d.posts : [],
+    });
     const benchmark = benchmarkPosition(stats.tier, stats.engagementRate);
-    const perfil = { username: d.username, bio: d.bio, category: d.category, isBusiness: !!d.isBusiness, following: d.following, postsCount: d.postsCount, legendas: (d.posts || []).slice(0, 12).map((p: any) => p.caption) };
+    const perfil = {
+      username: d.username,
+      bio: d.bio,
+      category: d.category,
+      isBusiness: !!d.isBusiness,
+      following: d.following,
+      postsCount: d.postsCount,
+      legendas: (d.posts || []).slice(0, 12).map((p: any) => p.caption),
+    };
     const prompt = `Você é um analista sênior de Instagram. Responda em português do Brasil, direto e profissional.
 REGRAS OBRIGATÓRIAS:
 - Use SOMENTE os FATOS e a BASE DE CONHECIMENTO abaixo. Nunca invente números, tendências, público, gênero ou localização.
@@ -54,7 +92,11 @@ FATOS (calculados, confiáveis): ${JSON.stringify(stats)}
 PERFIL: ${JSON.stringify(perfil)}`;
     const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "fetch" },
+      headers: {
+        "Content-Type": "application/json",
+        "Lovable-API-Key": key,
+        "X-Lovable-AIG-SDK": "fetch",
+      },
       body: JSON.stringify({
         model: "openai/gpt-6-astra",
         input: prompt,
@@ -71,7 +113,8 @@ PERFIL: ${JSON.stringify(perfil)}`;
     }
     const reader = res.body.getReader();
     const dec = new TextDecoder();
-    let buf = "", text = "";
+    let buf = "",
+      text = "";
     for (;;) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -83,17 +126,33 @@ PERFIL: ${JSON.stringify(perfil)}`;
         try {
           const ev = JSON.parse(l.slice(5).trim());
           if (ev.type === "response.output_text.delta") text += ev.delta;
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       }
     }
     try {
       const out = JSON.parse(text) as Pick<AiReport, "resumo" | "pontos_fortes" | "melhorias">;
       const allowed = allowedNumbers({ stats, benchmark, BENCHMARKS });
       const ok = (e: string) => !!e?.trim() && evidenceIsGrounded(e, allowed);
-      const melhorias = out.melhorias.filter((m) => ok(m.evidencia) || /profissional/i.test(m.acao));
+      const melhorias = out.melhorias.filter(
+        (m) => ok(m.evidencia) || /profissional/i.test(m.acao),
+      );
       const pontos = out.pontos_fortes.filter((p) => ok(p.evidencia));
-      const descartados = out.melhorias.length - melhorias.length + out.pontos_fortes.length - pontos.length;
-      return { report: { resumo: out.resumo, pontos_fortes: pontos, melhorias, stats, benchmark, sources: SOURCES, descartados } };
+      const descartados =
+        out.melhorias.length - melhorias.length + out.pontos_fortes.length - pontos.length;
+      return {
+        report: {
+          resumo: out.resumo,
+          pontos_fortes: pontos,
+          melhorias,
+          stats,
+          benchmark,
+          sources: SOURCES,
+          descartados,
+        },
+      };
+    } catch {
+      return { error: "A IA não retornou um relatório válido." };
     }
-    catch { return { error: "A IA não retornou um relatório válido." }; }
   });
